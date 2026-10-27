@@ -36,12 +36,46 @@ export default function Home() {
   const [isAddGoalOpen, setIsAddGoalOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  // Sync with localStorage safely
+  // Load from Backend Database via API (with localStorage fallback)
   useEffect(() => {
-    setStats(storage.getStats());
-    setTransactions(storage.getTransactions());
-    setGoals(storage.getGoals());
-    setQuests(storage.getQuests());
+    async function loadData() {
+      try {
+        const [txRes, goalsRes, statsRes] = await Promise.all([
+          fetch('/api/transactions'),
+          fetch('/api/goals'),
+          fetch('/api/stats'),
+        ]);
+
+        if (txRes.ok) {
+          const txData = await txRes.json();
+          if (Array.isArray(txData) && txData.length > 0) {
+            setTransactions(txData);
+            storage.saveTransactions(txData);
+          }
+        }
+        if (goalsRes.ok) {
+          const goalsData = await goalsRes.json();
+          if (Array.isArray(goalsData) && goalsData.length > 0) {
+            setGoals(goalsData);
+            storage.saveGoals(goalsData);
+          }
+        }
+        if (statsRes.ok) {
+          const statsData = await statsRes.json();
+          if (statsData && statsData.level) {
+            setStats(statsData);
+            storage.saveStats(statsData);
+          }
+        }
+      } catch (err) {
+        console.warn('API fetch fallback to localStorage:', err);
+        setStats(storage.getStats());
+        setTransactions(storage.getTransactions());
+        setGoals(storage.getGoals());
+      }
+      setQuests(storage.getQuests());
+    }
+    loadData();
   }, []);
 
   const showToast = (msg: string) => {
@@ -80,6 +114,14 @@ export default function Home() {
         title: newTitle,
       };
       storage.saveStats(updated);
+
+      // Async sync stats to DB
+      fetch('/api/stats', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updated),
+      }).catch((e) => console.warn('Sync stats error:', e));
+
       return updated;
     });
   };
@@ -95,34 +137,85 @@ export default function Home() {
 
   const totalSavings = goals.reduce((acc, curr) => acc + curr.currentAmount, 0);
 
-  // Add Transaction
-  const handleAddTransaction = (data: Omit<Transaction, 'id' | 'xpEarned'>) => {
+  // Add Transaction to Database
+  const handleAddTransaction = async (data: Omit<Transaction, 'id' | 'xpEarned'>) => {
+    try {
+      const res = await fetch('/api/transactions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+
+      if (res.ok) {
+        const json = await res.json();
+        const updated = [json.transaction, ...transactions];
+        setTransactions(updated);
+        storage.saveTransactions(updated);
+        if (json.stats) {
+          setStats(json.stats);
+          storage.saveStats(json.stats);
+        }
+        showToast(`Catatan tersimpan di database! +25 XP`);
+        return;
+      }
+    } catch (e) {
+      console.warn('API error, falling back locally:', e);
+    }
+
+    // Local fallback if API fails
     const xpReward = 25;
     const newTx: Transaction = {
       id: `tx-${Date.now()}`,
       ...data,
       xpEarned: xpReward,
     };
-
     const updated = [newTx, ...transactions];
     setTransactions(updated);
     storage.saveTransactions(updated);
-
     gainXp(xpReward);
     showToast(`Catatan keuangan tersimpan! +${xpReward} XP diperoleh.`);
   };
 
-  // Delete Transaction
-  const handleDeleteTransaction = (id: string) => {
+  // Delete Transaction from Database
+  const handleDeleteTransaction = async (id: string) => {
     if (!confirm('Apakah kamu yakin ingin menghapus catatan ini?')) return;
+    try {
+      await fetch(`/api/transactions?id=${id}`, { method: 'DELETE' });
+    } catch (e) {
+      console.warn('Delete transaction API failed:', e);
+    }
     const updated = transactions.filter((tx) => tx.id !== id);
     setTransactions(updated);
     storage.saveTransactions(updated);
-    showToast('Catatan telah dihapus.');
+    showToast('Catatan telah dihapus dari database.');
   };
 
-  // Add Goal
-  const handleAddGoal = (title: string, targetAmount: number) => {
+  // Add Goal to Database
+  const handleAddGoal = async (title: string, targetAmount: number) => {
+    try {
+      const res = await fetch('/api/goals', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'create', title, targetAmount }),
+      });
+
+      if (res.ok) {
+        const json = await res.json();
+        const updated = [...goals, json.goal];
+        setGoals(updated);
+        storage.saveGoals(updated);
+        if (json.stats) {
+          setStats(json.stats);
+          storage.saveStats(json.stats);
+        }
+        showToast(`Target "${title}" tersimpan di database! +30 XP.`);
+        return;
+      }
+    } catch (e) {
+      console.warn('API error on addGoal:', e);
+    }
+
+    // Local fallback
     const xpReward = 30;
     const newGoal: Goal = {
       id: `goal-${Date.now()}`,
@@ -134,13 +227,35 @@ export default function Home() {
     const updated = [...goals, newGoal];
     setGoals(updated);
     storage.saveGoals(updated);
-
     gainXp(xpReward);
     showToast(`Target "${title}" berhasil dibuat! +${xpReward} XP.`);
   };
 
-  // Top up Goal
-  const handleTopUpGoal = (goalId: string, amount: number) => {
+  // Top up Goal in Database
+  const handleTopUpGoal = async (goalId: string, amount: number) => {
+    try {
+      const res = await fetch('/api/goals', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'topup', id: goalId, amount }),
+      });
+
+      if (res.ok) {
+        const json = await res.json();
+        setGoals(json.goals);
+        storage.saveGoals(json.goals);
+        if (json.stats) {
+          setStats(json.stats);
+          storage.saveStats(json.stats);
+        }
+        showToast(`Berhasil menabung Rp ${amount.toLocaleString('id-ID')} ke database! +25 XP.`);
+        return;
+      }
+    } catch (e) {
+      console.warn('API error on topUpGoal:', e);
+    }
+
+    // Local fallback
     const xpReward = 25;
     const updated = goals.map((g) => {
       if (g.id === goalId) {
@@ -153,7 +268,6 @@ export default function Home() {
     });
     setGoals(updated);
     storage.saveGoals(updated);
-
     gainXp(xpReward);
     showToast(`Berhasil menabung Rp ${amount.toLocaleString('id-ID')} ke celengan! +${xpReward} XP.`);
   };
@@ -208,14 +322,14 @@ export default function Home() {
               
               {activeTab === 'home' && (
                 <>
-                  {/* Hero Banner with Penguin Mascot */}
+                  {/* Hero Banner with Wallaby Mascot */}
                   <LingoraHeroBanner
                     userName={stats.name}
                     onOpenAddModal={() => openAddModalWithType('expense')}
                     activeGoalTitle={activeMainGoal.title}
                   />
 
-                  {/* Featured Goal (Lingora "Continue Learning" style) */}
+                  {/* Featured Goal (Continue Learning style) */}
                   <FeaturedGoalCard
                     goal={activeMainGoal}
                     onTopUp={handleTopUpGoal}
@@ -251,7 +365,7 @@ export default function Home() {
                         Manajemen Pemasukan (Income)
                       </h2>
                       <p className="text-xs text-slate-600 font-medium mt-1">
-                        Total Pemasukan Bulan Ini: <strong className="text-emerald-700">{totalIncome.toLocaleString('id-ID')}</strong>
+                        Total Pemasukan: <strong className="text-emerald-700">{totalIncome.toLocaleString('id-ID')}</strong>
                       </p>
                     </div>
                     <button
@@ -280,7 +394,7 @@ export default function Home() {
                         Manajemen Pengeluaran (Expense)
                       </h2>
                       <p className="text-xs text-slate-600 font-medium mt-1">
-                        Total Pengeluaran Bulan Ini: <strong className="text-rose-700">{totalExpense.toLocaleString('id-ID')}</strong>
+                        Total Pengeluaran: <strong className="text-rose-700">{totalExpense.toLocaleString('id-ID')}</strong>
                       </p>
                     </div>
                     <button
@@ -321,7 +435,7 @@ export default function Home() {
 
             </div>
 
-            {/* Right Sidebar Rail matching Lingora */}
+            {/* Right Sidebar Rail */}
             <LingoraRightRail
               streakDays={stats.streakDays}
               dailyExpenseToday={35000}

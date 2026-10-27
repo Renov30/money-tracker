@@ -1,0 +1,262 @@
+import { Pool } from 'pg';
+import { Transaction, Goal, UserStats } from '@/types';
+import {
+  INITIAL_USER_STATS,
+  INITIAL_TRANSACTIONS,
+  INITIAL_GOALS,
+} from './storage';
+
+// Initialize PostgreSQL pool
+const pool = new Pool({
+  connectionString:
+    process.env.DATABASE_URL ||
+    'postgres://postgres:postgres@localhost:5432/money_tracker',
+  max: 10,
+  idleTimeoutMillis: 30000,
+});
+
+let isInitialized = false;
+
+export async function initDb() {
+  if (isInitialized) return;
+
+  try {
+    const client = await pool.connect();
+    try {
+      // 1. Transactions Table
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS transactions (
+          id VARCHAR(100) PRIMARY KEY,
+          title VARCHAR(255) NOT NULL,
+          amount BIGINT NOT NULL,
+          type VARCHAR(20) NOT NULL,
+          category VARCHAR(100) NOT NULL,
+          date VARCHAR(50) NOT NULL,
+          xp_earned INT DEFAULT 25,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+      `);
+
+      // 2. Goals Table
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS goals (
+          id VARCHAR(100) PRIMARY KEY,
+          title VARCHAR(255) NOT NULL,
+          target_amount BIGINT NOT NULL,
+          current_amount BIGINT DEFAULT 0,
+          category VARCHAR(100) NOT NULL,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+      `);
+
+      // 3. User Stats Table
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS user_stats (
+          id VARCHAR(50) PRIMARY KEY,
+          name VARCHAR(100) NOT NULL,
+          title VARCHAR(100) NOT NULL,
+          level INT DEFAULT 12,
+          current_xp INT DEFAULT 750,
+          xp_to_next_level INT DEFAULT 1000,
+          streak_days INT DEFAULT 12,
+          last_active_date VARCHAR(50) NOT NULL,
+          monthly_budget BIGINT DEFAULT 7000000,
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+      `);
+
+      // Check if stats seeded
+      const statsRes = await client.query('SELECT * FROM user_stats WHERE id = $1', ['current_user']);
+      if (statsRes.rowCount === 0) {
+        await client.query(
+          `INSERT INTO user_stats (id, name, title, level, current_xp, xp_to_next_level, streak_days, last_active_date, monthly_budget)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+          [
+            'current_user',
+            INITIAL_USER_STATS.name,
+            INITIAL_USER_STATS.title,
+            INITIAL_USER_STATS.level,
+            INITIAL_USER_STATS.currentXp,
+            INITIAL_USER_STATS.xpToNextLevel,
+            INITIAL_USER_STATS.streakDays,
+            INITIAL_USER_STATS.lastActiveDate,
+            INITIAL_USER_STATS.monthlyBudget,
+          ]
+        );
+      }
+
+      // Check if transactions seeded
+      const txRes = await client.query('SELECT COUNT(*) FROM transactions');
+      if (parseInt(txRes.rows[0].count, 10) === 0) {
+        for (const tx of INITIAL_TRANSACTIONS) {
+          await client.query(
+            `INSERT INTO transactions (id, title, amount, type, category, date, xp_earned)
+             VALUES ($1, $2, $3, $4, $5, $6, $7) ON CONFLICT DO NOTHING`,
+            [tx.id, tx.title, tx.amount, tx.type, tx.category, tx.date, tx.xpEarned]
+          );
+        }
+      }
+
+      // Check if goals seeded
+      const goalsRes = await client.query('SELECT COUNT(*) FROM goals');
+      if (parseInt(goalsRes.rows[0].count, 10) === 0) {
+        for (const goal of INITIAL_GOALS) {
+          await client.query(
+            `INSERT INTO goals (id, title, target_amount, current_amount, category)
+             VALUES ($1, $2, $3, $4, $5) ON CONFLICT DO NOTHING`,
+            [goal.id, goal.title, goal.targetAmount, goal.currentAmount, goal.category]
+          );
+        }
+      }
+
+      isInitialized = true;
+    } finally {
+      client.release();
+    }
+  } catch (error) {
+    console.warn('PostgreSQL database connection warning (fallback mode active):', error);
+  }
+}
+
+// Data access operations
+export const db = {
+  // TRANSACTIONS
+  async getTransactions(): Promise<Transaction[]> {
+    await initDb();
+    try {
+      const res = await pool.query(
+        'SELECT id, title, amount::bigint, type, category, date, xp_earned as "xpEarned" FROM transactions ORDER BY created_at DESC'
+      );
+      return res.rows.map(r => ({
+        ...r,
+        amount: Number(r.amount),
+        xpEarned: Number(r.xpEarned),
+      }));
+    } catch {
+      return INITIAL_TRANSACTIONS;
+    }
+  },
+
+  async addTransaction(tx: Omit<Transaction, 'id' | 'xpEarned'> & { id: string; xpEarned: number }): Promise<Transaction> {
+    await initDb();
+    try {
+      await pool.query(
+        `INSERT INTO transactions (id, title, amount, type, category, date, xp_earned)
+         VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+        [tx.id, tx.title, tx.amount, tx.type, tx.category, tx.date, tx.xpEarned]
+      );
+      return tx;
+    } catch (e) {
+      console.error('Error adding transaction to DB:', e);
+      return tx;
+    }
+  },
+
+  async deleteTransaction(id: string): Promise<boolean> {
+    await initDb();
+    try {
+      await pool.query('DELETE FROM transactions WHERE id = $1', [id]);
+      return true;
+    } catch {
+      return false;
+    }
+  },
+
+  // GOALS
+  async getGoals(): Promise<Goal[]> {
+    await initDb();
+    try {
+      const res = await pool.query(
+        'SELECT id, title, target_amount as "targetAmount", current_amount as "currentAmount", category FROM goals ORDER BY created_at ASC'
+      );
+      return res.rows.map(r => ({
+        ...r,
+        targetAmount: Number(r.targetAmount),
+        currentAmount: Number(r.currentAmount),
+      }));
+    } catch {
+      return INITIAL_GOALS;
+    }
+  },
+
+  async addGoal(goal: Goal): Promise<Goal> {
+    await initDb();
+    try {
+      await pool.query(
+        `INSERT INTO goals (id, title, target_amount, current_amount, category)
+         VALUES ($1, $2, $3, $4, $5)`,
+        [goal.id, goal.title, goal.targetAmount, goal.currentAmount, goal.category]
+      );
+      return goal;
+    } catch {
+      return goal;
+    }
+  },
+
+  async topUpGoal(id: string, amount: number): Promise<boolean> {
+    await initDb();
+    try {
+      await pool.query(
+        `UPDATE goals 
+         SET current_amount = LEAST(target_amount, current_amount + $1) 
+         WHERE id = $2`,
+        [amount, id]
+      );
+      return true;
+    } catch {
+      return false;
+    }
+  },
+
+  // USER STATS
+  async getStats(): Promise<UserStats> {
+    await initDb();
+    try {
+      const res = await pool.query(
+        `SELECT name, title, level, current_xp as "currentXp", xp_to_next_level as "xpToNextLevel", 
+                streak_days as "streakDays", last_active_date as "lastActiveDate", monthly_budget as "monthlyBudget"
+         FROM user_stats WHERE id = 'current_user'`
+      );
+      if (res.rowCount && res.rowCount > 0) {
+        const r = res.rows[0];
+        return {
+          ...r,
+          level: Number(r.level),
+          currentXp: Number(r.currentXp),
+          xpToNextLevel: Number(r.xpToNextLevel),
+          streakDays: Number(r.streakDays),
+          monthlyBudget: Number(r.monthlyBudget),
+        };
+      }
+      return INITIAL_USER_STATS;
+    } catch {
+      return INITIAL_USER_STATS;
+    }
+  },
+
+  async updateStats(stats: UserStats): Promise<UserStats> {
+    await initDb();
+    try {
+      await pool.query(
+        `UPDATE user_stats 
+         SET name = $1, title = $2, level = $3, current_xp = $4, xp_to_next_level = $5, 
+             streak_days = $6, last_active_date = $7, monthly_budget = $8, updated_at = CURRENT_TIMESTAMP
+         WHERE id = 'current_user'`,
+        [
+          stats.name,
+          stats.title,
+          stats.level,
+          stats.currentXp,
+          stats.xpToNextLevel,
+          stats.streakDays,
+          stats.lastActiveDate,
+          stats.monthlyBudget,
+        ]
+      );
+      return stats;
+    } catch {
+      return stats;
+    }
+  },
+};
+
