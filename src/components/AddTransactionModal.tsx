@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Category, Transaction, TransactionType } from '@/types';
-import PenguinMascot from './PenguinMascot';
+import WallabyMascot from './WallabyMascot';
 
 interface AddTransactionModalProps {
   isOpen: boolean;
@@ -78,7 +78,7 @@ export default function AddTransactionModal({
         {/* Header with mini mascot */}
         <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
           <div className="flex items-center gap-2.5">
-            <PenguinMascot size={32} mood="happy" />
+            <WallabyMascot size={34} mood="happy" />
             <h3 className="text-sm font-black text-slate-900">
               Catat {type === 'income' ? 'Pemasukan' : 'Pengeluaran'} (+25 XP)
             </h3>
@@ -138,7 +138,7 @@ export default function AddTransactionModal({
                 onChange={(e) => setAmount(e.target.value)}
                 placeholder="35000"
                 required
-                className="w-full bg-slate-50 border border-slate-200 rounded-2xl pl-10 pr-4 py-2.5 text-slate-900 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition"
+                className="w-full bg-slate-50 border border-slate-200 rounded-2xl pl-10 pr-4 py-2.5 text-slate-900 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition"
               />
             </div>
 
@@ -149,7 +149,7 @@ export default function AddTransactionModal({
                   type="button"
                   key={chip}
                   onClick={() => handleChip(chip)}
-                  className="text-[11px] font-semibold px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition cursor-pointer"
+                  className="text-[11px] font-semibold px-2.5 py-1 bg-amber-50 hover:bg-amber-100 text-amber-900 rounded-xl transition cursor-pointer"
                 >
                   {chip >= 1000000
                     ? `${chip / 1000000}jt`
@@ -170,7 +170,7 @@ export default function AddTransactionModal({
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder={type === 'income' ? 'Misal: Gaji, Bonus, Freelance' : 'Misal: Makan Siang, Kopi, Bensin'}
-              className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3.5 py-2 text-slate-900 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition"
+              className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3.5 py-2 text-slate-900 text-xs focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition"
             />
           </div>
 
@@ -181,7 +181,7 @@ export default function AddTransactionModal({
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value as Category)}
-              className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3.5 py-2 text-slate-900 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition"
+              className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3.5 py-2 text-slate-900 text-xs focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition"
             >
               {CATEGORIES[type].map((cat) => (
                 <option key={cat} value={cat}>
@@ -193,7 +193,7 @@ export default function AddTransactionModal({
 
           <button
             type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-full text-xs shadow-sm shadow-blue-500/25 transition active:scale-95 cursor-pointer mt-2"
+            className="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 rounded-full text-xs shadow-sm shadow-amber-600/25 transition active:scale-95 cursor-pointer mt-2"
           >
             Simpan Catatan (+25 XP)
           </button>

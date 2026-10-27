@@ -39,30 +39,30 @@ export default function LingoraRightRail({
   return (
     <aside className="w-full xl:w-72 space-y-4 shrink-0">
       
-      {/* 1. Your Daily Goal Card (Matching Lingora circular ring & week dots) */}
-      <div className="bg-white rounded-3xl p-5 border border-slate-100 shadow-xs space-y-4">
+      {/* 1. Your Daily Goal Card (Warm Amber Accent) */}
+      <div className="bg-white rounded-3xl p-5 border border-amber-100 shadow-xs space-y-4">
         <div className="flex items-center justify-between">
           <h4 className="text-xs font-black uppercase tracking-wider text-slate-800">
             Batas Belanja Harian
           </h4>
-          <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
+          <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-100">
             Aman
           </span>
         </div>
 
-        {/* Circular Progress & Text */}
+        {/* Circular Progress Ring in Warm Amber */}
         <div className="flex items-center justify-between gap-4">
           <div className="relative w-20 h-20 flex items-center justify-center shrink-0">
             <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
               <path
-                className="text-slate-100"
+                className="text-amber-50"
                 strokeWidth="3.5"
                 stroke="currentColor"
                 fill="none"
                 d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
               />
               <path
-                className="text-blue-600"
+                className="text-amber-500"
                 strokeDasharray={`${percentage}, 100`}
                 strokeWidth="3.5"
                 strokeLinecap="round"
@@ -73,7 +73,7 @@ export default function LingoraRightRail({
             </svg>
             <div className="absolute text-center">
               <span className="text-sm">🔥</span>
-              <div className="text-[10px] font-black text-slate-800 font-mono">
+              <div className="text-[10px] font-black text-amber-950 font-mono">
                 {percentage}%
               </div>
             </div>
@@ -90,15 +90,15 @@ export default function LingoraRightRail({
         </div>
 
         {/* Week Streak Dots (Mon - Sun) */}
-        <div className="flex items-center justify-between pt-2 border-t border-slate-100">
+        <div className="flex items-center justify-between pt-2 border-t border-amber-50">
           {days.map((item, index) => (
             <div key={index} className="flex flex-col items-center gap-1">
               <span className="text-[9px] font-bold text-slate-400">{item.day}</span>
               <div
                 className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold transition-all ${
                   item.checked
-                    ? 'bg-blue-600 text-white shadow-xs'
-                    : 'bg-slate-100 text-slate-300'
+                    ? 'bg-amber-600 text-white shadow-xs'
+                    : 'bg-amber-50 text-amber-200'
                 }`}
               >
                 {item.checked ? '✓' : ''}
@@ -108,13 +108,13 @@ export default function LingoraRightRail({
         </div>
       </div>
 
-      {/* 2. Leaderboard Card (Matching Lingora Leaderboard) */}
-      <div className="bg-white rounded-3xl p-5 border border-slate-100 shadow-xs space-y-3">
+      {/* 2. Leaderboard Card */}
+      <div className="bg-white rounded-3xl p-5 border border-amber-100 shadow-xs space-y-3">
         <div className="flex items-center justify-between">
           <h4 className="text-xs font-black uppercase tracking-wider text-slate-800">
             Peringkat Hemat
           </h4>
-          <span className="text-[10px] font-bold text-slate-400">Minggu Ini</span>
+          <span className="text-[10px] font-bold text-amber-700/80">Minggu Ini</span>
         </div>
 
         <div className="space-y-2.5">
@@ -122,7 +122,7 @@ export default function LingoraRightRail({
             <div
               key={user.rank}
               className={`flex items-center justify-between p-2 rounded-2xl transition ${
-                user.isUser ? 'bg-blue-50/80 border border-blue-200/60' : 'hover:bg-slate-50'
+                user.isUser ? 'bg-amber-50/90 border border-amber-200/80' : 'hover:bg-amber-50/40'
               }`}
             >
               <div className="flex items-center gap-2.5">
@@ -130,11 +130,11 @@ export default function LingoraRightRail({
                   className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${
                     user.rank === 1
                       ? 'bg-amber-400 text-slate-900'
-                      : user.rank === 2
-                      ? 'bg-blue-600 text-white'
-                      : user.rank === 3
+                    : user.rank === 2
+                      ? 'bg-amber-600 text-white'
+                    : user.rank === 3
                       ? 'bg-orange-400 text-white'
-                      : 'text-slate-400'
+                    : 'text-slate-400'
                   }`}
                 >
                   {user.rank}
@@ -152,19 +152,19 @@ export default function LingoraRightRail({
       </div>
 
       {/* 3. Gift Box / Mystery Quest Box */}
-      <div className="bg-gradient-to-br from-sky-50 to-blue-50 border border-blue-100 rounded-3xl p-4 shadow-xs flex items-center gap-3">
-        <div className="w-12 h-12 rounded-2xl bg-white border border-blue-100 flex items-center justify-center text-2xl shadow-xs shrink-0 animate-bounce">
+      <div className="bg-gradient-to-br from-amber-50 to-orange-50/70 border border-amber-200/80 rounded-3xl p-4 shadow-xs flex items-center gap-3">
+        <div className="w-12 h-12 rounded-2xl bg-white border border-amber-200 flex items-center justify-center text-2xl shadow-xs shrink-0 animate-bounce">
           🎁
         </div>
         <div className="space-y-1">
           <div className="text-xs font-bold text-slate-900 leading-tight">
             Peti Koin Rahasia
           </div>
-          <p className="text-[10px] text-slate-500 font-medium">
+          <p className="text-[10px] text-amber-900/80 font-medium">
             Catat 3 transaksi hari ini untuk membuka peti (2/3).
           </p>
-          <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden mt-1">
-            <div className="bg-blue-600 h-full rounded-full" style={{ width: '66%' }}></div>
+          <div className="w-full bg-amber-100 h-1.5 rounded-full overflow-hidden mt-1">
+            <div className="bg-amber-500 h-full rounded-full" style={{ width: '66%' }}></div>
           </div>
         </div>
       </div>
@@ -172,4 +172,3 @@ export default function LingoraRightRail({
     </aside>
   );
 }
-

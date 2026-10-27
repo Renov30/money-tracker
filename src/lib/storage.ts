@@ -87,7 +87,7 @@ export const INITIAL_QUESTS: DailyQuest[] = [
   {
     id: 'quest-1',
     title: 'Catat Pengeluaran Pertama Hari Ini',
-    description: 'Bantu Penny mendata arus kas harianmu',
+    description: 'Bantu Wally mendata arus kas harianmu',
     xpReward: 25,
     completed: true,
     claimed: true,

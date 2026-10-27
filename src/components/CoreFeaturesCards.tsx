@@ -84,23 +84,23 @@ export default function CoreFeaturesCards({
           </span>
         </div>
 
-        {/* Fitur 3: Goals Tabungan */}
+        {/* Fitur 3: Goals Tabungan (Wallaby Amber Tone) */}
         <div
           onClick={onOpenAddGoal}
-          className="bg-blue-50/70 hover:bg-blue-50 border border-blue-100 rounded-2xl p-4 transition-all duration-200 cursor-pointer shadow-xs hover:shadow-sm flex items-center justify-between group"
+          className="bg-amber-50/80 hover:bg-amber-100/70 border border-amber-200/70 rounded-2xl p-4 transition-all duration-200 cursor-pointer shadow-xs hover:shadow-sm flex items-center justify-between group"
         >
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center text-lg font-bold">
+            <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center text-lg font-bold">
               🎯
             </div>
             <div>
-              <div className="text-[11px] font-bold uppercase tracking-wider text-blue-800">
+              <div className="text-[11px] font-bold uppercase tracking-wider text-amber-900">
                 Goals Tabungan
               </div>
               <div className="text-sm font-black text-slate-900 mt-0.5">
                 {formatRupiah(totalSavings)}
               </div>
-              <div className="text-[10px] text-blue-600 font-semibold mt-0.5 group-hover:underline">
+              <div className="text-[10px] text-amber-700 font-semibold mt-0.5 group-hover:underline">
                 + Buat Target Baru
               </div>
             </div>
@@ -113,4 +113,3 @@ export default function CoreFeaturesCards({
     </div>
   );
 }
-

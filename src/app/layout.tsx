@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Money Tracker - Gamified Personal Finance",
-  description: "Aplikasi pencatatan keuangan sederhana berbasis gamifikasi",
+  title: "WallyTracker - Money Tracker with Wallaby Mascot",
+  description: "Aplikasi pencatatan keuangan sederhana berbasis gamifikasi bersama maskot Wallaby",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

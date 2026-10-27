@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import PenguinMascot from './PenguinMascot';
+import WallabyMascot from './WallabyMascot';
 
 interface AddGoalModalProps {
   isOpen: boolean;
@@ -38,7 +38,7 @@ export default function AddGoalModal({
       <div className="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl border border-slate-100 relative">
         <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
           <div className="flex items-center gap-2">
-            <PenguinMascot size={30} mood="happy" />
+            <WallabyMascot size={32} mood="happy" />
             <h3 className="text-sm font-black text-slate-900">
               Buat Target Celengan Baru
             </h3>
@@ -62,7 +62,7 @@ export default function AddGoalModal({
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Contoh: Beli Laptop Baru, Liburan"
               required
-              className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3.5 py-2.5 text-slate-900 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition"
+              className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3.5 py-2.5 text-slate-900 text-xs focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition"
             />
           </div>
 
@@ -76,13 +76,13 @@ export default function AddGoalModal({
               onChange={(e) => setTargetAmount(e.target.value)}
               placeholder="Contoh: 5000000"
               required
-              className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3.5 py-2.5 text-slate-900 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition"
+              className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3.5 py-2.5 text-slate-900 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition"
             />
           </div>
 
           <button
             type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-full text-xs shadow-sm shadow-blue-500/25 transition active:scale-95 cursor-pointer mt-2"
+            className="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 rounded-full text-xs shadow-sm shadow-amber-600/25 transition active:scale-95 cursor-pointer mt-2"
           >
             Simpan Target (+30 XP)
           </button>

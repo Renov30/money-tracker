@@ -33,9 +33,9 @@ export default function TransactionsSection({
   });
 
   return (
-    <div className="bg-white rounded-3xl p-5 border border-slate-100 shadow-xs space-y-4">
+    <div className="bg-white rounded-3xl p-5 border border-amber-100/70 shadow-xs space-y-4">
       {/* Header and Filter Tabs */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-amber-50">
         <div>
           <h3 className="text-sm font-black text-slate-900 tracking-tight">
             {activeFilter === 'income'
@@ -51,13 +51,13 @@ export default function TransactionsSection({
 
         <div className="flex items-center gap-2">
           {forcedType === 'all' && (
-            <div className="flex items-center gap-1 p-1 bg-slate-100 rounded-full text-xs font-semibold">
+            <div className="flex items-center gap-1 p-1 bg-amber-50/80 rounded-full text-xs font-semibold">
               <button
                 onClick={() => setFilterType('all')}
                 className={`px-3 py-1 rounded-full transition cursor-pointer ${
                   filterType === 'all'
                     ? 'bg-white text-slate-900 shadow-xs'
-                    : 'text-slate-500 hover:text-slate-900'
+                    : 'text-amber-800 hover:text-slate-900'
                 }`}
               >
                 Semua
@@ -67,7 +67,7 @@ export default function TransactionsSection({
                 className={`px-3 py-1 rounded-full transition cursor-pointer ${
                   filterType === 'income'
                     ? 'bg-emerald-600 text-white shadow-xs'
-                    : 'text-slate-500 hover:text-emerald-600'
+                    : 'text-emerald-700 hover:text-emerald-900'
                 }`}
               >
                 Pemasukan
@@ -77,7 +77,7 @@ export default function TransactionsSection({
                 className={`px-3 py-1 rounded-full transition cursor-pointer ${
                   filterType === 'expense'
                     ? 'bg-rose-600 text-white shadow-xs'
-                    : 'text-slate-500 hover:text-rose-600'
+                    : 'text-rose-700 hover:text-rose-900'
                 }`}
               >
                 Pengeluaran
@@ -87,7 +87,7 @@ export default function TransactionsSection({
 
           <button
             onClick={() => onOpenAddModal(activeFilter === 'all' ? 'expense' : activeFilter)}
-            className="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-full shadow-xs transition active:scale-95 cursor-pointer shrink-0"
+            className="px-4 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-full shadow-xs transition active:scale-95 cursor-pointer shrink-0"
           >
             + Catat {activeFilter === 'income' ? 'Pemasukan' : activeFilter === 'expense' ? 'Pengeluaran' : 'Baru'}
           </button>
@@ -118,7 +118,7 @@ export default function TransactionsSection({
             return (
               <div
                 key={tx.id}
-                className="flex items-center justify-between p-3 rounded-2xl bg-slate-50/70 border border-slate-100/80 hover:bg-slate-50 hover:border-slate-200 transition"
+                className="flex items-center justify-between p-3 rounded-2xl bg-amber-50/30 border border-amber-100/60 hover:bg-amber-50/60 transition"
               >
                 <div className="flex items-center gap-3">
                   <span className={`text-[10px] font-bold px-2.5 py-1 rounded-xl ${badgeBg}`}>
@@ -139,7 +139,7 @@ export default function TransactionsSection({
                     <div className={`text-xs font-bold font-mono ${amountColor}`}>
                       {sign}{formatRupiah(tx.amount)}
                     </div>
-                    <div className="text-[10px] font-bold text-blue-600">
+                    <div className="text-[10px] font-bold text-amber-600">
                       +{tx.xpEarned} XP
                     </div>
                   </div>
@@ -161,4 +161,3 @@ export default function TransactionsSection({
     </div>
   );
 }
-

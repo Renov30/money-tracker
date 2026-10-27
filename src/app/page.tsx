@@ -172,7 +172,7 @@ export default function Home() {
   };
 
   return (
-    <div className="bg-[#f8fafc] min-h-screen w-full flex flex-col md:flex-row font-sans antialiased text-slate-800">
+    <div className="bg-[#faf7f2] min-h-screen w-full flex flex-col md:flex-row font-sans antialiased text-slate-800">
       
       {/* Toast Notification */}
       {toastMessage && (
@@ -190,7 +190,7 @@ export default function Home() {
       />
 
       {/* Center & Right Content Shell */}
-      <div className="flex-1 flex flex-col min-h-screen bg-[#f8fafc]">
+      <div className="flex-1 flex flex-col min-h-screen bg-[#faf7f2]">
           
           {/* Top Search & Stats Bar */}
           <LingoraTopBar
