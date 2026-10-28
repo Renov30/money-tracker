@@ -121,15 +121,6 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {/* Quick Demo Credentials Info */}
-          <div className="bg-amber-50/70 border border-amber-200/80 rounded-2xl p-3 text-[11px] text-amber-900 space-y-1">
-            <div className="font-bold">Akun Demo Tersedia:</div>
-            <div className="flex justify-between items-center text-[10px] text-amber-800/90 font-mono">
-              <span>Admin: <strong>admin</strong> / <strong>admin123</strong></span>
-              <span>User: <strong>alex</strong> / <strong>user123</strong></span>
-            </div>
-          </div>
-
           <button
             type="submit"
             disabled={loading}
