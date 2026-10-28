@@ -5,7 +5,6 @@ import WallabyMascot from './WallabyMascot';
 import {
   IoClose,
   IoAlertCircle,
-  IoCheckmarkCircle,
   IoPerson,
   IoLockClosed,
   IoEye,
@@ -98,36 +97,43 @@ export default function AccountSettingsModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
-      <div className="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl border border-slate-100 relative">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
-          <div className="flex items-center gap-2">
-            <WallabyMascot size={32} mood="happy" />
-            <h3 className="text-sm font-black text-slate-900">
-              Pengaturan Akun
-            </h3>
+    <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
+      <div 
+        className="bg-white w-full max-w-md rounded-2xl p-6 border-2 border-slate-200 shadow-xl relative space-y-4"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header Duolingo Style */}
+        <div className="flex items-center justify-between pb-3 border-b-2 border-slate-100">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-amber-50 border-2 border-amber-200 flex items-center justify-center">
+              <WallabyMascot size={26} mood="happy" />
+            </div>
+            <div>
+              <h3 className="text-sm font-black text-slate-800 tracking-tight">
+                PENGATURAN AKUN
+              </h3>
+            </div>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="w-7 h-7 rounded-full bg-slate-100 text-slate-500 hover:text-slate-800 flex items-center justify-center font-bold text-xs transition cursor-pointer"
+            className="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition cursor-pointer"
           >
-            <IoClose className="text-base" />
+            <IoClose className="text-lg" />
           </button>
         </div>
 
         {error && (
-          <div className="flex items-center gap-2 p-2.5 mb-3 bg-rose-50 border border-rose-200 rounded-2xl text-xs text-rose-700 font-semibold">
+          <div className="flex items-center gap-2 p-3 bg-rose-50 border-2 border-rose-200 rounded-xl text-xs text-rose-600 font-bold">
             <IoAlertCircle className="text-lg shrink-0" />
             <span>{error}</span>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-3.5">
-          {/* Ganti Nama Akun / Username */}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Username */}
           <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1">
+            <label className="block text-xs font-extrabold uppercase tracking-wider text-slate-500 mb-1">
               Nama Akun (Username)
             </label>
             <div className="relative">
@@ -138,26 +144,48 @@ export default function AccountSettingsModal({
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="Nama akun baru"
+                placeholder="Username"
                 required
-                className="w-full bg-slate-50 border border-slate-200 rounded-2xl pl-10 pr-3.5 py-2.5 text-slate-900 text-xs focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition"
+                className="w-full bg-slate-50 border-2 border-slate-200 rounded-xl pl-10 pr-3.5 py-2.5 text-slate-800 font-bold text-xs focus:outline-none focus:border-amber-500 transition"
               />
             </div>
-            <p className="text-[10px] text-slate-400 mt-1">
-              Nama akun ini yang ditampilkan di sidebar dan halaman dashboard.
-            </p>
           </div>
 
-          <div className="border-t border-slate-100 pt-3">
-            <div className="text-xs font-bold text-slate-900 mb-2">
+          {/* Ganti Password */}
+          <div className="pt-2 border-t-2 border-slate-100 space-y-3">
+            <span className="block text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
               Ganti Password (Opsional)
+            </span>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-600 mb-1">
+                Password Baru
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                  <IoLockClosed className="text-sm" />
+                </div>
+                <input
+                  type={showNewPassword ? 'text' : 'password'}
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="Kosongkan jika tidak diganti"
+                  className="w-full bg-slate-50 border-2 border-slate-200 rounded-xl pl-10 pr-10 py-2.5 text-slate-800 font-bold text-xs focus:outline-none focus:border-amber-500 transition"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowNewPassword(!showNewPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 transition cursor-pointer"
+                >
+                  {showNewPassword ? <IoEyeOff className="text-base" /> : <IoEye className="text-base" />}
+                </button>
+              </div>
             </div>
 
-            {/* Password Baru */}
-            <div className="space-y-2.5">
+            {newPassword && (
               <div>
-                <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                  Password Baru
+                <label className="block text-xs font-bold text-slate-600 mb-1">
+                  Ulangi Password Baru
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
@@ -165,47 +193,20 @@ export default function AccountSettingsModal({
                   </div>
                   <input
                     type={showNewPassword ? 'text' : 'password'}
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    placeholder="Kosongkan jika tidak ingin ganti"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-2xl pl-10 pr-10 py-2.5 text-slate-900 text-xs focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition"
+                    value={confirmNewPassword}
+                    onChange={(e) => setConfirmNewPassword(e.target.value)}
+                    placeholder="Ulangi password baru"
+                    className="w-full bg-slate-50 border-2 border-slate-200 rounded-xl pl-10 pr-3.5 py-2.5 text-slate-800 font-bold text-xs focus:outline-none focus:border-amber-500 transition"
                   />
-                  <button
-                    type="button"
-                    onClick={() => setShowNewPassword(!showNewPassword)}
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 transition cursor-pointer"
-                  >
-                    {showNewPassword ? <IoEyeOff className="text-base" /> : <IoEye className="text-base" />}
-                  </button>
                 </div>
               </div>
-
-              {newPassword && (
-                <div>
-                  <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                    Ulangi Password Baru
-                  </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                      <IoLockClosed className="text-sm" />
-                    </div>
-                    <input
-                      type={showNewPassword ? 'text' : 'password'}
-                      value={confirmNewPassword}
-                      onChange={(e) => setConfirmNewPassword(e.target.value)}
-                      placeholder="Ketik ulang password baru"
-                      className="w-full bg-slate-50 border border-slate-200 rounded-2xl pl-10 pr-3.5 py-2.5 text-slate-900 text-xs focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition"
-                    />
-                  </div>
-                </div>
-              )}
-            </div>
+            )}
           </div>
 
-          {/* Konfirmasi Password Saat Ini (Keamanan) */}
-          <div className="border-t border-slate-100 pt-3">
-            <label className="block text-xs font-bold text-amber-950 mb-1">
-              Konfirmasi Password Saat Ini <span className="text-rose-500">*</span>
+          {/* Konfirmasi Password Saat Ini */}
+          <div className="pt-2 border-t-2 border-slate-100">
+            <label className="block text-xs font-extrabold uppercase tracking-wider text-slate-700 mb-1">
+              Password Saat Ini <span className="text-rose-500">*</span>
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
@@ -215,9 +216,9 @@ export default function AccountSettingsModal({
                 type={showCurrentPassword ? 'text' : 'password'}
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
-                placeholder="Masukkan password saat ini untuk simpan"
+                placeholder="Ketik password saat ini"
                 required
-                className="w-full bg-amber-50/40 border border-amber-200 rounded-2xl pl-10 pr-10 py-2.5 text-slate-900 text-xs focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition"
+                className="w-full bg-amber-50/50 border-2 border-amber-200 rounded-xl pl-10 pr-10 py-2.5 text-slate-800 font-bold text-xs focus:outline-none focus:border-amber-500 transition"
               />
               <button
                 type="button"
@@ -229,13 +230,16 @@ export default function AccountSettingsModal({
             </div>
           </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-3 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white font-bold text-xs rounded-full shadow-xs shadow-amber-600/30 transition active:scale-95 cursor-pointer mt-2 disabled:opacity-50"
-          >
-            {loading ? 'Menyimpan Perubahan...' : 'Simpan Perubahan Akun'}
-          </button>
+          {/* Action Button Duolingo 3D */}
+          <div className="pt-2">
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-3 bg-amber-500 hover:bg-amber-400 text-white font-extrabold text-xs uppercase tracking-wider rounded-xl border-b-4 border-amber-600 active:border-b-0 active:translate-y-1 transition cursor-pointer disabled:opacity-50"
+            >
+              {loading ? 'MENYIMPAN...' : 'SIMPAN PERUBAHAN'}
+            </button>
+          </div>
         </form>
       </div>
     </div>
