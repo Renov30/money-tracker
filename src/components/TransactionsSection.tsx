@@ -1,10 +1,18 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Transaction, TransactionType, Category, CustomCategory, DEFAULT_CATEGORIES } from '@/types';
 import { formatRupiah } from '@/lib/storage';
-import { IoWalletOutline, IoTrashOutline, IoPencil, IoFilter, IoPricetagsOutline } from 'react-icons/io5';
-import CustomDropdown, { DropdownOption } from './CustomDropdown';
+import {
+  IoWalletOutline,
+  IoTrashOutline,
+  IoPencil,
+  IoFilter,
+  IoChevronBack,
+  IoChevronForward,
+  IoCheckmark,
+  IoClose,
+} from 'react-icons/io5';
 
 interface TransactionsSectionProps {
   transactions: Transaction[];
@@ -15,7 +23,9 @@ interface TransactionsSectionProps {
   forcedType?: TransactionType | 'all';
   customCategories?: CustomCategory[];
   onOpenManageCategories?: () => void;
-  monthFilter?: string; // Optional: filter transactions specifically by selected month YYYY-MM
+  monthFilter?: string; // Format YYYY-MM
+  onPrevMonth?: () => void;
+  onNextMonth?: () => void;
 }
 
 export default function TransactionsSection({
@@ -28,13 +38,37 @@ export default function TransactionsSection({
   customCategories = [],
   onOpenManageCategories,
   monthFilter,
+  onPrevMonth,
+  onNextMonth,
 }: TransactionsSectionProps) {
   const [filterType, setFilterType] = useState<TransactionType | 'all'>(forcedType);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [dateFilterPreset, setDateFilterPreset] = useState<'all' | 'today' | '7days' | 'month' | 'custom'>('all');
-  const [customDate, setCustomDate] = useState<string>('');
+  
+  // Filter Rentang Jumlah
+  const [minAmount, setMinAmount] = useState<string>('');
+  const [maxAmount, setMaxAmount] = useState<string>('');
+
+  // Dropdown "Filter by" popup state
+  const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false);
+  const [activeFilterTab, setActiveFilterTab] = useState<'category' | 'range'>('category');
+  const filterMenuRef = useRef<HTMLDivElement>(null);
 
   const activeFilter = forcedType !== 'all' ? forcedType : filterType;
+
+  // Tutup dropdown jika klik di luar
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (filterMenuRef.current && !filterMenuRef.current.contains(e.target as Node)) {
+        setIsFilterMenuOpen(false);
+      }
+    };
+    if (isFilterMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isFilterMenuOpen]);
 
   const customNames = customCategories
     .filter((c) => activeFilter === 'all' || c.type === activeFilter)
@@ -55,38 +89,44 @@ export default function TransactionsSection({
     new Set([...baseCategories, ...customNames, ...txCategories])
   );
 
-  const categoryDropdownOptions: (string | DropdownOption)[] = [
-    { value: 'all', label: 'Semua Kategori' },
-    ...availableCategories.map((cat) => ({ value: cat, label: cat })),
-    ...(onOpenManageCategories
-      ? [{ value: '__MANAGE__', label: '⚙️ Kelola Kategori...', isAction: true }]
-      : []),
-  ];
+  // Format Nama Bulan (Contoh: "Oktober 2026")
+  const formatMonthTitle = (mStr?: string) => {
+    if (!mStr) return '';
+    try {
+      const [year, month] = mStr.split('-');
+      const d = new Date(parseInt(year, 10), parseInt(month, 10) - 1, 1);
+      return d.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+    } catch {
+      return mStr;
+    }
+  };
 
-  const datePresetOptions: DropdownOption[] = [
-    { value: 'all', label: 'Semua Waktu' },
-    { value: 'today', label: 'Hari Ini' },
-    { value: '7days', label: '7 Hari' },
-    { value: 'month', label: 'Bulan Ini' },
-    { value: 'custom', label: 'Pilih Tanggal' },
-  ];
-
+  // Filter Data Transaksi
   const filtered = transactions.filter((tx) => {
-    // 0. Month scope filter (if specified from monthly view)
+    // 1. Month scope filter
     if (monthFilter && !tx.date.startsWith(monthFilter)) {
       return false;
     }
 
-    // 1. Type Filter
+    // 2. Type Filter
     const matchesFilter = activeFilter === 'all' ? true : tx.type === activeFilter;
     if (!matchesFilter) return false;
 
-    // 2. Category Filter
+    // 3. Category Filter
     if (selectedCategory !== 'all' && tx.category !== selectedCategory) {
       return false;
     }
 
-    // 3. Search Filter
+    // 4. Amount Range Filter
+    const numAmount = Number(tx.amount) || 0;
+    if (minAmount && numAmount < Number(minAmount)) {
+      return false;
+    }
+    if (maxAmount && numAmount > Number(maxAmount)) {
+      return false;
+    }
+
+    // 5. Search Filter
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       const matchesSearch =
@@ -95,42 +135,22 @@ export default function TransactionsSection({
       if (!matchesSearch) return false;
     }
 
-    // 4. Date Preset Filter
-    if (dateFilterPreset !== 'all') {
-      const today = new Date();
-      const todayStr = today.toISOString().split('T')[0];
-
-      if (dateFilterPreset === 'today') {
-        if (tx.date !== todayStr) return false;
-      } else if (dateFilterPreset === '7days') {
-        const txTime = new Date(tx.date).getTime();
-        const nowTime = today.getTime();
-        const diffDays = (nowTime - txTime) / (1000 * 60 * 60 * 24);
-        if (diffDays > 7 || diffDays < 0) return false;
-      } else if (dateFilterPreset === 'month') {
-        const txMonth = tx.date.slice(0, 7);
-        const curMonth = todayStr.slice(0, 7);
-        if (txMonth !== curMonth) return false;
-      } else if (dateFilterPreset === 'custom' && customDate) {
-        if (tx.date !== customDate) return false;
-      }
-    }
-
     return true;
   });
 
-  const isFiltered = selectedCategory !== 'all' || dateFilterPreset !== 'all';
+  const isFiltered = selectedCategory !== 'all' || Boolean(minAmount) || Boolean(maxAmount);
 
   const resetFilters = () => {
     setSelectedCategory('all');
-    setDateFilterPreset('all');
-    setCustomDate('');
+    setMinAmount('');
+    setMaxAmount('');
+    setIsFilterMenuOpen(false);
   };
 
   return (
     <div className="space-y-3">
-      {/* Header and Filter Controls */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+      {/* Header Controls */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <h3 className="text-xs font-extrabold uppercase tracking-wider text-slate-400">
           {activeFilter === 'income'
             ? 'RIWAYAT PEMASUKAN'
@@ -176,56 +196,171 @@ export default function TransactionsSection({
             </div>
           )}
 
-          {/* Filter Kategori */}
-          <CustomDropdown
-            value={selectedCategory}
-            onChange={(val) => {
-              if (val === '__MANAGE__') {
-                onOpenManageCategories?.();
-              } else {
-                setSelectedCategory(val);
-              }
-            }}
-            options={categoryDropdownOptions}
-            variant="pill"
-            prefixIcon={<IoFilter className="text-amber-600 text-xs shrink-0" />}
-          />
-
-          {/* Filter Waktu */}
-          <CustomDropdown
-            value={dateFilterPreset}
-            onChange={(val) => setDateFilterPreset(val as any)}
-            options={datePresetOptions}
-            variant="pill"
-          />
-
-          {dateFilterPreset === 'custom' && (
-            <input
-              type="date"
-              value={customDate}
-              onChange={(e) => setCustomDate(e.target.value)}
-              className="bg-white border-2 border-slate-200 text-slate-800 text-xs font-bold rounded-xl px-2.5 py-1 focus:outline-none focus:border-amber-500 cursor-pointer"
-            />
-          )}
-
-          {/* Kelola Kategori Button */}
-          {onOpenManageCategories && (
+          {/* 1. Tombol "Filter by" dengan Pop-up Kategori & Rentang Jumlah */}
+          <div className="relative" ref={filterMenuRef}>
             <button
               type="button"
-              onClick={onOpenManageCategories}
-              className="flex items-center gap-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 border-2 border-amber-200 rounded-xl px-3 py-1.5 text-xs font-extrabold transition cursor-pointer"
+              onClick={() => setIsFilterMenuOpen(!isFilterMenuOpen)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-extrabold border-2 transition cursor-pointer ${
+                isFiltered || isFilterMenuOpen
+                  ? 'bg-amber-50 text-amber-700 border-amber-300'
+                  : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200'
+              }`}
             >
-              <IoPricetagsOutline className="text-sm" />
-              <span>Kategori</span>
+              <IoFilter className="text-sm text-amber-600" />
+              <span>Filter by</span>
+              {isFiltered && (
+                <span className="w-2 h-2 rounded-full bg-amber-500" />
+              )}
             </button>
+
+            {/* Pop-up Dialog Filter */}
+            {isFilterMenuOpen && (
+              <div className="absolute left-0 sm:right-0 sm:left-auto top-full mt-2 w-72 bg-white rounded-2xl border-2 border-slate-200 shadow-xl z-30 p-3 space-y-3 animate-fade-in">
+                {/* Tabs Kategori vs Rentang */}
+                <div className="grid grid-cols-2 gap-1 p-1 bg-slate-100 rounded-xl text-xs font-extrabold">
+                  <button
+                    type="button"
+                    onClick={() => setActiveFilterTab('category')}
+                    className={`py-1.5 rounded-lg transition cursor-pointer ${
+                      activeFilterTab === 'category'
+                        ? 'bg-white text-slate-800 shadow-2xs'
+                        : 'text-slate-500 hover:text-slate-800'
+                    }`}
+                  >
+                    Kategori
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveFilterTab('range')}
+                    className={`py-1.5 rounded-lg transition cursor-pointer ${
+                      activeFilterTab === 'range'
+                        ? 'bg-white text-slate-800 shadow-2xs'
+                        : 'text-slate-500 hover:text-slate-800'
+                    }`}
+                  >
+                    Rentang
+                  </button>
+                </div>
+
+                {/* Tab Konten 1: Kategori */}
+                {activeFilterTab === 'category' && (
+                  <div className="space-y-1.5 max-h-52 overflow-y-auto pr-1">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedCategory('all')}
+                      className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs font-extrabold text-left transition cursor-pointer ${
+                        selectedCategory === 'all'
+                          ? 'bg-amber-50 text-amber-700'
+                          : 'hover:bg-slate-50 text-slate-700'
+                      }`}
+                    >
+                      <span>Semua Kategori</span>
+                      {selectedCategory === 'all' && <IoCheckmark className="text-base text-amber-600" />}
+                    </button>
+                    {availableCategories.map((cat) => (
+                      <button
+                        key={cat}
+                        type="button"
+                        onClick={() => setSelectedCategory(cat)}
+                        className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs font-extrabold text-left transition cursor-pointer ${
+                          selectedCategory === cat
+                            ? 'bg-amber-50 text-amber-700'
+                            : 'hover:bg-slate-50 text-slate-700'
+                        }`}
+                      >
+                        <span className="truncate">{cat}</span>
+                        {selectedCategory === cat && <IoCheckmark className="text-base text-amber-600" />}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {/* Tab Konten 2: Rentang Jumlah */}
+                {activeFilterTab === 'range' && (
+                  <div className="space-y-2.5">
+                    <div>
+                      <label className="block text-[11px] font-extrabold uppercase tracking-wider text-slate-400 mb-1">
+                        Jumlah Minimal (Rp)
+                      </label>
+                      <input
+                        type="number"
+                        value={minAmount}
+                        onChange={(e) => setMinAmount(e.target.value)}
+                        placeholder="Contoh: 10000"
+                        className="w-full bg-slate-50 border-2 border-slate-200 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-amber-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-extrabold uppercase tracking-wider text-slate-400 mb-1">
+                        Jumlah Maksimal (Rp)
+                      </label>
+                      <input
+                        type="number"
+                        value={maxAmount}
+                        onChange={(e) => setMaxAmount(e.target.value)}
+                        placeholder="Contoh: 500000"
+                        className="w-full bg-slate-50 border-2 border-slate-200 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-amber-500"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Footer Pop-up: Reset & Tutup */}
+                <div className="flex items-center justify-between pt-2 border-t-2 border-slate-100">
+                  <button
+                    type="button"
+                    onClick={resetFilters}
+                    className="text-xs font-extrabold text-rose-500 hover:text-rose-600 cursor-pointer"
+                  >
+                    Reset Filter
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsFilterMenuOpen(false)}
+                    className="px-3 py-1 bg-amber-500 hover:bg-amber-400 text-white font-extrabold text-xs uppercase rounded-lg border-b-2 border-amber-600 active:border-b-0 transition cursor-pointer"
+                  >
+                    Tutup
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* 2. Navigator Bulan di Samping Tombol Filter (Bisa Diklik Kiri dan Kanan) */}
+          {monthFilter && onPrevMonth && onNextMonth && (
+            <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-xl border border-slate-200">
+              <button
+                type="button"
+                onClick={onPrevMonth}
+                className="w-7 h-7 rounded-lg bg-white hover:bg-slate-50 text-slate-700 flex items-center justify-center transition cursor-pointer shadow-2xs"
+                title="Bulan sebelumnya"
+              >
+                <IoChevronBack className="text-xs" />
+              </button>
+              <span className="text-xs font-extrabold text-slate-800 px-2 min-w-[95px] text-center capitalize">
+                {formatMonthTitle(monthFilter)}
+              </span>
+              <button
+                type="button"
+                onClick={onNextMonth}
+                className="w-7 h-7 rounded-lg bg-white hover:bg-slate-50 text-slate-700 flex items-center justify-center transition cursor-pointer shadow-2xs"
+                title="Bulan berikutnya"
+              >
+                <IoChevronForward className="text-xs" />
+              </button>
+            </div>
           )}
 
+          {/* Indikator Reset Cepat saat Terfilter */}
           {isFiltered && (
             <button
               onClick={resetFilters}
-              className="text-xs font-extrabold text-rose-500 hover:text-rose-600 px-2 py-1 cursor-pointer"
+              className="text-xs font-extrabold text-rose-500 hover:text-rose-600 px-2 py-1 cursor-pointer flex items-center gap-0.5"
+              title="Reset semua filter aktif"
             >
-              Reset
+              <IoClose className="text-sm" />
+              <span>Reset</span>
             </button>
           )}
         </div>
@@ -238,16 +373,25 @@ export default function TransactionsSection({
             <IoWalletOutline className="text-4xl" />
           </div>
           <div className="text-sm font-extrabold text-slate-600">
-            Belum ada transaksi di bulan ini
+            {isFiltered
+              ? 'Tidak ada transaksi yang cocok dengan filter'
+              : 'Belum ada transaksi di bulan ini'}
           </div>
-          {forcedType === 'all' && (
+          {isFiltered ? (
+            <button
+              onClick={resetFilters}
+              className="mt-1 inline-block text-xs font-extrabold text-amber-600 hover:text-amber-700 underline cursor-pointer"
+            >
+              Reset Filter
+            </button>
+          ) : forcedType === 'all' ? (
             <button
               onClick={() => onOpenAddModal('expense')}
               className="mt-1 inline-block px-4 py-2 bg-amber-500 hover:bg-amber-400 text-white font-extrabold text-xs uppercase rounded-xl border-b-4 border-amber-600 active:border-b-0 active:translate-y-1 transition cursor-pointer"
             >
               + Catat Sekarang
             </button>
-          )}
+          ) : null}
         </div>
       ) : (
         <div className="space-y-2">
