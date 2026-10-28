@@ -103,7 +103,6 @@ export default function ManageCategoriesModal({
       return;
     }
 
-    // Check duplicate among other categories
     const isDuplicate =
       currentDefaults.some((c) => c.toLowerCase() === trimmed.toLowerCase()) ||
       currentCustoms.some((c) => c.id !== id && c.name.toLowerCase() === trimmed.toLowerCase());
@@ -136,42 +135,42 @@ export default function ManageCategoriesModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
-      <div className="bg-white w-full max-w-lg rounded-3xl p-6 shadow-2xl border border-slate-100 relative max-h-[90vh] flex flex-col">
+    <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
+      <div 
+        className="bg-white w-full max-w-lg rounded-2xl p-6 border-2 border-slate-200 shadow-xl relative max-h-[90vh] flex flex-col space-y-3"
+        onClick={(e) => e.stopPropagation()}
+      >
         
-        {/* Header */}
-        <div className="flex items-center justify-between pb-3 border-b border-slate-100 shrink-0">
+        {/* Header Duolingo Style */}
+        <div className="flex items-center justify-between pb-3 border-b-2 border-slate-100 shrink-0">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-2xl bg-amber-50 border border-amber-200/80 flex items-center justify-center shadow-xs text-amber-700">
+            <div className="w-9 h-9 rounded-xl bg-amber-50 border-2 border-amber-200 flex items-center justify-center text-amber-600">
               <IoPricetagsOutline className="text-xl" />
             </div>
             <div>
-              <h3 className="text-sm font-black text-slate-900">
-                Manajemen Kategori
+              <h3 className="text-sm font-black text-slate-800 uppercase tracking-tight">
+                MANAJEMEN KATEGORI
               </h3>
-              <p className="text-[11px] text-slate-400 font-medium">
-                Tambah, ubah nama, atau hapus kategori keuangan
-              </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="w-7 h-7 rounded-full bg-slate-100 text-slate-500 hover:text-slate-800 flex items-center justify-center font-bold text-xs transition cursor-pointer"
+            className="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition cursor-pointer"
           >
-            <IoClose className="text-base" />
+            <IoClose className="text-lg" />
           </button>
         </div>
 
         {/* Error Alert */}
         {error && (
-          <div className="my-3 flex items-center gap-2 p-2.5 bg-rose-50 border border-rose-200 rounded-2xl text-xs text-rose-700 font-semibold shrink-0">
+          <div className="flex items-center gap-2 p-2.5 bg-rose-50 border-2 border-rose-200 rounded-xl text-xs text-rose-600 font-bold shrink-0">
             <IoAlertCircle className="text-lg shrink-0" />
             <span>{error}</span>
           </div>
         )}
 
-        {/* Type Toggle Pills */}
-        <div className="grid grid-cols-2 gap-2 my-3 p-1 bg-slate-100 rounded-full shrink-0">
+        {/* Type Toggle Pills Duolingo Style */}
+        <div className="grid grid-cols-2 gap-2 p-1 bg-slate-100 rounded-xl text-xs font-extrabold shrink-0">
           <button
             type="button"
             onClick={() => {
@@ -179,14 +178,14 @@ export default function ManageCategoriesModal({
               setError(null);
               setEditingId(null);
             }}
-            className={`py-2 rounded-full text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1.5 ${
+            className={`py-2 rounded-lg transition cursor-pointer flex items-center justify-center gap-1.5 uppercase ${
               activeType === 'expense'
-                ? 'bg-rose-500 text-white shadow-xs'
-                : 'text-slate-600 hover:text-slate-900'
+                ? 'bg-rose-500 text-white shadow-2xs'
+                : 'text-slate-500 hover:text-rose-600'
             }`}
           >
             <IoTrendingDown className="text-base" />
-            <span>Kategori Pengeluaran ({DEFAULT_CATEGORIES.expense.length + customCategories.filter(c => c.type === 'expense').length})</span>
+            <span>Pengeluaran ({DEFAULT_CATEGORIES.expense.length + customCategories.filter(c => c.type === 'expense').length})</span>
           </button>
           <button
             type="button"
@@ -195,57 +194,54 @@ export default function ManageCategoriesModal({
               setError(null);
               setEditingId(null);
             }}
-            className={`py-2 rounded-full text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1.5 ${
+            className={`py-2 rounded-lg transition cursor-pointer flex items-center justify-center gap-1.5 uppercase ${
               activeType === 'income'
-                ? 'bg-emerald-600 text-white shadow-xs'
-                : 'text-slate-600 hover:text-slate-900'
+                ? 'bg-emerald-500 text-white shadow-2xs'
+                : 'text-slate-500 hover:text-emerald-600'
             }`}
           >
             <IoTrendingUp className="text-base" />
-            <span>Kategori Pemasukan ({DEFAULT_CATEGORIES.income.length + customCategories.filter(c => c.type === 'income').length})</span>
+            <span>Pemasukan ({DEFAULT_CATEGORIES.income.length + customCategories.filter(c => c.type === 'income').length})</span>
           </button>
         </div>
 
         {/* Add New Category Box */}
-        <form onSubmit={handleAdd} className="mb-3 p-3 bg-amber-50/70 border border-amber-200/80 rounded-2xl shrink-0">
-          <label className="block text-[11px] font-bold text-amber-950 mb-1.5">
-            + Tambah Kategori Baru ({activeType === 'expense' ? 'Pengeluaran' : 'Pemasukan'}):
+        <form onSubmit={handleAdd} className="p-3 bg-slate-50 border-2 border-slate-200 rounded-xl shrink-0 space-y-1.5">
+          <label className="block text-[11px] font-extrabold uppercase tracking-wider text-slate-500">
+            + Tambah Kategori ({activeType === 'expense' ? 'Pengeluaran' : 'Pemasukan'})
           </label>
           <div className="flex items-center gap-2">
             <input
               type="text"
               value={newCatName}
               onChange={(e) => setNewCatName(e.target.value)}
-              placeholder={activeType === 'expense' ? 'Contoh: Olahraga, Langganan, Zakat...' : 'Contoh: Bonus, Dividen, Saham...'}
-              className="flex-1 bg-white border border-amber-200 rounded-xl px-3 py-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500/20"
+              placeholder={activeType === 'expense' ? 'Contoh: Olahraga, Langganan, Zakat' : 'Contoh: Bonus, Dividen, Saham'}
+              className="flex-1 bg-white border-2 border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-amber-500 transition"
             />
             <button
               type="submit"
               disabled={isSubmitting || !newCatName.trim()}
-              className="px-4 py-2 bg-amber-600 hover:bg-amber-700 disabled:opacity-50 text-white font-bold text-xs rounded-xl shadow-xs transition active:scale-95 cursor-pointer flex items-center gap-1 shrink-0"
+              className="px-4 py-2 bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-white font-extrabold text-xs uppercase tracking-wider rounded-xl border-b-4 border-amber-600 active:border-b-0 active:translate-y-1 transition cursor-pointer flex items-center gap-1 shrink-0"
             >
-              <IoAdd className="text-base" />
-              <span>Tambah</span>
+              <IoAdd className="text-base stroke-2" />
+              <span>TAMBAH</span>
             </button>
           </div>
         </form>
 
         {/* Scrollable Categories List */}
-        <div className="flex-1 overflow-y-auto space-y-2 pr-1 min-h-[220px]">
+        <div className="flex-1 overflow-y-auto space-y-3 pr-1 min-h-[200px]">
           
           {/* Custom Categories Section */}
           <div className="space-y-1.5">
-            <div className="flex items-center justify-between text-[11px] font-bold text-slate-500 uppercase tracking-wider px-1 pt-1">
-              <span>Kategori Kustom Anda ({currentCustoms.length})</span>
+            <div className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 px-1 pt-1">
+              Kategori Kustom ({currentCustoms.length})
             </div>
 
             {currentCustoms.length === 0 ? (
-              <div className="p-4 bg-slate-50 border border-dashed border-slate-200 rounded-2xl text-center">
-                <p className="text-xs text-slate-500 font-medium">
+              <div className="p-4 bg-white border-2 border-dashed border-slate-200 rounded-xl text-center">
+                <p className="text-xs font-bold text-slate-400">
                   Belum ada kategori kustom untuk {activeType === 'expense' ? 'pengeluaran' : 'pemasukan'}.
-                </p>
-                <p className="text-[11px] text-slate-400 mt-0.5">
-                  Gunakan form di atas untuk menambahkan kategori barumu.
                 </p>
               </div>
             ) : (
@@ -256,13 +252,13 @@ export default function ManageCategoriesModal({
                   return (
                     <div
                       key={cat.id}
-                      className="p-2.5 bg-amber-50 border border-amber-300 rounded-2xl flex items-center gap-2 animate-fade-in"
+                      className="p-2.5 bg-amber-50 border-2 border-amber-300 rounded-xl flex items-center gap-2"
                     >
                       <input
                         type="text"
                         value={editingName}
                         onChange={(e) => setEditingName(e.target.value)}
-                        className="flex-1 bg-white border border-amber-300 rounded-xl px-3 py-1.5 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/20"
+                        className="flex-1 bg-white border-2 border-amber-300 rounded-lg px-3 py-1.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-amber-500"
                         autoFocus
                         onKeyDown={(e) => {
                           if (e.key === 'Enter') {
@@ -277,15 +273,15 @@ export default function ManageCategoriesModal({
                         type="button"
                         onClick={() => handleSaveEdit(cat.id)}
                         disabled={isSubmitting || !editingName.trim()}
-                        className="p-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow-xs transition cursor-pointer"
-                        title="Simpan Perubahan"
+                        className="p-2 bg-emerald-500 hover:bg-emerald-400 text-white rounded-lg transition cursor-pointer"
+                        title="Simpan"
                       >
-                        <IoCheckmark className="text-sm" />
+                        <IoCheckmark className="text-sm stroke-2" />
                       </button>
                       <button
                         type="button"
                         onClick={cancelEdit}
-                        className="p-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl transition cursor-pointer"
+                        className="p-2 bg-slate-200 hover:bg-slate-300 text-slate-600 rounded-lg transition cursor-pointer"
                         title="Batal"
                       >
                         <IoClose className="text-sm" />
@@ -297,32 +293,32 @@ export default function ManageCategoriesModal({
                 return (
                   <div
                     key={cat.id}
-                    className="p-2.5 bg-white border border-slate-200/80 hover:border-amber-300 rounded-2xl flex items-center justify-between gap-2 shadow-2xs transition group"
+                    className="p-2.5 bg-white border-2 border-slate-200 hover:border-slate-300 rounded-xl flex items-center justify-between gap-2 transition"
                   >
                     <div className="flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full bg-amber-500 shrink-0"></span>
-                      <span className="text-xs font-bold text-slate-800">{cat.name}</span>
-                      <span className="text-[10px] font-semibold px-2 py-0.5 bg-amber-50 text-amber-700 rounded-full border border-amber-200/60">
+                      <span className="w-2 h-2 rounded-full bg-amber-500 shrink-0" />
+                      <span className="text-xs font-extrabold text-slate-800">{cat.name}</span>
+                      <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 bg-amber-50 text-amber-700 rounded-lg border border-amber-200">
                         Kustom
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-1 opacity-90 group-hover:opacity-100 transition">
+                    <div className="flex items-center gap-1">
                       <button
                         type="button"
                         onClick={() => startEdit(cat)}
-                        className="p-1.5 hover:bg-amber-100 text-slate-500 hover:text-amber-800 rounded-xl transition cursor-pointer"
-                        title={`Ubah nama kategori "${cat.name}"`}
+                        className="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg transition cursor-pointer"
+                        title="Ubah nama"
                       >
-                        <IoPencil className="text-sm" />
+                        <IoPencil className="text-xs" />
                       </button>
                       <button
                         type="button"
                         onClick={() => handleDelete(cat.id, cat.name)}
-                        className="p-1.5 hover:bg-rose-50 text-slate-400 hover:text-rose-600 rounded-xl transition cursor-pointer"
-                        title={`Hapus kategori "${cat.name}"`}
+                        className="p-1.5 bg-rose-50 hover:bg-rose-100 text-rose-500 rounded-lg transition cursor-pointer"
+                        title="Hapus"
                       >
-                        <IoTrashOutline className="text-sm" />
+                        <IoTrashOutline className="text-xs" />
                       </button>
                     </div>
                   </div>
@@ -332,19 +328,19 @@ export default function ManageCategoriesModal({
           </div>
 
           {/* System Default Categories Section */}
-          <div className="space-y-1.5 pt-3">
-            <div className="flex items-center justify-between text-[11px] font-bold text-slate-400 uppercase tracking-wider px-1">
-              <span>Kategori Bawaan ({currentDefaults.length})</span>
+          <div className="space-y-1.5 pt-2">
+            <div className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 px-1">
+              Kategori Bawaan ({currentDefaults.length})
             </div>
 
             <div className="grid grid-cols-2 gap-1.5">
               {currentDefaults.map((cat) => (
                 <div
                   key={cat}
-                  className="p-2 bg-slate-50 border border-slate-200/70 rounded-xl flex items-center justify-between gap-2"
+                  className="p-2 bg-slate-50 border-2 border-slate-100 rounded-xl flex items-center justify-between gap-2"
                 >
-                  <span className="text-xs font-semibold text-slate-600 truncate">{cat}</span>
-                  <span className="text-[9px] font-medium px-1.5 py-0.5 bg-slate-200/80 text-slate-500 rounded-md shrink-0 flex items-center gap-0.5" title="Kategori standar sistem">
+                  <span className="text-xs font-bold text-slate-700 truncate">{cat}</span>
+                  <span className="text-[9px] font-extrabold uppercase px-1.5 py-0.5 bg-slate-200 text-slate-500 rounded-md shrink-0 flex items-center gap-0.5">
                     <IoLockClosedOutline className="text-[10px]" />
                     <span>Bawaan</span>
                   </span>
@@ -355,14 +351,14 @@ export default function ManageCategoriesModal({
 
         </div>
 
-        {/* Footer */}
-        <div className="pt-3 mt-3 border-t border-slate-100 flex items-center justify-end shrink-0">
+        {/* Footer Duolingo Style Button */}
+        <div className="pt-2 border-t-2 border-slate-100 flex items-center justify-end shrink-0">
           <button
             type="button"
             onClick={onClose}
-            className="px-5 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-full shadow-xs transition active:scale-95 cursor-pointer"
+            className="w-full sm:w-auto px-6 py-2.5 bg-amber-500 hover:bg-amber-400 text-white font-extrabold text-xs uppercase tracking-wider rounded-xl border-b-4 border-amber-600 active:border-b-0 active:translate-y-1 transition cursor-pointer"
           >
-            Selesai
+            SELESAI
           </button>
         </div>
 
