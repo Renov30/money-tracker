@@ -1,20 +1,48 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-## Getting Started
+## 🚀 Getting Started
 
-First, run the development server:
+### 1. Database Setup (PostgreSQL)
+
+Pastikan container PostgreSQL berjalan (via Docker):
+
+```bash
+docker compose up -d db
+```
+
+Atau pastikan variabel `DATABASE_URL` di `.env.local` sudah mengarah ke instance PostgreSQL kamu:
+```env
+DATABASE_URL=postgres://postgres:postgres@localhost:5432/money_tracker
+```
+
+### 2. Migrasi & Seeder Database
+
+Jalankan perintah berikut untuk migrasi skema tabel dan mengisi data awal (dummy/seed):
+
+```bash
+# Jalankan migrasi tabel & indeks
+npm run db:migrate
+
+# Jalankan rollback migrasi (down)
+npm run db:migrate:down
+
+# Masukkan data awal (seeder)
+npm run db:seed
+
+# Bersihkan dan isi ulang data seeder segar
+npm run db:seed:fresh
+
+# Reset total (Rollback -> Migrate -> Fresh Seed)
+npm run db:reset
+```
+
+### 3. Menjalankan Server Development
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Buka [http://localhost:3000](http://localhost:3000) di browser untuk melihat aplikasi.
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 

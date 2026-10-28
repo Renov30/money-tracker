@@ -75,6 +75,19 @@ export async function initDb() {
         );
       `);
 
+      // 5. Daily Quests Table
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS daily_quests (
+          id VARCHAR(100) PRIMARY KEY,
+          title VARCHAR(255) NOT NULL,
+          description TEXT NOT NULL,
+          xp_reward INT DEFAULT 25,
+          completed BOOLEAN DEFAULT FALSE,
+          claimed BOOLEAN DEFAULT FALSE,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+      `);
+
       // Check if stats seeded
       const statsRes = await client.query('SELECT * FROM user_stats WHERE id = $1', ['current_user']);
       if (statsRes.rowCount === 0) {
