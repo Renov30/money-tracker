@@ -27,6 +27,7 @@ import ManageCategoriesModal from '@/components/ManageCategoriesModal';
 import TrashView from '@/components/TrashView';
 import AccountSettingsModal from '@/components/AccountSettingsModal';
 import ToastNotification, { ToastData, ToastType } from '@/components/ToastNotification';
+import { IoChevronBack, IoChevronForward } from 'react-icons/io5';
 
 export default function Home() {
   const router = useRouter();
@@ -222,6 +223,16 @@ export default function Home() {
     const nextY = nextDate.getFullYear();
     const nextM = String(nextDate.getMonth() + 1).padStart(2, '0');
     setSelectedMonth(`${nextY}-${nextM}`);
+  };
+
+  const formatMonthTitle = (monthStr: string) => {
+    try {
+      const [year, month] = monthStr.split('-');
+      const d = new Date(parseInt(year, 10), parseInt(month, 10) - 1, 1);
+      return d.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+    } catch {
+      return monthStr;
+    }
   };
 
   // Add Transaction to Database
@@ -834,18 +845,44 @@ export default function Home() {
 
               {activeTab === 'income' && (
                 <div className="space-y-6">
-                  <div className="bg-white rounded-2xl p-5 border-2 border-slate-200 flex items-center justify-between">
+                  {/* Monthly Header with Navigator */}
+                  <div className="bg-white rounded-2xl p-5 border-2 border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
-                      <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
-                        PEMASUKAN BULAN INI ({selectedMonth})
-                      </span>
-                      <h2 className="text-2xl font-black text-emerald-500 mt-0.5">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
+                          PEMASUKAN
+                        </span>
+                        {/* Month Navigator Pills */}
+                        <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg">
+                          <button
+                            type="button"
+                            onClick={handlePrevMonth}
+                            className="w-6 h-6 rounded-md bg-white hover:bg-slate-50 text-slate-700 flex items-center justify-center transition cursor-pointer shadow-2xs"
+                            title="Bulan sebelumnya"
+                          >
+                            <IoChevronBack className="text-xs" />
+                          </button>
+                          <span className="text-[11px] font-extrabold text-slate-800 px-1.5 capitalize">
+                            {formatMonthTitle(selectedMonth)}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={handleNextMonth}
+                            className="w-6 h-6 rounded-md bg-white hover:bg-slate-50 text-slate-700 flex items-center justify-center transition cursor-pointer shadow-2xs"
+                            title="Bulan berikutnya"
+                          >
+                            <IoChevronForward className="text-xs" />
+                          </button>
+                        </div>
+                      </div>
+                      <h2 className="text-2xl font-black text-emerald-500 mt-1">
                         Rp {monthlyIncome.toLocaleString('id-ID')}
                       </h2>
                     </div>
+
                     <button
                       onClick={() => openAddModalWithType('income')}
-                      className="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-white font-extrabold text-xs uppercase tracking-wider rounded-xl border-b-4 border-emerald-600 active:border-b-0 active:translate-y-1 transition cursor-pointer"
+                      className="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-white font-extrabold text-xs uppercase tracking-wider rounded-xl border-b-4 border-emerald-600 active:border-b-0 active:translate-y-1 transition cursor-pointer self-start sm:self-auto shrink-0"
                     >
                       + PEMASUKAN
                     </button>
@@ -867,18 +904,44 @@ export default function Home() {
 
               {activeTab === 'expense' && (
                 <div className="space-y-6">
-                  <div className="bg-white rounded-2xl p-5 border-2 border-slate-200 flex items-center justify-between">
+                  {/* Monthly Header with Navigator */}
+                  <div className="bg-white rounded-2xl p-5 border-2 border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
-                      <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
-                        PENGELUARAN BULAN INI ({selectedMonth})
-                      </span>
-                      <h2 className="text-2xl font-black text-rose-500 mt-0.5">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
+                          PENGELUARAN
+                        </span>
+                        {/* Month Navigator Pills */}
+                        <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg">
+                          <button
+                            type="button"
+                            onClick={handlePrevMonth}
+                            className="w-6 h-6 rounded-md bg-white hover:bg-slate-50 text-slate-700 flex items-center justify-center transition cursor-pointer shadow-2xs"
+                            title="Bulan sebelumnya"
+                          >
+                            <IoChevronBack className="text-xs" />
+                          </button>
+                          <span className="text-[11px] font-extrabold text-slate-800 px-1.5 capitalize">
+                            {formatMonthTitle(selectedMonth)}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={handleNextMonth}
+                            className="w-6 h-6 rounded-md bg-white hover:bg-slate-50 text-slate-700 flex items-center justify-center transition cursor-pointer shadow-2xs"
+                            title="Bulan berikutnya"
+                          >
+                            <IoChevronForward className="text-xs" />
+                          </button>
+                        </div>
+                      </div>
+                      <h2 className="text-2xl font-black text-rose-500 mt-1">
                         Rp {monthlyExpense.toLocaleString('id-ID')}
                       </h2>
                     </div>
+
                     <button
                       onClick={() => openAddModalWithType('expense')}
-                      className="px-4 py-2.5 bg-rose-500 hover:bg-rose-400 text-white font-extrabold text-xs uppercase tracking-wider rounded-xl border-b-4 border-rose-600 active:border-b-0 active:translate-y-1 transition cursor-pointer"
+                      className="px-4 py-2.5 bg-rose-500 hover:bg-rose-400 text-white font-extrabold text-xs uppercase tracking-wider rounded-xl border-b-4 border-rose-600 active:border-b-0 active:translate-y-1 transition cursor-pointer self-start sm:self-auto shrink-0"
                     >
                       + PENGELUARAN
                     </button>
