@@ -48,11 +48,7 @@ export default function LingoraHeroBanner({
 
       {/* Interactive Animated Wallaby Mascot on the Right */}
       <div className="absolute right-2 sm:right-6 bottom-0 z-20">
-        <InteractiveMascot
-          userName={userName}
-          activeGoalTitle={activeGoalTitle}
-          size={175}
-        />
+        <InteractiveMascot size={175} />
       </div>
 
       {/* Decorative Warm Sun/Cloud Shapes in Background */}

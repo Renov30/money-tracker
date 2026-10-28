@@ -87,3 +87,4 @@ export default function WallyLogo({ className = '', size = 36 }: WallyLogoProps)
     </div>
   );
 }
+
