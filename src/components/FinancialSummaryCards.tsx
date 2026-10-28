@@ -5,7 +5,8 @@ import { formatRupiah } from '@/lib/storage';
 import { IoWalletOutline, IoSaveOutline, IoChevronBack, IoChevronForward } from 'react-icons/io5';
 
 interface FinancialSummaryCardsProps {
-  totalBalance?: number;
+  safeToSpend?: number; // Kas siap pakai (Total Kas Bersih - Total Tabungan)
+  rawCashBalance?: number; // Total Kas Bersih Akumulatif dari pemasukan - pengeluaran
   totalSavings?: number;
   selectedMonth?: string; // YYYY-MM
   onPrevMonth?: () => void;
@@ -18,7 +19,8 @@ interface FinancialSummaryCardsProps {
 }
 
 export default function FinancialSummaryCards({
-  totalBalance = 0,
+  safeToSpend = 0,
+  rawCashBalance = 0,
   totalSavings = 0,
   selectedMonth = '',
   onPrevMonth,
@@ -42,7 +44,8 @@ export default function FinancialSummaryCards({
     }
   };
 
-  const safeBalance = Number(totalBalance) || 0;
+  const safeSpendVal = Number(safeToSpend) || 0;
+  const rawCashVal = Number(rawCashBalance) || 0;
   const safeIncome = Number(monthlyIncome) || 0;
   const safeExpense = Number(monthlyExpense) || 0;
   const safeSavings = Number(totalSavings) || 0;
@@ -80,36 +83,36 @@ export default function FinancialSummaryCards({
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {/* Kartu 1: Arus Kas Bulan Ini */}
+        {/* Kartu 1: Kas Siap Pakai (Bisa Dipakai) */}
         <div
           onClick={onOpenAddTransaction}
           className="bg-white border-2 border-slate-200 border-b-4 hover:bg-slate-50 rounded-2xl p-4 flex flex-col justify-between transition cursor-pointer active:border-b-2 active:translate-y-0.5"
         >
           <div className="flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-xl bg-emerald-500 text-white flex items-center justify-center shrink-0">
+            <div className={`w-12 h-12 rounded-xl text-white flex items-center justify-center shrink-0 ${safeSpendVal < 0 ? 'bg-rose-500' : 'bg-emerald-500'}`}>
               <IoWalletOutline className="text-2xl" />
             </div>
             <div>
               <div className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
-                SISA KAS BULAN INI
+                KAS SIAP PAKAI (BEBAS DIGUNAKAN)
               </div>
-              <div className={`text-xl font-black mt-0.5 ${safeBalance < 0 ? 'text-rose-500' : 'text-slate-800'}`}>
-                {formatRupiah(safeBalance)}
+              <div className={`text-xl font-black mt-0.5 ${safeSpendVal < 0 ? 'text-rose-500' : 'text-slate-800'}`}>
+                {formatRupiah(safeSpendVal)}
               </div>
             </div>
           </div>
 
           <div className="flex items-center justify-between text-xs font-extrabold pt-3 mt-2 border-t-2 border-slate-100">
-            <span className="text-emerald-600">
-              Masuk: +{formatRupiah(safeIncome)}
+            <span className="text-slate-500 font-bold" title="Total akumulasi kas riil Anda">
+              Total Kas: {formatRupiah(rawCashVal)}
             </span>
-            <span className="text-rose-500">
-              Keluar: -{formatRupiah(safeExpense)}
+            <span className="text-amber-600 font-bold" title="Tertahan di seluruh celengan impian">
+              Di Celengan: -{formatRupiah(safeSavings)}
             </span>
           </div>
         </div>
 
-        {/* Kartu 2: Total Tabungan (Akumulatif & Berjalan Terus) */}
+        {/* Kartu 2: Total Tabungan (Akumulatif & Tidak Boleh Dipakai) */}
         <div
           onClick={onViewGoals || onOpenAddGoal}
           className="bg-white border-2 border-slate-200 border-b-4 hover:bg-slate-50 rounded-2xl p-4 flex flex-col justify-between transition cursor-pointer active:border-b-2 active:translate-y-0.5"
@@ -120,7 +123,7 @@ export default function FinancialSummaryCards({
             </div>
             <div>
               <div className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
-                TOTAL TABUNGAN
+                TOTAL TABUNGAN (TERTAHAN)
               </div>
               <div className="text-xl font-black text-slate-800 mt-0.5">
                 {formatRupiah(safeSavings)}
@@ -129,8 +132,8 @@ export default function FinancialSummaryCards({
           </div>
 
           <div className="flex items-center justify-between text-xs font-bold text-slate-400 pt-3 mt-2 border-t-2 border-slate-100">
-            <span>Terkumpul di celengan impian</span>
-            <span className="text-amber-600 font-extrabold">Lihat Celengan →</span>
+            <span className="text-emerald-600 font-extrabold">Bulan Ini: +{formatRupiah(safeIncome)}</span>
+            <span className="text-rose-500 font-extrabold">Keluar: -{formatRupiah(safeExpense)}</span>
           </div>
         </div>
       </div>

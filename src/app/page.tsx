@@ -205,8 +205,22 @@ export default function Home() {
     .filter((tx) => tx.type === 'expense')
     .reduce((acc, curr) => acc + (Number(curr.amount) || 0), 0);
 
+  // Akumulasi Total Kas Riil (Seluruh Transaksi Masuk - Keluar)
+  const allTimeIncome = transactions
+    .filter((tx) => tx.type === 'income')
+    .reduce((acc, curr) => acc + (Number(curr.amount) || 0), 0);
+
+  const allTimeExpense = transactions
+    .filter((tx) => tx.type === 'expense')
+    .reduce((acc, curr) => acc + (Number(curr.amount) || 0), 0);
+
+  const rawCashBalance = allTimeIncome - allTimeExpense;
+
   // Tabungan berjalan terus (total saldo terkumpul di seluruh celengan)
   const totalSavings = goals.reduce((acc, curr) => acc + (Number(curr.currentAmount) || 0), 0);
+
+  // Kas Siap Pakai (Uang yang bebas digunakan setelah disisihkan ke tabungan celengan)
+  const safeToSpend = rawCashBalance - totalSavings;
 
   // Navigasi Bulan
   const handlePrevMonth = () => {
@@ -694,6 +708,14 @@ export default function Home() {
 
   // Top up Goal in Database
   const handleTopUpGoal = async (goalId: string, amount: number) => {
+    // Validasi: Cek apakah kas siap pakai mencukupi
+    if (safeToSpend < amount) {
+      const confirmSpend = window.confirm(
+        `Kas siap pakai Anda (${formatRupiah(safeToSpend)}) lebih kecil dari nominal tabungan (${formatRupiah(amount)}). Tetap ingin menabung? Sisa kas siap pakai akan menjadi minus.`
+      );
+      if (!confirmSpend) return;
+    }
+
     try {
       const res = await fetch('/api/goals', {
         method: 'POST',
@@ -805,9 +827,10 @@ export default function Home() {
                     onOpenAddModal={() => openAddModalWithType('expense')}
                   />
 
-                  {/* Rangkuman Keuangan: Sisa Kas Bulan Ini & Total Tabungan */}
+                  {/* Rangkuman Keuangan: Kas Siap Pakai & Total Tabungan Tertahan */}
                   <FinancialSummaryCards
-                    totalBalance={monthlyIncome - monthlyExpense}
+                    safeToSpend={safeToSpend}
+                    rawCashBalance={rawCashBalance}
                     totalSavings={totalSavings}
                     selectedMonth={selectedMonth}
                     onPrevMonth={handlePrevMonth}
