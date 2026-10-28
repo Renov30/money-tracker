@@ -69,18 +69,44 @@ export default function LingoraSidebar({
               <button
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
-                className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition cursor-pointer ${
+                className={`relative group w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all duration-300 ease-out cursor-pointer select-none ${
                   isActive
-                    ? 'bg-amber-50 text-amber-900 shadow-xs border border-amber-200/60'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-amber-50/40'
+                    ? 'bg-gradient-to-r from-amber-100/90 via-amber-50 to-orange-50/70 text-amber-950 shadow-xs border border-amber-300/80 translate-x-1.5'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-amber-50/50 hover:translate-x-1 active:scale-[0.98]'
                 }`}
               >
+                {/* Active Left Pill Accent Indicator */}
+                {isActive && (
+                  <span className="absolute -left-[1px] top-1/2 -translate-y-1/2 w-1.5 h-5 bg-gradient-to-b from-amber-500 to-amber-600 rounded-r-full shadow-xs shadow-amber-500/50 animate-fade-in" />
+                )}
+
                 <div className="flex items-center gap-3">
-                  <span className="shrink-0">{item.icon}</span>
-                  <span>{item.label}</span>
+                  <span
+                    className={`w-7 h-7 rounded-xl flex items-center justify-center transition-all duration-300 ${
+                      isActive
+                        ? 'bg-white shadow-xs text-amber-700 scale-105 ring-1 ring-amber-200/50'
+                        : 'text-slate-500 group-hover:text-amber-700 group-hover:scale-110 group-hover:bg-white/70'
+                    }`}
+                  >
+                    {item.icon}
+                  </span>
+                  <span
+                    className={`transition-colors duration-200 ${
+                      isActive ? 'font-black text-amber-950' : 'font-semibold'
+                    }`}
+                  >
+                    {item.label}
+                  </span>
                 </div>
+
                 {item.badge !== null && item.badge !== undefined && (
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-500 text-white shadow-xs">
+                  <span
+                    className={`px-2 py-0.5 rounded-full text-[10px] font-black transition-all duration-300 ${
+                      isActive
+                        ? 'bg-rose-500 text-white shadow-xs scale-105'
+                        : 'bg-rose-100 text-rose-600 group-hover:bg-rose-500 group-hover:text-white'
+                    }`}
+                  >
                     {item.badge}
                   </span>
                 )}
