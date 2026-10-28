@@ -11,7 +11,6 @@ import {
   IoSparkles,
   IoSettingsOutline,
   IoPersonCircle,
-  IoPricetagsOutline,
   IoTrashBinOutline,
 } from 'react-icons/io5';
 
@@ -20,7 +19,6 @@ interface SidebarProps {
   setActiveTab: (tab: string) => void;
   level: number;
   userName: string;
-  onOpenManageCategories?: () => void;
   trashCount?: number;
 }
 
@@ -29,7 +27,6 @@ export default function LingoraSidebar({
   setActiveTab,
   level,
   userName,
-  onOpenManageCategories,
   trashCount = 0,
 }: SidebarProps) {
   const navItems = [
@@ -38,12 +35,6 @@ export default function LingoraSidebar({
     { id: 'expense', label: 'Pengeluaran', icon: <IoTrendingDown className="text-lg text-rose-600" /> },
     { id: 'goals', label: 'Goals Tabungan', icon: <IoFlag className="text-lg text-amber-600" /> },
     { id: 'leaderboard', label: 'Peringkat & Misi', icon: <IoTrophy className="text-lg text-amber-500" /> },
-    {
-      id: 'categories',
-      label: 'Kelola Kategori',
-      icon: <IoPricetagsOutline className="text-lg text-amber-700" />,
-      onClick: onOpenManageCategories,
-    },
     {
       id: 'trash',
       label: 'Tempat Sampah',
@@ -77,13 +68,7 @@ export default function LingoraSidebar({
             return (
               <button
                 key={item.id}
-                onClick={() => {
-                  if (item.onClick) {
-                    item.onClick();
-                  } else {
-                    setActiveTab(item.id);
-                  }
-                }}
+                onClick={() => setActiveTab(item.id)}
                 className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition cursor-pointer ${
                   isActive
                     ? 'bg-amber-50 text-amber-900 shadow-xs border border-amber-200/60'

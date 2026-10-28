@@ -559,7 +559,6 @@ export default function Home() {
         setActiveTab={setActiveTab}
         level={stats.level}
         userName={stats.name}
-        onOpenManageCategories={() => handleOpenManageCategories('expense')}
         trashCount={trashTransactions.length}
       />
 
