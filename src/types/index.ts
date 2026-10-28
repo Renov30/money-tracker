@@ -40,6 +40,7 @@ export interface Goal {
   targetAmount: number;
   currentAmount: number;
   category: string;
+  isMain?: boolean;
 }
 
 export interface DailyQuest {

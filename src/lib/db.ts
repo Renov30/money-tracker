@@ -45,9 +45,12 @@ export async function initDb() {
           target_amount BIGINT NOT NULL,
           current_amount BIGINT DEFAULT 0,
           category VARCHAR(100) NOT NULL,
+          is_main BOOLEAN DEFAULT FALSE,
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
       `);
+      // Ensure column is_main exists if table was created earlier
+      await client.query(`ALTER TABLE goals ADD COLUMN IF NOT EXISTS is_main BOOLEAN DEFAULT FALSE;`);
 
       // 3. User Stats Table
       await client.query(`
@@ -280,12 +283,13 @@ export const db = {
     await initDb();
     try {
       const res = await pool.query(
-        'SELECT id, title, target_amount as "targetAmount", current_amount as "currentAmount", category FROM goals ORDER BY created_at ASC'
+        'SELECT id, title, target_amount as "targetAmount", current_amount as "currentAmount", category, COALESCE(is_main, FALSE) as "isMain" FROM goals ORDER BY is_main DESC, created_at ASC'
       );
       return res.rows.map(r => ({
         ...r,
         targetAmount: Number(r.targetAmount),
         currentAmount: Number(r.currentAmount),
+        isMain: Boolean(r.isMain),
       }));
     } catch {
       return INITIAL_GOALS;
@@ -296,13 +300,65 @@ export const db = {
     await initDb();
     try {
       await pool.query(
-        `INSERT INTO goals (id, title, target_amount, current_amount, category)
-         VALUES ($1, $2, $3, $4, $5)`,
-        [goal.id, goal.title, goal.targetAmount, goal.currentAmount, goal.category]
+        `INSERT INTO goals (id, title, target_amount, current_amount, category, is_main)
+         VALUES ($1, $2, $3, $4, $5, $6)`,
+        [goal.id, goal.title, goal.targetAmount, goal.currentAmount, goal.category, Boolean(goal.isMain)]
       );
       return goal;
     } catch {
       return goal;
+    }
+  },
+
+  async updateGoal(goal: Goal): Promise<Goal> {
+    await initDb();
+    try {
+      await pool.query(
+        `UPDATE goals 
+         SET title = $1, target_amount = $2, current_amount = $3, category = $4
+         WHERE id = $5`,
+        [goal.title, goal.targetAmount, goal.currentAmount, goal.category, goal.id]
+      );
+      return goal;
+    } catch (e) {
+      console.error('Error updating goal in DB:', e);
+      return goal;
+    }
+  },
+
+  async deleteGoal(id: string): Promise<boolean> {
+    await initDb();
+    try {
+      // If deleted goal was the main goal, promote the next oldest goal to main
+      const res = await pool.query('SELECT is_main FROM goals WHERE id = $1', [id]);
+      const wasMain = res.rows[0]?.is_main;
+      
+      await pool.query('DELETE FROM goals WHERE id = $1', [id]);
+
+      if (wasMain) {
+        await pool.query(`
+          UPDATE goals 
+          SET is_main = TRUE 
+          WHERE id = (SELECT id FROM goals ORDER BY created_at ASC LIMIT 1)
+        `);
+      }
+      return true;
+    } catch (e) {
+      console.error('Error deleting goal in DB:', e);
+      return false;
+    }
+  },
+
+  async lockInMainGoal(id: string): Promise<boolean> {
+    await initDb();
+    try {
+      // Reset all goals is_main to FALSE, then set target id to TRUE
+      await pool.query('UPDATE goals SET is_main = FALSE');
+      await pool.query('UPDATE goals SET is_main = TRUE WHERE id = $1', [id]);
+      return true;
+    } catch (e) {
+      console.error('Error locking in main goal in DB:', e);
+      return false;
     }
   },
 

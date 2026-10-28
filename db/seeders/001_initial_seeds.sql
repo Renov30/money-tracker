@@ -54,11 +54,11 @@ INSERT INTO transactions (id, title, amount, type, category, date, xp_earned) VA
 ON CONFLICT (id) DO NOTHING;
 
 -- 4. Seed Goals
-INSERT INTO goals (id, title, target_amount, current_amount, category) VALUES
-    ('goal-1', 'Beli Nintendo Switch OLED', 4500000, 3375000, 'Gadget Impian'),
-    ('goal-2', 'Dana Darurat 3 Bulan', 10000000, 6500000, 'Tabungan Aman'),
-    ('goal-3', 'Liburan Akhir Tahun ke Jepang', 15000000, 4500000, 'Liburan'),
-    ('goal-4', 'Upgrade Monitor & Ergonomic Chair', 5500000, 1800000, 'Setup Kerja')
+INSERT INTO goals (id, title, target_amount, current_amount, category, is_main) VALUES
+    ('goal-1', 'Beli Nintendo Switch OLED', 4500000, 3375000, 'Gadget Impian', TRUE),
+    ('goal-2', 'Dana Darurat 3 Bulan', 10000000, 6500000, 'Tabungan Aman', FALSE),
+    ('goal-3', 'Liburan Akhir Tahun ke Jepang', 15000000, 4500000, 'Liburan', FALSE),
+    ('goal-4', 'Upgrade Monitor & Ergonomic Chair', 5500000, 1800000, 'Setup Kerja', FALSE)
 ON CONFLICT (id) DO NOTHING;
 
 -- 5. Seed Daily Quests

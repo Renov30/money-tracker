@@ -66,6 +66,7 @@ export const INITIAL_GOALS: Goal[] = [
     targetAmount: 4500000,
     currentAmount: 3375000,
     category: 'Gadget Impian',
+    isMain: true,
   },
   {
     id: 'goal-2',
@@ -73,6 +74,7 @@ export const INITIAL_GOALS: Goal[] = [
     targetAmount: 10000000,
     currentAmount: 6500000,
     category: 'Tabungan Aman',
+    isMain: false,
   },
   {
     id: 'goal-3',
@@ -80,6 +82,7 @@ export const INITIAL_GOALS: Goal[] = [
     targetAmount: 15000000,
     currentAmount: 4500000,
     category: 'Liburan',
+    isMain: false,
   },
 ];
 

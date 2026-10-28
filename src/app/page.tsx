@@ -20,7 +20,7 @@ import TransactionsSection from '@/components/TransactionsSection';
 import GoalsManagerView from '@/components/GoalsManagerView';
 import LingoraRightRail from '@/components/LingoraRightRail';
 import AddTransactionModal from '@/components/AddTransactionModal';
-import AddGoalModal from '@/components/AddGoalModal';
+import GoalModal from '@/components/GoalModal';
 import ConfirmDialogModal from '@/components/ConfirmDialogModal';
 import ManageCategoriesModal from '@/components/ManageCategoriesModal';
 import TrashView from '@/components/TrashView';
@@ -41,6 +41,7 @@ export default function Home() {
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [addTxType, setAddTxType] = useState<TransactionType>('expense');
   const [isAddGoalOpen, setIsAddGoalOpen] = useState(false);
+  const [editingGoal, setEditingGoal] = useState<Goal | null>(null);
 
   // Category Manager Modal State
   const [isManageCategoriesOpen, setIsManageCategoriesOpen] = useState(false);
@@ -48,7 +49,8 @@ export default function Home() {
   
   // Custom Confirmation Dialog State (replacing native confirm)
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
-  const [deleteMode, setDeleteMode] = useState<'soft' | 'permanent' | 'empty_trash'>('soft');
+  const [deleteMode, setDeleteMode] = useState<'soft' | 'permanent' | 'empty_trash' | 'goal'>('soft');
+  const [goalToDelete, setGoalToDelete] = useState<Goal | null>(null);
   const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false);
 
   // Custom Toast State (replacing native alert)
@@ -275,6 +277,36 @@ export default function Home() {
       }
       setTrashTransactions([]);
       showToast('Tempat sampah berhasil dikosongkan.', 'delete');
+    } else if (deleteMode === 'goal' && goalToDelete) {
+      const id = goalToDelete.id;
+      const title = goalToDelete.title;
+      try {
+        const res = await fetch(`/api/goals?id=${id}`, { method: 'DELETE' });
+        if (res.ok) {
+          const json = await res.json();
+          if (json.goals) {
+            setGoals(json.goals);
+            storage.saveGoals(json.goals);
+            showToast(`Target celengan "${title}" berhasil dihapus!`, 'delete');
+            setGoalToDelete(null);
+            setDeleteTargetId(null);
+            return;
+          }
+        }
+      } catch (e) {
+        console.warn('Delete goal API failed:', e);
+      }
+
+      // Local fallback
+      const remainingGoals = goals.filter((g) => g.id !== id);
+      // If deleted goal was main, lock in the first remaining goal
+      if (goalToDelete.isMain && remainingGoals.length > 0) {
+        remainingGoals[0].isMain = true;
+      }
+      setGoals(remainingGoals);
+      storage.saveGoals(remainingGoals);
+      showToast(`Target celengan "${title}" berhasil dihapus!`, 'delete');
+      setGoalToDelete(null);
     }
 
     setDeleteTargetId(null);
@@ -451,45 +483,144 @@ export default function Home() {
     showToast(`Kategori "${catName}" berhasil dihapus.`, 'success');
   };
 
-  // Add Goal to Database
-  const handleAddGoal = async (title: string, targetAmount: number) => {
+  // Save Goal (Create or Update)
+  const handleSaveGoal = async (data: {
+    id?: string;
+    title: string;
+    targetAmount: number;
+    currentAmount?: number;
+    category?: string;
+    isMain?: boolean;
+  }) => {
+    if (data.id) {
+      // Edit existing goal
+      try {
+        const res = await fetch('/api/goals', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        });
+        if (res.ok) {
+          const json = await res.json();
+          if (json.goals) {
+            setGoals(json.goals);
+            storage.saveGoals(json.goals);
+            showToast(`Target "${data.title}" berhasil diperbarui!`, 'edit');
+            setEditingGoal(null);
+            return;
+          }
+        }
+      } catch (e) {
+        console.warn('Edit goal API error:', e);
+      }
+
+      // Local fallback
+      const updated = goals.map((g) =>
+        g.id === data.id
+          ? {
+              ...g,
+              title: data.title,
+              targetAmount: data.targetAmount,
+              currentAmount: data.currentAmount ?? g.currentAmount,
+              category: data.category || g.category,
+            }
+          : g
+      );
+      setGoals(updated);
+      storage.saveGoals(updated);
+      showToast(`Target "${data.title}" berhasil diperbarui!`, 'edit');
+      setEditingGoal(null);
+    } else {
+      // Create new goal
+      try {
+        const res = await fetch('/api/goals', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'create', ...data }),
+        });
+
+        if (res.ok) {
+          const json = await res.json();
+          const updated = json.goals || [...goals, json.goal];
+          setGoals(updated);
+          storage.saveGoals(updated);
+          if (json.stats) {
+            setStats(json.stats);
+            storage.saveStats(json.stats);
+          }
+          showToast(`Target "${data.title}" tersimpan di database! +30 XP.`);
+          return;
+        }
+      } catch (e) {
+        console.warn('API error on addGoal:', e);
+      }
+
+      // Local fallback
+      const xpReward = 30;
+      const newGoal: Goal = {
+        id: `goal-${Date.now()}`,
+        title: data.title,
+        targetAmount: data.targetAmount,
+        currentAmount: data.currentAmount || 0,
+        category: data.category || 'Target Impian',
+        isMain: Boolean(data.isMain),
+      };
+      const updated = data.isMain
+        ? [newGoal, ...goals.map((g) => ({ ...g, isMain: false }))]
+        : [...goals, newGoal];
+      setGoals(updated);
+      storage.saveGoals(updated);
+      gainXp(xpReward);
+      showToast(`Target "${data.title}" berhasil dibuat! +${xpReward} XP.`);
+    }
+  };
+
+  // Lock In Main Goal
+  const handleLockInGoal = async (goalId: string) => {
     try {
       const res = await fetch('/api/goals', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'create', title, targetAmount }),
+        body: JSON.stringify({ action: 'lock_in', id: goalId }),
       });
-
       if (res.ok) {
         const json = await res.json();
-        const updated = [...goals, json.goal];
-        setGoals(updated);
-        storage.saveGoals(updated);
-        if (json.stats) {
-          setStats(json.stats);
-          storage.saveStats(json.stats);
+        if (json.goals) {
+          setGoals(json.goals);
+          storage.saveGoals(json.goals);
+          const lockedGoal = json.goals.find((g: Goal) => g.id === goalId);
+          showToast(`Target "${lockedGoal?.title || 'Goal'}" berhasil di-Lock In sebagai Target Utama!`, 'success');
+          return;
         }
-        showToast(`Target "${title}" tersimpan di database! +30 XP.`);
-        return;
       }
     } catch (e) {
-      console.warn('API error on addGoal:', e);
+      console.warn('Lock in goal API error:', e);
     }
 
     // Local fallback
-    const xpReward = 30;
-    const newGoal: Goal = {
-      id: `goal-${Date.now()}`,
-      title,
-      targetAmount,
-      currentAmount: 0,
-      category: 'Target Impian',
-    };
-    const updated = [...goals, newGoal];
-    setGoals(updated);
-    storage.saveGoals(updated);
-    gainXp(xpReward);
-    showToast(`Target "${title}" berhasil dibuat! +${xpReward} XP.`);
+    const updated = goals.map((g) => ({
+      ...g,
+      isMain: g.id === goalId,
+    }));
+    // Reorder so main goal is first
+    const sorted = [...updated].sort((a, b) => (b.isMain ? 1 : 0) - (a.isMain ? 1 : 0));
+    setGoals(sorted);
+    storage.saveGoals(sorted);
+    const lockedGoal = sorted.find((g) => g.id === goalId);
+    showToast(`Target "${lockedGoal?.title || 'Goal'}" berhasil di-Lock In sebagai Target Utama!`, 'success');
+  };
+
+  // Prompt Delete Goal
+  const promptDeleteGoal = (goal: Goal) => {
+    setGoalToDelete(goal);
+    setDeleteMode('goal');
+    setIsConfirmDeleteOpen(true);
+  };
+
+  // Open Edit Goal Modal
+  const handleOpenEditGoal = (goal: Goal) => {
+    setEditingGoal(goal);
+    setIsAddGoalOpen(true);
   };
 
   // Top up Goal in Database
@@ -539,12 +670,14 @@ export default function Home() {
     setIsAddTxOpen(true);
   };
 
-  const activeMainGoal = goals[0] || {
+  // Active Main Goal is the one marked with isMain: true, or the first goal
+  const activeMainGoal = goals.find((g) => g.isMain) || goals[0] || {
     id: 'goal-default',
     title: 'Celengan Target',
     targetAmount: 5000000,
     currentAmount: 2500000,
     category: 'Target',
+    isMain: true,
   };
 
   return (
@@ -685,7 +818,13 @@ export default function Home() {
                 <GoalsManagerView
                   goals={goals}
                   onTopUp={handleTopUpGoal}
-                  onOpenAddGoal={() => setIsAddGoalOpen(true)}
+                  onOpenAddGoal={() => {
+                    setEditingGoal(null);
+                    setIsAddGoalOpen(true);
+                  }}
+                  onEditGoal={handleOpenEditGoal}
+                  onDeleteGoal={promptDeleteGoal}
+                  onLockInGoal={handleLockInGoal}
                 />
               )}
 
@@ -694,7 +833,13 @@ export default function Home() {
                   <GoalsManagerView
                     goals={goals}
                     onTopUp={handleTopUpGoal}
-                    onOpenAddGoal={() => setIsAddGoalOpen(true)}
+                    onOpenAddGoal={() => {
+                      setEditingGoal(null);
+                      setIsAddGoalOpen(true);
+                    }}
+                    onEditGoal={handleOpenEditGoal}
+                    onDeleteGoal={promptDeleteGoal}
+                    onLockInGoal={handleLockInGoal}
                   />
                 </div>
               )}
@@ -746,10 +891,14 @@ export default function Home() {
         initialType={manageCategoriesType}
       />
 
-      <AddGoalModal
+      <GoalModal
         isOpen={isAddGoalOpen}
-        onClose={() => setIsAddGoalOpen(false)}
-        onAddGoal={handleAddGoal}
+        onClose={() => {
+          setIsAddGoalOpen(false);
+          setEditingGoal(null);
+        }}
+        onSaveGoal={handleSaveGoal}
+        editingGoal={editingGoal}
       />
 
       {/* Custom Confirmation Modal (No Browser Confirm) */}
@@ -758,24 +907,31 @@ export default function Home() {
         onClose={() => {
           setIsConfirmDeleteOpen(false);
           setDeleteTargetId(null);
+          setGoalToDelete(null);
         }}
         onConfirm={handleExecuteDelete}
         title={
-          deleteMode === 'empty_trash'
+          deleteMode === 'goal'
+            ? 'Hapus Target Celengan?'
+            : deleteMode === 'empty_trash'
             ? 'Kosongkan Tempat Sampah?'
             : deleteMode === 'permanent'
             ? 'Hapus Catatan Permanen?'
             : 'Pindahkan ke Tempat Sampah?'
         }
         message={
-          deleteMode === 'empty_trash'
+          deleteMode === 'goal'
+            ? `Target celengan "${goalToDelete?.title}" akan dihapus dari daftar impianmu. Tindakan ini tidak dapat dibatalkan.`
+            : deleteMode === 'empty_trash'
             ? 'Semua catatan di tempat sampah akan dihapus secara permanen dari database. Tindakan ini tidak dapat dibatalkan.'
             : deleteMode === 'permanent'
             ? 'Catatan keuangan ini akan dihapus secara permanen dari database. Tindakan ini tidak dapat dibatalkan.'
             : 'Catatan keuangan ini akan dipindahkan ke tempat sampah dan disimpan selama 30 hari sebelum terhapus secara otomatis.'
         }
         confirmLabel={
-          deleteMode === 'empty_trash'
+          deleteMode === 'goal'
+            ? 'Ya, Hapus Target'
+            : deleteMode === 'empty_trash'
             ? 'Ya, Kosongkan'
             : deleteMode === 'permanent'
             ? 'Ya, Hapus Permanen'
