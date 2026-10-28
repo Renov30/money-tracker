@@ -282,18 +282,6 @@ export default function AddTransactionModal({
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
-                    onClick={() => {
-                      setIsAddingPreset(!isAddingPreset);
-                      setPresetError(null);
-                    }}
-                    className="text-[11px] font-semibold text-amber-700 hover:text-amber-800 transition cursor-pointer flex items-center gap-0.5"
-                    title="Tambah nominal default baru"
-                  >
-                    <IoAdd className="text-xs" />
-                    <span>{isAddingPreset ? 'Batal' : '+ Nominal'}</span>
-                  </button>
-                  <button
-                    type="button"
                     onClick={() => setIsManagingPresets(!isManagingPresets)}
                     className={`text-[11px] font-semibold transition cursor-pointer flex items-center gap-0.5 ${
                       isManagingPresets
@@ -352,6 +340,16 @@ export default function AddTransactionModal({
                       className="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-xl shadow-xs transition active:scale-95 cursor-pointer shrink-0"
                     >
                       Tambah
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsAddingPreset(false);
+                        setPresetError(null);
+                      }}
+                      className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs rounded-xl transition cursor-pointer shrink-0"
+                    >
+                      Batal
                     </button>
                   </div>
                 </div>
