@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import confetti from 'canvas-confetti';
 import {
   storage,
@@ -28,6 +29,7 @@ import AccountSettingsModal from '@/components/AccountSettingsModal';
 import ToastNotification, { ToastData, ToastType } from '@/components/ToastNotification';
 
 export default function Home() {
+  const router = useRouter();
   const [stats, setStats] = useState<UserStats>(INITIAL_USER_STATS);
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>(INITIAL_TRANSACTIONS);
@@ -76,7 +78,14 @@ export default function Home() {
           const authData = await authRes.json();
           if (authData.user) {
             setCurrentUser(authData.user);
+          } else {
+            // User belum login atau sesi berakhir -> arahkan langsung ke halaman login
+            router.push('/login');
+            return;
           }
+        } else {
+          router.push('/login');
+          return;
         }
 
         if (txRes.ok) {
@@ -699,9 +708,11 @@ export default function Home() {
         body: JSON.stringify({ action: 'logout' }),
       });
       setCurrentUser(null);
-      showToast('Berhasil keluar dari sesi akun.', 'success');
+      router.push('/login');
+      router.refresh();
     } catch (e) {
       console.error(e);
+      router.push('/login');
     }
   };
 
