@@ -41,6 +41,12 @@ export default function Home() {
   
   const [activeTab, setActiveTab] = useState<string>('home');
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [selectedMonth, setSelectedMonth] = useState<string>(() => {
+    const today = new Date();
+    const y = today.getFullYear();
+    const m = String(today.getMonth() + 1).padStart(2, '0');
+    return `${y}-${m}`;
+  });
 
   const [isAddTxOpen, setIsAddTxOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
@@ -185,16 +191,38 @@ export default function Home() {
     });
   };
 
-  // Financial Computations
-  const totalIncome = transactions
+  // Financial Computations: Bulan Terpilih untuk Pemasukan & Pengeluaran, Tabungan Berjalan Terus
+  const monthlyTransactions = transactions.filter((tx) =>
+    tx.date.startsWith(selectedMonth)
+  );
+
+  const monthlyIncome = monthlyTransactions
     .filter((tx) => tx.type === 'income')
     .reduce((acc, curr) => acc + curr.amount, 0);
 
-  const totalExpense = transactions
+  const monthlyExpense = monthlyTransactions
     .filter((tx) => tx.type === 'expense')
     .reduce((acc, curr) => acc + curr.amount, 0);
 
+  // Tabungan berjalan terus (total saldo terkumpul di seluruh celengan)
   const totalSavings = goals.reduce((acc, curr) => acc + curr.currentAmount, 0);
+
+  // Navigasi Bulan
+  const handlePrevMonth = () => {
+    const [y, m] = selectedMonth.split('-').map(Number);
+    const prevDate = new Date(y, m - 2, 1);
+    const nextY = prevDate.getFullYear();
+    const nextM = String(prevDate.getMonth() + 1).padStart(2, '0');
+    setSelectedMonth(`${nextY}-${nextM}`);
+  };
+
+  const handleNextMonth = () => {
+    const [y, m] = selectedMonth.split('-').map(Number);
+    const nextDate = new Date(y, m, 1);
+    const nextY = nextDate.getFullYear();
+    const nextM = String(nextDate.getMonth() + 1).padStart(2, '0');
+    setSelectedMonth(`${nextY}-${nextM}`);
+  };
 
   // Add Transaction to Database
   const handleAddTransaction = async (data: Omit<Transaction, 'id' | 'xpEarned'>) => {
@@ -765,10 +793,15 @@ export default function Home() {
                     onOpenAddModal={() => openAddModalWithType('expense')}
                   />
 
-                  {/* Rangkuman Keuangan: Uang Dimiliki & Total Tabungan */}
+                  {/* Rangkuman Keuangan: Sisa Kas Bulan Ini & Total Tabungan */}
                   <FinancialSummaryCards
-                    totalBalance={totalIncome - totalExpense}
+                    totalBalance={monthlyIncome - monthlyExpense}
                     totalSavings={totalSavings}
+                    selectedMonth={selectedMonth}
+                    onPrevMonth={handlePrevMonth}
+                    onNextMonth={handleNextMonth}
+                    monthlyIncome={monthlyIncome}
+                    monthlyExpense={monthlyExpense}
                     onOpenAddTransaction={() => openAddModalWithType('expense')}
                     onOpenAddGoal={() => {
                       setEditingGoal(null);
@@ -777,16 +810,16 @@ export default function Home() {
                     onViewGoals={() => setActiveTab('goals')}
                   />
 
-                  {/* Target Tabungan Utama */}
+                  {/* Target Tabungan Utama (Berjalan Terus) */}
                   <FeaturedGoalCard
                     goal={activeMainGoal}
                     onTopUp={handleTopUpGoal}
                     onViewAllGoals={() => setActiveTab('goals')}
                   />
 
-                  {/* Recent Transactions List */}
+                  {/* Recent Transactions List (Bulan Terpilih) */}
                   <TransactionsSection
-                    transactions={transactions.slice(0, 6)}
+                    transactions={transactions}
                     onDelete={promptDeleteTransaction}
                     onEdit={handleOpenEditModal}
                     onOpenAddModal={openAddModalWithType}
@@ -794,6 +827,7 @@ export default function Home() {
                     forcedType="all"
                     customCategories={customCategories}
                     onOpenManageCategories={() => handleOpenManageCategories('expense')}
+                    monthFilter={selectedMonth}
                   />
                 </>
               )}
@@ -803,10 +837,10 @@ export default function Home() {
                   <div className="bg-white rounded-2xl p-5 border-2 border-slate-200 flex items-center justify-between">
                     <div>
                       <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
-                        TOTAL PEMASUKAN
+                        PEMASUKAN BULAN INI ({selectedMonth})
                       </span>
                       <h2 className="text-2xl font-black text-emerald-500 mt-0.5">
-                        Rp {totalIncome.toLocaleString('id-ID')}
+                        Rp {monthlyIncome.toLocaleString('id-ID')}
                       </h2>
                     </div>
                     <button
@@ -826,6 +860,7 @@ export default function Home() {
                     forcedType="income"
                     customCategories={customCategories}
                     onOpenManageCategories={() => handleOpenManageCategories('income')}
+                    monthFilter={selectedMonth}
                   />
                 </div>
               )}
@@ -835,10 +870,10 @@ export default function Home() {
                   <div className="bg-white rounded-2xl p-5 border-2 border-slate-200 flex items-center justify-between">
                     <div>
                       <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
-                        TOTAL PENGELUARAN
+                        PENGELUARAN BULAN INI ({selectedMonth})
                       </span>
                       <h2 className="text-2xl font-black text-rose-500 mt-0.5">
-                        Rp {totalExpense.toLocaleString('id-ID')}
+                        Rp {monthlyExpense.toLocaleString('id-ID')}
                       </h2>
                     </div>
                     <button
@@ -858,6 +893,7 @@ export default function Home() {
                     forcedType="expense"
                     customCategories={customCategories}
                     onOpenManageCategories={() => handleOpenManageCategories('expense')}
+                    monthFilter={selectedMonth}
                   />
                 </div>
               )}

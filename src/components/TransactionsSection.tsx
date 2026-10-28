@@ -15,6 +15,7 @@ interface TransactionsSectionProps {
   forcedType?: TransactionType | 'all';
   customCategories?: CustomCategory[];
   onOpenManageCategories?: () => void;
+  monthFilter?: string; // Optional: filter transactions specifically by selected month YYYY-MM
 }
 
 export default function TransactionsSection({
@@ -26,6 +27,7 @@ export default function TransactionsSection({
   forcedType = 'all',
   customCategories = [],
   onOpenManageCategories,
+  monthFilter,
 }: TransactionsSectionProps) {
   const [filterType, setFilterType] = useState<TransactionType | 'all'>(forcedType);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -70,13 +72,21 @@ export default function TransactionsSection({
   ];
 
   const filtered = transactions.filter((tx) => {
+    // 0. Month scope filter (if specified from monthly view)
+    if (monthFilter && !tx.date.startsWith(monthFilter)) {
+      return false;
+    }
+
+    // 1. Type Filter
     const matchesFilter = activeFilter === 'all' ? true : tx.type === activeFilter;
     if (!matchesFilter) return false;
 
+    // 2. Category Filter
     if (selectedCategory !== 'all' && tx.category !== selectedCategory) {
       return false;
     }
 
+    // 3. Search Filter
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       const matchesSearch =
@@ -85,6 +95,7 @@ export default function TransactionsSection({
       if (!matchesSearch) return false;
     }
 
+    // 4. Date Preset Filter
     if (dateFilterPreset !== 'all') {
       const today = new Date();
       const todayStr = today.toISOString().split('T')[0];
@@ -125,7 +136,7 @@ export default function TransactionsSection({
             ? 'RIWAYAT PEMASUKAN'
             : activeFilter === 'expense'
             ? 'RIWAYAT PENGELUARAN'
-            : 'TRANSAKSI TERKINI'}
+            : 'DAFTAR TRANSAKSI'}
         </h3>
 
         <div className="flex flex-wrap items-center gap-2">
@@ -197,6 +208,18 @@ export default function TransactionsSection({
             />
           )}
 
+          {/* Kelola Kategori Button */}
+          {onOpenManageCategories && (
+            <button
+              type="button"
+              onClick={onOpenManageCategories}
+              className="flex items-center gap-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 border-2 border-amber-200 rounded-xl px-3 py-1.5 text-xs font-extrabold transition cursor-pointer"
+            >
+              <IoPricetagsOutline className="text-sm" />
+              <span>Kategori</span>
+            </button>
+          )}
+
           {isFiltered && (
             <button
               onClick={resetFilters}
@@ -215,7 +238,7 @@ export default function TransactionsSection({
             <IoWalletOutline className="text-4xl" />
           </div>
           <div className="text-sm font-extrabold text-slate-600">
-            Belum ada transaksi
+            Belum ada transaksi di bulan ini
           </div>
           {forcedType === 'all' && (
             <button
