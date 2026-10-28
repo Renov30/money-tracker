@@ -5,40 +5,47 @@ import { formatRupiah } from '@/lib/storage';
 import { IoWalletOutline, IoSaveOutline, IoChevronBack, IoChevronForward } from 'react-icons/io5';
 
 interface FinancialSummaryCardsProps {
-  totalBalance: number;
-  totalSavings: number;
-  selectedMonth: string; // YYYY-MM
-  onPrevMonth: () => void;
-  onNextMonth: () => void;
-  monthlyIncome: number;
-  monthlyExpense: number;
+  totalBalance?: number;
+  totalSavings?: number;
+  selectedMonth?: string; // YYYY-MM
+  onPrevMonth?: () => void;
+  onNextMonth?: () => void;
+  monthlyIncome?: number;
+  monthlyExpense?: number;
   onOpenAddTransaction: () => void;
   onOpenAddGoal: () => void;
   onViewGoals?: () => void;
 }
 
 export default function FinancialSummaryCards({
-  totalBalance,
-  totalSavings,
-  selectedMonth,
+  totalBalance = 0,
+  totalSavings = 0,
+  selectedMonth = '',
   onPrevMonth,
   onNextMonth,
-  monthlyIncome,
-  monthlyExpense,
+  monthlyIncome = 0,
+  monthlyExpense = 0,
   onOpenAddTransaction,
   onOpenAddGoal,
   onViewGoals,
 }: FinancialSummaryCardsProps) {
   // Format Month Year (Contoh: "Oktober 2026")
   const formatMonthTitle = (monthStr: string) => {
+    if (!monthStr) return 'Bulan Ini';
     try {
       const [year, month] = monthStr.split('-');
+      if (!year || !month) return 'Bulan Ini';
       const d = new Date(parseInt(year, 10), parseInt(month, 10) - 1, 1);
       return d.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
     } catch {
       return monthStr;
     }
   };
+
+  const safeBalance = Number(totalBalance) || 0;
+  const safeIncome = Number(monthlyIncome) || 0;
+  const safeExpense = Number(monthlyExpense) || 0;
+  const safeSavings = Number(totalSavings) || 0;
 
   return (
     <div className="space-y-2.5">
@@ -86,18 +93,18 @@ export default function FinancialSummaryCards({
               <div className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
                 SISA KAS BULAN INI
               </div>
-              <div className={`text-xl font-black mt-0.5 ${totalBalance < 0 ? 'text-rose-500' : 'text-slate-800'}`}>
-                {formatRupiah(totalBalance)}
+              <div className={`text-xl font-black mt-0.5 ${safeBalance < 0 ? 'text-rose-500' : 'text-slate-800'}`}>
+                {formatRupiah(safeBalance)}
               </div>
             </div>
           </div>
 
           <div className="flex items-center justify-between text-xs font-extrabold pt-3 mt-2 border-t-2 border-slate-100">
             <span className="text-emerald-600">
-              Masuk: +{formatRupiah(monthlyIncome)}
+              Masuk: +{formatRupiah(safeIncome)}
             </span>
             <span className="text-rose-500">
-              Keluar: -{formatRupiah(monthlyExpense)}
+              Keluar: -{formatRupiah(safeExpense)}
             </span>
           </div>
         </div>
@@ -116,7 +123,7 @@ export default function FinancialSummaryCards({
                 TOTAL TABUNGAN
               </div>
               <div className="text-xl font-black text-slate-800 mt-0.5">
-                {formatRupiah(totalSavings)}
+                {formatRupiah(safeSavings)}
               </div>
             </div>
           </div>

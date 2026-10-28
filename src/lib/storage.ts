@@ -237,10 +237,12 @@ export const storage = {
   },
 };
 
-export const formatRupiah = (amount: number): string => {
+export const formatRupiah = (amount: number | string | undefined | null): string => {
+  const num = Number(amount);
+  const safeNum = isNaN(num) ? 0 : num;
   return new Intl.NumberFormat('id-ID', {
     style: 'currency',
     currency: 'IDR',
     maximumFractionDigits: 0,
-  }).format(amount);
+  }).format(safeNum);
 };

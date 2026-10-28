@@ -193,19 +193,19 @@ export default function Home() {
 
   // Financial Computations: Bulan Terpilih untuk Pemasukan & Pengeluaran, Tabungan Berjalan Terus
   const monthlyTransactions = transactions.filter((tx) =>
-    tx.date.startsWith(selectedMonth)
+    tx && typeof tx.date === 'string' && tx.date.startsWith(selectedMonth)
   );
 
   const monthlyIncome = monthlyTransactions
     .filter((tx) => tx.type === 'income')
-    .reduce((acc, curr) => acc + curr.amount, 0);
+    .reduce((acc, curr) => acc + (Number(curr.amount) || 0), 0);
 
   const monthlyExpense = monthlyTransactions
     .filter((tx) => tx.type === 'expense')
-    .reduce((acc, curr) => acc + curr.amount, 0);
+    .reduce((acc, curr) => acc + (Number(curr.amount) || 0), 0);
 
   // Tabungan berjalan terus (total saldo terkumpul di seluruh celengan)
-  const totalSavings = goals.reduce((acc, curr) => acc + curr.currentAmount, 0);
+  const totalSavings = goals.reduce((acc, curr) => acc + (Number(curr.currentAmount) || 0), 0);
 
   // Navigasi Bulan
   const handlePrevMonth = () => {
