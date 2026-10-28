@@ -15,7 +15,7 @@ import LingoraSidebar from '@/components/LingoraSidebar';
 import LingoraTopBar from '@/components/LingoraTopBar';
 import LingoraHeroBanner from '@/components/LingoraHeroBanner';
 import FeaturedGoalCard from '@/components/FeaturedGoalCard';
-import CoreFeaturesCards from '@/components/CoreFeaturesCards';
+import FinancialSummaryCards from '@/components/FinancialSummaryCards';
 import TransactionsSection from '@/components/TransactionsSection';
 import GoalsManagerView from '@/components/GoalsManagerView';
 import LingoraRightRail from '@/components/LingoraRightRail';
@@ -752,14 +752,16 @@ export default function Home() {
                     onViewAllGoals={() => setActiveTab('goals')}
                   />
 
-                  {/* 3 Core Features Cards: Pemasukan, Pengeluaran, Goals */}
-                  <CoreFeaturesCards
-                    totalIncome={totalIncome}
-                    totalExpense={totalExpense}
+                  {/* Rangkuman Keuangan: Total Uang Dimiliki & Total Tabungan */}
+                  <FinancialSummaryCards
+                    totalBalance={totalIncome - totalExpense}
                     totalSavings={totalSavings}
-                    onOpenAddIncome={() => openAddModalWithType('income')}
-                    onOpenAddExpense={() => openAddModalWithType('expense')}
-                    onOpenAddGoal={() => setIsAddGoalOpen(true)}
+                    onOpenAddTransaction={() => openAddModalWithType('expense')}
+                    onOpenAddGoal={() => {
+                      setEditingGoal(null);
+                      setIsAddGoalOpen(true);
+                    }}
+                    onViewGoals={() => setActiveTab('goals')}
                   />
 
                   {/* Recent Transactions List */}
