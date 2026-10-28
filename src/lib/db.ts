@@ -138,9 +138,16 @@ export async function initDb() {
         }
       }
 
-      // Check if goals seeded
-      const goalsRes = await client.query('SELECT COUNT(*) FROM goals');
-      if (parseInt(goalsRes.rows[0].count, 10) === 0) {
+      // Check if goals seeded (only on first init if table newly created)
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS system_seeds (
+          key VARCHAR(100) PRIMARY KEY,
+          seeded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+      `);
+
+      const seededRes = await client.query('SELECT 1 FROM system_seeds WHERE key = $1', ['goals_initial_seed']);
+      if (seededRes.rowCount === 0) {
         for (const goal of INITIAL_GOALS) {
           await client.query(
             `INSERT INTO goals (id, title, target_amount, current_amount, category)
@@ -148,6 +155,7 @@ export async function initDb() {
             [goal.id, goal.title, goal.targetAmount, goal.currentAmount, goal.category]
           );
         }
+        await client.query('INSERT INTO system_seeds (key) VALUES ($1) ON CONFLICT DO NOTHING', ['goals_initial_seed']);
       }
 
       isInitialized = true;
@@ -292,7 +300,7 @@ export const db = {
         isMain: Boolean(r.isMain),
       }));
     } catch {
-      return INITIAL_GOALS;
+      return [];
     }
   },
 

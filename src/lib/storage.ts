@@ -219,9 +219,9 @@ export const storage = {
   },
 
   getGoals: (): Goal[] => {
-    if (typeof window === 'undefined') return INITIAL_GOALS;
+    if (typeof window === 'undefined') return [];
     const data = localStorage.getItem(KEYS.GOALS);
-    return data ? JSON.parse(data) : INITIAL_GOALS;
+    return data ? JSON.parse(data) : [];
   },
   saveGoals: (goals: Goal[]) => {
     if (typeof window === 'undefined') return;

@@ -36,7 +36,7 @@ export default function Home() {
   const [isLoadingAuth, setIsLoadingAuth] = useState(true);
   const [transactions, setTransactions] = useState<Transaction[]>(INITIAL_TRANSACTIONS);
   const [trashTransactions, setTrashTransactions] = useState<Transaction[]>([]);
-  const [goals, setGoals] = useState<Goal[]>(INITIAL_GOALS);
+  const [goals, setGoals] = useState<Goal[]>([]);
   const [quests, setQuests] = useState<DailyQuest[]>(INITIAL_QUESTS);
   const [customCategories, setCustomCategories] = useState<CustomCategory[]>([]);
   
@@ -112,7 +112,7 @@ export default function Home() {
         }
         if (goalsRes.ok) {
           const goalsData = await goalsRes.json();
-          if (Array.isArray(goalsData) && goalsData.length > 0) {
+          if (Array.isArray(goalsData)) {
             setGoals(goalsData);
             storage.saveGoals(goalsData);
           }
