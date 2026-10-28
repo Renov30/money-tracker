@@ -15,6 +15,11 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "WallyTracker - Money Tracker with Wallaby Mascot",
   description: "Aplikasi pencatatan keuangan sederhana berbasis gamifikasi bersama maskot Wallaby",
+  icons: {
+    icon: '/wally-logo.svg',
+    shortcut: '/wally-logo.svg',
+    apple: '/wally-logo.svg',
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
