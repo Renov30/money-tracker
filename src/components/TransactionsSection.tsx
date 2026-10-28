@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { Transaction, TransactionType, Category, CustomCategory, DEFAULT_CATEGORIES } from '@/types';
 import { formatRupiah } from '@/lib/storage';
-import { IoWalletOutline, IoTrashOutline, IoPencil, IoFilter, IoPricetagsOutline } from 'react-icons/io5';
+import { IoWalletOutline, IoTrashOutline, IoPencil, IoFilter } from 'react-icons/io5';
 import CustomDropdown, { DropdownOption } from './CustomDropdown';
 
 interface TransactionsSectionProps {
@@ -217,10 +217,9 @@ export default function TransactionsSection({
             <button
               type="button"
               onClick={onOpenManageCategories}
-              className="flex items-center gap-1.5 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200/80 rounded-full px-3 py-1.5 text-xs font-bold transition cursor-pointer active:scale-95 shadow-2xs"
+              className="text-[11px] font-semibold text-slate-400 hover:text-slate-600 transition cursor-pointer px-1.5 py-1"
               title="Buka Manajemen Kategori"
             >
-              <IoPricetagsOutline className="text-sm" />
               <span>Kelola Kategori</span>
             </button>
           )}

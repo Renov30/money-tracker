@@ -12,7 +12,6 @@ import {
   IoClose,
   IoAdd,
   IoRefreshOutline,
-  IoPricetagsOutline,
 } from 'react-icons/io5';
 import CustomDropdown, { DropdownOption } from './CustomDropdown';
 
@@ -422,10 +421,10 @@ export default function AddTransactionModal({
                 <button
                   type="button"
                   onClick={onOpenManageCategories}
-                  className="text-[11px] font-bold text-amber-700 hover:text-amber-800 transition cursor-pointer flex items-center gap-1"
+                  className="text-[11px] font-semibold text-slate-400 hover:text-slate-600 transition cursor-pointer"
+                  title="Kelola daftar kategori"
                 >
-                  <IoPricetagsOutline className="text-xs" />
-                  <span>Kelola Kategori</span>
+                  <span>Kelola</span>
                 </button>
               )}
             </div>
