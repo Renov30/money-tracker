@@ -32,6 +32,7 @@ export default function Home() {
   const router = useRouter();
   const [stats, setStats] = useState<UserStats>(INITIAL_USER_STATS);
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
+  const [isLoadingAuth, setIsLoadingAuth] = useState(true);
   const [transactions, setTransactions] = useState<Transaction[]>(INITIAL_TRANSACTIONS);
   const [trashTransactions, setTrashTransactions] = useState<Transaction[]>([]);
   const [goals, setGoals] = useState<Goal[]>(INITIAL_GOALS);
@@ -78,6 +79,7 @@ export default function Home() {
           const authData = await authRes.json();
           if (authData.user) {
             setCurrentUser(authData.user);
+            setIsLoadingAuth(false);
           } else {
             // User belum login atau sesi berakhir -> arahkan langsung ke halaman login
             router.push('/login');
@@ -716,6 +718,16 @@ export default function Home() {
     }
   };
 
+  if (isLoadingAuth) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-amber-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  const displayName = currentUser?.username || 'Pengguna';
+
   return (
     <div className="bg-white min-h-screen w-full flex flex-col md:flex-row font-sans antialiased text-slate-800">
       
@@ -726,7 +738,7 @@ export default function Home() {
       <LingoraSidebar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
-        userName={currentUser ? currentUser.username : stats.name}
+        userName={displayName}
         trashCount={trashTransactions.length}
         currentUser={currentUser}
         onLogout={handleLogout}
@@ -749,7 +761,7 @@ export default function Home() {
                 <>
                   {/* Hero Banner with Wallaby Mascot */}
                   <LingoraHeroBanner
-                    userName={currentUser ? currentUser.username : stats.name}
+                    userName={displayName}
                     onOpenAddModal={() => openAddModalWithType('expense')}
                   />
 

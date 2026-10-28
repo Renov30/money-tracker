@@ -1,7 +1,7 @@
 import { Transaction, Goal, DailyQuest, UserStats, CustomCategory } from '@/types';
 
 export const INITIAL_USER_STATS: UserStats = {
-  name: 'Alex',
+  name: 'Pengguna',
   title: 'Pengatur Bijak (Level 12)',
   level: 12,
   currentXp: 750,
