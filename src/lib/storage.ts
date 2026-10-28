@@ -1,4 +1,4 @@
-import { Transaction, Goal, DailyQuest, UserStats, CustomCategory } from '@/types';
+import { Transaction, Goal, DailyQuest, UserStats, CustomCategory, DEFAULT_CATEGORIES } from '@/types';
 
 export const INITIAL_USER_STATS: UserStats = {
   name: 'Pengguna',
