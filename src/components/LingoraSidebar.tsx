@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import WallabyMascot from './WallabyMascot';
+import WallyLogo from './WallyLogo';
 import {
   IoHome,
   IoTrendingUp,
@@ -55,10 +55,10 @@ export default function LingoraSidebar({
   return (
     <aside className="w-full md:w-64 bg-white border-r border-amber-100/60 flex flex-col justify-between p-4 md:p-6 shrink-0 md:h-screen md:sticky md:top-0 overflow-y-auto">
       <div className="space-y-6">
-        {/* App Branding with Wallaby Mascot */}
+        {/* App Branding with Wally Logo */}
         <div className="flex items-center gap-3 px-2">
-          <div className="w-10 h-10 rounded-2xl bg-amber-50 border border-amber-200/70 flex items-center justify-center shadow-xs overflow-hidden">
-            <WallabyMascot size={36} mood="waving" />
+          <div className="w-10 h-10 rounded-2xl bg-amber-50 border border-amber-200/70 flex items-center justify-center shadow-xs overflow-hidden shrink-0">
+            <WallyLogo size={38} />
           </div>
           <div>
             <h1 className="text-base font-black text-slate-900 tracking-tight leading-none">
