@@ -9,7 +9,7 @@ import {
   INITIAL_GOALS,
   INITIAL_QUESTS,
 } from '@/lib/storage';
-import { Transaction, Goal, DailyQuest, UserStats, TransactionType, CustomCategory } from '@/types';
+import { Transaction, Goal, DailyQuest, UserStats, TransactionType, CustomCategory, AuthUser } from '@/types';
 
 import LingoraSidebar from '@/components/LingoraSidebar';
 import LingoraTopBar from '@/components/LingoraTopBar';
@@ -28,6 +28,7 @@ import ToastNotification, { ToastData, ToastType } from '@/components/ToastNotif
 
 export default function Home() {
   const [stats, setStats] = useState<UserStats>(INITIAL_USER_STATS);
+  const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>(INITIAL_TRANSACTIONS);
   const [trashTransactions, setTrashTransactions] = useState<Transaction[]>([]);
   const [goals, setGoals] = useState<Goal[]>(INITIAL_GOALS);
@@ -60,13 +61,21 @@ export default function Home() {
   useEffect(() => {
     async function loadData() {
       try {
-        const [txRes, goalsRes, statsRes, catRes, trashRes] = await Promise.all([
+        const [txRes, goalsRes, statsRes, catRes, trashRes, authRes] = await Promise.all([
           fetch('/api/transactions'),
           fetch('/api/goals'),
           fetch('/api/stats'),
           fetch('/api/categories'),
           fetch('/api/transactions?trash=true'),
+          fetch('/api/auth'),
         ]);
+
+        if (authRes.ok) {
+          const authData = await authRes.json();
+          if (authData.user) {
+            setCurrentUser(authData.user);
+          }
+        }
 
         if (txRes.ok) {
           const txData = await txRes.json();
@@ -680,6 +689,20 @@ export default function Home() {
     isMain: true,
   };
 
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'logout' }),
+      });
+      setCurrentUser(null);
+      showToast('Berhasil keluar dari sesi akun.', 'success');
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   return (
     <div className="bg-[#faf7f2] min-h-screen w-full flex flex-col md:flex-row font-sans antialiased text-slate-800">
       
@@ -691,8 +714,10 @@ export default function Home() {
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         level={stats.level}
-        userName={stats.name}
+        userName={currentUser ? currentUser.name : stats.name}
         trashCount={trashTransactions.length}
+        currentUser={currentUser}
+        onLogout={handleLogout}
       />
 
       {/* Center & Right Content Shell */}

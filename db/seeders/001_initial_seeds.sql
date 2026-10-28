@@ -68,3 +68,27 @@ INSERT INTO daily_quests (id, title, description, xp_reward, completed, claimed)
     ('quest-3', 'Setor Tabungan ke Celengan Target', 'Sisihkan minimal Rp 50.000 untuk target impian', 40, FALSE, FALSE),
     ('quest-4', 'Review Anggaran Mingguan', 'Periksa sisa kuota budget bulan ini', 30, FALSE, FALSE)
 ON CONFLICT (id) DO NOTHING;
+
+-- 6. Seed Users (Admin & Standard Demo User)
+-- Password for admin: admin123
+-- Password for user: user123
+INSERT INTO users (id, username, password_hash, name, role, gender, age) VALUES
+    (
+        'user-admin',
+        'admin',
+        '6a0431de7cd94e2ec53e66d58534603f:12b239ac582fdb7996024749756772a637dc55ccf24a496743017f94bcb009728db345ec2a90fb9995795d3292dd45108f1bfccff38dbb24d116e7bd2fc46bb7',
+        'Administrator Money Tracker',
+        'admin',
+        'pria',
+        28
+    ),
+    (
+        'user-demo',
+        'alex',
+        '6dc8c06ec60352545b7e177e6a5d5842:7882fd9669a4f1b49c66228034168bea6b02410930467ab432a26b980b9a158d7dd3ab4cdd7014ddb2b8df7362f591900a035758746dc736f598876b96a0b550',
+        'Alex Pratama',
+        'user',
+        'pria',
+        22
+    )
+ON CONFLICT (id) DO NOTHING;

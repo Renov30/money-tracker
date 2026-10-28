@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 import WallabyMascot from './WallabyMascot';
 import {
   IoHome,
@@ -12,7 +13,11 @@ import {
   IoSettingsOutline,
   IoPersonCircle,
   IoTrashBinOutline,
+  IoShieldCheckmark,
+  IoLogOutOutline,
+  IoLogInOutline,
 } from 'react-icons/io5';
+import { AuthUser } from '@/types';
 
 interface SidebarProps {
   activeTab: string;
@@ -20,6 +25,8 @@ interface SidebarProps {
   level: number;
   userName: string;
   trashCount?: number;
+  currentUser?: AuthUser | null;
+  onLogout?: () => void;
 }
 
 export default function LingoraSidebar({
@@ -28,6 +35,8 @@ export default function LingoraSidebar({
   level,
   userName,
   trashCount = 0,
+  currentUser = null,
+  onLogout,
 }: SidebarProps) {
   const navItems = [
     { id: 'home', label: 'Home', icon: <IoHome className="text-lg" /> },
@@ -139,24 +148,55 @@ export default function LingoraSidebar({
 
         {/* User Profile Footer Row with Ionicons Avatar */}
         <div className="flex items-center justify-between px-2 pt-1">
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2.5 min-w-0">
             <div className="w-9 h-9 rounded-full overflow-hidden border border-amber-200/80 flex items-center justify-center bg-amber-50 shadow-xs shrink-0 text-amber-800">
               <IoPersonCircle className="text-3xl" />
             </div>
-            <div>
-              <div className="text-xs font-bold text-slate-900">{userName}</div>
+            <div className="min-w-0 flex-1">
+              <div className="text-xs font-bold text-slate-900 truncate flex items-center gap-1">
+                <span>{currentUser ? currentUser.name : userName}</span>
+                {currentUser?.role === 'admin' && (
+                  <span title="Administrator">
+                    <IoShieldCheckmark className="text-amber-600 text-xs shrink-0" />
+                  </span>
+                )}
+              </div>
               <div className="text-[10px] text-amber-700/80 font-medium">
-                Level {level}
+                {currentUser?.role === 'admin' ? 'Administrator' : `Level ${level}`}
               </div>
             </div>
           </div>
-          <button
-            type="button"
-            className="p-1 hover:bg-slate-100 rounded-lg transition cursor-pointer text-slate-500 hover:text-slate-800 outline-none focus:outline-none"
-            title="Pengaturan"
-          >
-            <IoSettingsOutline className="text-lg" />
-          </button>
+
+          <div className="flex items-center gap-1 shrink-0">
+            {currentUser?.role === 'admin' && (
+              <Link
+                href="/admin"
+                className="p-1.5 hover:bg-amber-100 rounded-lg text-amber-700 transition cursor-pointer"
+                title="Panel Admin"
+              >
+                <IoShieldCheckmark className="text-base" />
+              </Link>
+            )}
+
+            {currentUser ? (
+              <button
+                type="button"
+                onClick={onLogout}
+                className="p-1.5 hover:bg-rose-50 text-slate-400 hover:text-rose-600 rounded-lg transition cursor-pointer outline-none focus:outline-none"
+                title="Keluar (Logout)"
+              >
+                <IoLogOutOutline className="text-base" />
+              </button>
+            ) : (
+              <Link
+                href="/login"
+                className="p-1.5 hover:bg-amber-100 text-slate-500 hover:text-amber-800 rounded-lg transition cursor-pointer"
+                title="Masuk / Login"
+              >
+                <IoLogInOutline className="text-base" />
+              </Link>
+            )}
+          </div>
         </div>
       </div>
     </aside>

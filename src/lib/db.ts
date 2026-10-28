@@ -1,5 +1,5 @@
 import { Pool } from 'pg';
-import { Transaction, Goal, UserStats, CustomCategory } from '@/types';
+import { Transaction, Goal, UserStats, CustomCategory, AuthUser, UserRole, UserGender } from '@/types';
 import {
   INITIAL_USER_STATS,
   INITIAL_TRANSACTIONS,
@@ -479,6 +479,217 @@ export const db = {
     } catch (e) {
       console.error('Error updating category:', e);
       return null;
+    }
+  },
+
+  // USERS & AUTHENTICATION
+  async getUserByUsername(username: string): Promise<(AuthUser & { passwordHash: string }) | null> {
+    await initDb();
+    try {
+      const res = await pool.query(
+        'SELECT id, username, password_hash as "passwordHash", name, role, gender, age, created_at as "createdAt" FROM users WHERE LOWER(username) = LOWER($1)',
+        [username]
+      );
+      if (res.rowCount === 0) return null;
+      const r = res.rows[0];
+      return {
+        id: r.id,
+        username: r.username,
+        passwordHash: r.passwordHash,
+        name: r.name,
+        role: r.role as UserRole,
+        gender: r.gender as UserGender,
+        age: Number(r.age),
+        createdAt: r.createdAt ? new Date(r.createdAt).toISOString() : undefined,
+      };
+    } catch (e) {
+      console.error('Error getUserByUsername:', e);
+      return null;
+    }
+  },
+
+  async getUserById(id: string): Promise<AuthUser | null> {
+    await initDb();
+    try {
+      const res = await pool.query(
+        'SELECT id, username, name, role, gender, age, created_at as "createdAt" FROM users WHERE id = $1',
+        [id]
+      );
+      if (res.rowCount === 0) return null;
+      const r = res.rows[0];
+      return {
+        id: r.id,
+        username: r.username,
+        name: r.name,
+        role: r.role as UserRole,
+        gender: r.gender as UserGender,
+        age: Number(r.age),
+        createdAt: r.createdAt ? new Date(r.createdAt).toISOString() : undefined,
+      };
+    } catch (e) {
+      console.error('Error getUserById:', e);
+      return null;
+    }
+  },
+
+  async createUser(user: {
+    id: string;
+    username: string;
+    passwordHash: string;
+    name: string;
+    role?: UserRole;
+    gender: UserGender;
+    age: number;
+  }): Promise<AuthUser | null> {
+    await initDb();
+    try {
+      const res = await pool.query(
+        `INSERT INTO users (id, username, password_hash, name, role, gender, age)
+         VALUES ($1, $2, $3, $4, $5, $6, $7)
+         RETURNING id, username, name, role, gender, age, created_at as "createdAt"`,
+        [
+          user.id,
+          user.username.toLowerCase(),
+          user.passwordHash,
+          user.name,
+          user.role || 'user',
+          user.gender,
+          user.age,
+        ]
+      );
+      const r = res.rows[0];
+      return {
+        id: r.id,
+        username: r.username,
+        name: r.name,
+        role: r.role as UserRole,
+        gender: r.gender as UserGender,
+        age: Number(r.age),
+        createdAt: r.createdAt ? new Date(r.createdAt).toISOString() : undefined,
+      };
+    } catch (e) {
+      console.error('Error createUser:', e);
+      return null;
+    }
+  },
+
+  async getAllUsers(): Promise<AuthUser[]> {
+    await initDb();
+    try {
+      const res = await pool.query(
+        'SELECT id, username, name, role, gender, age, created_at as "createdAt" FROM users ORDER BY created_at DESC'
+      );
+      return res.rows.map(r => ({
+        id: r.id,
+        username: r.username,
+        name: r.name,
+        role: r.role as UserRole,
+        gender: r.gender as UserGender,
+        age: Number(r.age),
+        createdAt: r.createdAt ? new Date(r.createdAt).toISOString() : undefined,
+      }));
+    } catch (e) {
+      console.error('Error getAllUsers:', e);
+      return [];
+    }
+  },
+
+  async updateUser(user: {
+    id: string;
+    name: string;
+    role: UserRole;
+    gender: UserGender;
+    age: number;
+    passwordHash?: string;
+  }): Promise<AuthUser | null> {
+    await initDb();
+    try {
+      if (user.passwordHash) {
+        await pool.query(
+          `UPDATE users
+           SET name = $1, role = $2, gender = $3, age = $4, password_hash = $5, updated_at = CURRENT_TIMESTAMP
+           WHERE id = $6`,
+          [user.name, user.role, user.gender, user.age, user.passwordHash, user.id]
+        );
+      } else {
+        await pool.query(
+          `UPDATE users
+           SET name = $1, role = $2, gender = $3, age = $4, updated_at = CURRENT_TIMESTAMP
+           WHERE id = $5`,
+          [user.name, user.role, user.gender, user.age, user.id]
+        );
+      }
+      return this.getUserById(user.id);
+    } catch (e) {
+      console.error('Error updateUser:', e);
+      return null;
+    }
+  },
+
+  async deleteUser(id: string): Promise<boolean> {
+    await initDb();
+    try {
+      await pool.query('DELETE FROM users WHERE id = $1', [id]);
+      return true;
+    } catch (e) {
+      console.error('Error deleteUser:', e);
+      return false;
+    }
+  },
+
+  // SESSIONS
+  async createSession(token: string, userId: string, expiresAt: Date): Promise<boolean> {
+    await initDb();
+    try {
+      await pool.query(
+        'INSERT INTO sessions (id, user_id, expires_at) VALUES ($1, $2, $3)',
+        [token, userId, expiresAt]
+      );
+      return true;
+    } catch (e) {
+      console.error('Error createSession:', e);
+      return false;
+    }
+  },
+
+  async getSessionUser(token: string): Promise<AuthUser | null> {
+    await initDb();
+    try {
+      // Auto-delete expired sessions
+      await pool.query('DELETE FROM sessions WHERE expires_at < CURRENT_TIMESTAMP');
+
+      const res = await pool.query(
+        `SELECT u.id, u.username, u.name, u.role, u.gender, u.age, u.created_at as "createdAt"
+         FROM sessions s
+         JOIN users u ON s.user_id = u.id
+         WHERE s.id = $1 AND s.expires_at >= CURRENT_TIMESTAMP`,
+        [token]
+      );
+      if (res.rowCount === 0) return null;
+      const r = res.rows[0];
+      return {
+        id: r.id,
+        username: r.username,
+        name: r.name,
+        role: r.role as UserRole,
+        gender: r.gender as UserGender,
+        age: Number(r.age),
+        createdAt: r.createdAt ? new Date(r.createdAt).toISOString() : undefined,
+      };
+    } catch (e) {
+      console.error('Error getSessionUser:', e);
+      return null;
+    }
+  },
+
+  async deleteSession(token: string): Promise<boolean> {
+    await initDb();
+    try {
+      await pool.query('DELETE FROM sessions WHERE id = $1', [token]);
+      return true;
+    } catch (e) {
+      console.error('Error deleteSession:', e);
+      return false;
     }
   },
 };

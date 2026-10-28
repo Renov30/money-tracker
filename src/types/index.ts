@@ -63,3 +63,16 @@ export interface UserStats {
   monthlyBudget: number;
 }
 
+export type UserRole = 'user' | 'admin';
+export type UserGender = 'pria' | 'wanita' | 'other';
+
+export interface AuthUser {
+  id: string;
+  username: string;
+  name: string;
+  role: UserRole;
+  gender: UserGender;
+  age: number;
+  createdAt?: string;
+}
+
