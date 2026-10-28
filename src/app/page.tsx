@@ -717,7 +717,7 @@ export default function Home() {
   };
 
   return (
-    <div className="bg-[#faf7f2] min-h-screen w-full flex flex-col md:flex-row font-sans antialiased text-slate-800">
+    <div className="bg-white min-h-screen w-full flex flex-col md:flex-row font-sans antialiased text-slate-800">
       
       {/* Custom Toast Notification */}
       <ToastNotification toast={toast} onClose={() => setToast(null)} />
@@ -733,8 +733,8 @@ export default function Home() {
         onOpenSettings={() => setIsAccountSettingsOpen(true)}
       />
 
-      {/* Center & Right Content Shell */}
-      <div className="flex-1 flex flex-col min-h-screen bg-[#faf7f2]">
+      {/* Main Content Shell */}
+      <div className="flex-1 flex flex-col min-h-screen bg-white">
           
           {/* Top Stats Bar */}
           <LingoraTopBar
@@ -742,11 +742,8 @@ export default function Home() {
             xpCoins={stats.currentXp}
           />
 
-          {/* Main Dashboard Layout: Center Column + Right Rail */}
-          <div className="p-4 md:p-8 flex flex-col xl:flex-row gap-6 max-w-[1600px] w-full">
-            
-            {/* Center Content Column (Tabs) */}
-            <div className="flex-1 space-y-6">
+          {/* Main Dashboard Layout: Clean Single Column */}
+          <div className="p-4 md:p-8 max-w-3xl mx-auto w-full space-y-6">
               
               {activeTab === 'home' && (
                 <>
@@ -756,14 +753,7 @@ export default function Home() {
                     onOpenAddModal={() => openAddModalWithType('expense')}
                   />
 
-                  {/* Featured Goal (Continue Learning style) */}
-                  <FeaturedGoalCard
-                    goal={activeMainGoal}
-                    onTopUp={handleTopUpGoal}
-                    onViewAllGoals={() => setActiveTab('goals')}
-                  />
-
-                  {/* Rangkuman Keuangan: Total Uang Dimiliki & Total Tabungan */}
+                  {/* Rangkuman Keuangan: Uang Dimiliki & Total Tabungan */}
                   <FinancialSummaryCards
                     totalBalance={totalIncome - totalExpense}
                     totalSavings={totalSavings}
@@ -775,9 +765,16 @@ export default function Home() {
                     onViewGoals={() => setActiveTab('goals')}
                   />
 
+                  {/* Target Tabungan Utama */}
+                  <FeaturedGoalCard
+                    goal={activeMainGoal}
+                    onTopUp={handleTopUpGoal}
+                    onViewAllGoals={() => setActiveTab('goals')}
+                  />
+
                   {/* Recent Transactions List */}
                   <TransactionsSection
-                    transactions={transactions}
+                    transactions={transactions.slice(0, 6)}
                     onDelete={promptDeleteTransaction}
                     onEdit={handleOpenEditModal}
                     onOpenAddModal={openAddModalWithType}
@@ -791,20 +788,20 @@ export default function Home() {
 
               {activeTab === 'income' && (
                 <div className="space-y-6">
-                  <div className="bg-gradient-to-r from-emerald-100 to-teal-100 rounded-3xl p-6 border border-emerald-200/60 flex items-center justify-between">
+                  <div className="bg-white rounded-2xl p-5 border-2 border-slate-200 flex items-center justify-between">
                     <div>
-                      <h2 className="text-xl font-black text-slate-900">
-                        Manajemen Pemasukan (Income)
+                      <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
+                        TOTAL PEMASUKAN
+                      </span>
+                      <h2 className="text-2xl font-black text-emerald-500 mt-0.5">
+                        Rp {totalIncome.toLocaleString('id-ID')}
                       </h2>
-                      <p className="text-xs text-slate-600 font-medium mt-1">
-                        Total Pemasukan: <strong className="text-emerald-700">{totalIncome.toLocaleString('id-ID')}</strong>
-                      </p>
                     </div>
                     <button
                       onClick={() => openAddModalWithType('income')}
-                      className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-full shadow-xs transition cursor-pointer"
+                      className="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-white font-extrabold text-xs uppercase tracking-wider rounded-xl border-b-4 border-emerald-600 active:border-b-0 active:translate-y-1 transition cursor-pointer"
                     >
-                      + Tambah Pemasukan
+                      + PEMASUKAN
                     </button>
                   </div>
 
@@ -823,20 +820,20 @@ export default function Home() {
 
               {activeTab === 'expense' && (
                 <div className="space-y-6">
-                  <div className="bg-gradient-to-r from-rose-100 to-orange-100 rounded-3xl p-6 border border-rose-200/60 flex items-center justify-between">
+                  <div className="bg-white rounded-2xl p-5 border-2 border-slate-200 flex items-center justify-between">
                     <div>
-                      <h2 className="text-xl font-black text-slate-900">
-                        Manajemen Pengeluaran (Expense)
+                      <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
+                        TOTAL PENGELUARAN
+                      </span>
+                      <h2 className="text-2xl font-black text-rose-500 mt-0.5">
+                        Rp {totalExpense.toLocaleString('id-ID')}
                       </h2>
-                      <p className="text-xs text-slate-600 font-medium mt-1">
-                        Total Pengeluaran: <strong className="text-rose-700">{totalExpense.toLocaleString('id-ID')}</strong>
-                      </p>
                     </div>
                     <button
                       onClick={() => openAddModalWithType('expense')}
-                      className="px-5 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-full shadow-xs transition cursor-pointer"
+                      className="px-4 py-2.5 bg-rose-500 hover:bg-rose-400 text-white font-extrabold text-xs uppercase tracking-wider rounded-xl border-b-4 border-rose-600 active:border-b-0 active:translate-y-1 transition cursor-pointer"
                     >
-                      - Catat Pengeluaran
+                      + PENGELUARAN
                     </button>
                   </div>
 
@@ -868,17 +865,19 @@ export default function Home() {
               )}
 
               {activeTab === 'leaderboard' && (
-                <div className="space-y-6">
-                  <GoalsManagerView
-                    goals={goals}
-                    onTopUp={handleTopUpGoal}
-                    onOpenAddGoal={() => {
-                      setEditingGoal(null);
-                      setIsAddGoalOpen(true);
-                    }}
-                    onEditGoal={handleOpenEditGoal}
-                    onDeleteGoal={promptDeleteGoal}
-                    onLockInGoal={handleLockInGoal}
+                <div className="space-y-4">
+                  <div>
+                    <h2 className="text-lg font-black text-slate-800">
+                      Misi & Papan Skor
+                    </h2>
+                    <p className="text-xs font-bold text-slate-400">
+                      Selesaikan misi harian dan raih peringkat teratas
+                    </p>
+                  </div>
+                  <LingoraRightRail
+                    streakDays={stats.streakDays}
+                    dailyExpenseToday={35000}
+                    dailyBudgetLimit={50000}
                   />
                 </div>
               )}
@@ -891,15 +890,6 @@ export default function Home() {
                   onEmptyTrash={promptEmptyTrash}
                 />
               )}
-
-            </div>
-
-            {/* Right Sidebar Rail */}
-            <LingoraRightRail
-              streakDays={stats.streakDays}
-              dailyExpenseToday={35000}
-              dailyBudgetLimit={50000}
-            />
 
           </div>
 

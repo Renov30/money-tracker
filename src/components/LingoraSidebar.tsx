@@ -9,7 +9,6 @@ import {
   IoTrendingDown,
   IoFlag,
   IoTrophy,
-  IoSparkles,
   IoSettingsOutline,
   IoPersonCircle,
   IoTrashBinOutline,
@@ -41,7 +40,6 @@ export default function LingoraSidebar({
   const [isAccountMenuOpen, setIsAccountMenuOpen] = React.useState(false);
   const accountMenuRef = React.useRef<HTMLDivElement>(null);
 
-  // Close popup menu when clicking outside
   React.useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (accountMenuRef.current && !accountMenuRef.current.contains(event.target as Node)) {
@@ -51,40 +49,34 @@ export default function LingoraSidebar({
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
   const navItems = [
-    { id: 'home', label: 'Home', icon: <IoHome className="text-lg" /> },
-    { id: 'income', label: 'Pemasukan', icon: <IoTrendingUp className="text-lg text-emerald-600" /> },
-    { id: 'expense', label: 'Pengeluaran', icon: <IoTrendingDown className="text-lg text-rose-600" /> },
-    { id: 'goals', label: 'Goals Tabungan', icon: <IoFlag className="text-lg text-amber-600" /> },
-    { id: 'leaderboard', label: 'Peringkat & Misi', icon: <IoTrophy className="text-lg text-amber-500" /> },
+    { id: 'home', label: 'BERANDA', icon: <IoHome className="text-xl text-amber-500" /> },
+    { id: 'income', label: 'PEMASUKAN', icon: <IoTrendingUp className="text-xl text-emerald-500" /> },
+    { id: 'expense', label: 'PENGELUARAN', icon: <IoTrendingDown className="text-xl text-rose-500" /> },
+    { id: 'goals', label: 'TARGET', icon: <IoFlag className="text-xl text-sky-500" /> },
+    { id: 'leaderboard', label: 'MISI & SKOR', icon: <IoTrophy className="text-xl text-amber-500" /> },
     {
       id: 'trash',
-      label: 'Tempat Sampah',
-      icon: <IoTrashBinOutline className="text-lg text-rose-500" />,
+      label: 'SAMPAH',
+      icon: <IoTrashBinOutline className="text-xl text-slate-400" />,
       badge: trashCount > 0 ? trashCount : null,
     },
   ];
 
   return (
-    <aside className="w-full md:w-64 bg-white border-r border-amber-100/60 flex flex-col justify-between p-4 md:p-6 shrink-0 md:h-screen md:sticky md:top-0 overflow-y-auto">
+    <aside className="w-full md:w-64 bg-white border-r-2 border-slate-200 flex flex-col justify-between p-4 md:p-5 shrink-0 md:h-screen md:sticky md:top-0">
       <div className="space-y-6">
-        {/* App Branding with Wally Logo */}
-        <div className="flex items-center gap-3 px-2">
-          <div className="w-10 h-10 rounded-2xl bg-amber-50 border border-amber-200/70 flex items-center justify-center shadow-xs overflow-hidden shrink-0">
-            <WallyLogo size={38} />
-          </div>
-          <div>
-            <h1 className="text-base font-black text-slate-900 tracking-tight leading-none">
-              WallyTracker
-            </h1>
-            <p className="text-[10px] text-amber-700/80 font-bold tracking-wide mt-1">
-              Save • Track • Grow
-            </p>
-          </div>
+        {/* App Branding (Duolingo bold header style) */}
+        <div className="flex items-center gap-3 px-3 pt-1">
+          <WallyLogo size={40} />
+          <span className="text-xl font-black text-amber-500 tracking-tight">
+            wally
+          </span>
         </div>
 
-        {/* Navigation Menu */}
-        <nav className="space-y-1">
+        {/* Navigation Menu (Duolingo Pill Style) */}
+        <nav className="space-y-1.5">
           {navItems.map((item) => {
             const isActive = activeTab === item.id;
             return (
@@ -92,46 +84,21 @@ export default function LingoraSidebar({
                 key={item.id}
                 type="button"
                 onClick={() => setActiveTab(item.id)}
-                className={`relative group w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all duration-300 ease-out cursor-pointer select-none outline-none focus:outline-none focus-visible:outline-none border ${
+                className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl text-xs font-extrabold tracking-wider transition-all duration-150 cursor-pointer select-none outline-none focus:outline-none border-2 ${
                   isActive
-                    ? 'bg-gradient-to-r from-amber-100/90 via-amber-50 to-orange-50/70 text-amber-950 shadow-xs border-amber-300/80 translate-x-1.5'
-                    : 'border-transparent text-slate-600 hover:text-slate-900 hover:bg-amber-50/50 hover:translate-x-1 active:scale-[0.98]'
+                    ? 'bg-amber-50 text-amber-600 border-amber-300'
+                    : 'border-transparent text-slate-500 hover:bg-slate-100'
                 }`}
               >
-                {/* Active Left Pill Accent Indicator */}
-                <span
-                  className={`absolute -left-[1px] top-1/2 -translate-y-1/2 w-1.5 h-5 bg-gradient-to-b from-amber-500 to-amber-600 rounded-r-full shadow-xs shadow-amber-500/50 transition-all duration-300 pointer-events-none ${
-                    isActive ? 'opacity-100 scale-100' : 'opacity-0 scale-75'
-                  }`}
-                />
-
-                <div className="flex items-center gap-3">
-                  <span
-                    className={`w-7 h-7 rounded-xl flex items-center justify-center transition-all duration-300 border ${
-                      isActive
-                        ? 'bg-white shadow-xs text-amber-700 scale-105 border-amber-200/60'
-                        : 'border-transparent text-slate-500 group-hover:text-amber-700 group-hover:scale-110 group-hover:bg-white/70'
-                    }`}
-                  >
+                <div className="flex items-center gap-3.5">
+                  <span className="flex items-center justify-center">
                     {item.icon}
                   </span>
-                  <span
-                    className={`transition-colors duration-200 ${
-                      isActive ? 'font-black text-amber-950' : 'font-semibold'
-                    }`}
-                  >
-                    {item.label}
-                  </span>
+                  <span>{item.label}</span>
                 </div>
 
                 {item.badge !== null && item.badge !== undefined && (
-                  <span
-                    className={`px-2 py-0.5 rounded-full text-[10px] font-black transition-all duration-300 border ${
-                      isActive
-                        ? 'bg-rose-500 text-white shadow-xs scale-105 border-rose-600/20'
-                        : 'border-transparent bg-rose-100 text-rose-600 group-hover:bg-rose-500 group-hover:text-white'
-                    }`}
-                  >
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-500 text-white">
                     {item.badge}
                   </span>
                 )}
@@ -141,64 +108,40 @@ export default function LingoraSidebar({
         </nav>
       </div>
 
-      <div className="space-y-4 pt-4 border-t border-amber-100/60">
-        {/* Wally Plus Card (Ionicons Sparkles Theme) */}
-        <div className="bg-gradient-to-b from-amber-50 to-orange-50/60 border border-amber-200/70 rounded-2xl p-3.5 space-y-2">
-          <div className="flex items-center gap-2">
-            <IoSparkles className="text-amber-500 text-lg" />
-            <span className="text-xs font-black text-slate-900">Wally Plus</span>
-          </div>
-          <p className="text-[11px] text-amber-900/80 font-medium leading-relaxed">
-            Klaim bonus XP 2x lipat dan buka kantung tabungan tanpa batas.
-          </p>
-          <button
-            type="button"
-            className="w-full py-2 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-xl shadow-xs shadow-amber-600/20 transition active:scale-95 cursor-pointer outline-none focus:outline-none"
-          >
-            Tingkatkan Level
-          </button>
-        </div>
-
-        {/* User Profile Footer Row with Interactive Popup Menu */}
+      {/* User Account Trigger at Bottom */}
+      <div className="pt-4 border-t-2 border-slate-100">
         <div className="relative" ref={accountMenuRef}>
-          {/* Popup Menu when info akun is clicked */}
           {isAccountMenuOpen && (
-            <div className="absolute bottom-full left-0 right-0 mb-2 bg-white rounded-2xl shadow-xl border border-amber-200/80 p-2 z-50 space-y-1 animate-fade-in">
-              <div className="px-3 py-1.5 border-b border-amber-100/60 mb-1">
-                <div className="text-[11px] font-bold text-slate-800 truncate">
-                  {currentUser ? currentUser.name : userName}
-                </div>
-                <div className="text-[10px] text-amber-700 font-mono">
+            <div className="absolute bottom-full left-0 right-0 mb-2 bg-white rounded-2xl border-2 border-slate-200 shadow-lg p-2 z-50 space-y-1 animate-fade-in">
+              <div className="px-3 py-1.5 border-b border-slate-100 mb-1">
+                <div className="text-xs font-black text-slate-800 truncate">
                   @{currentUser ? currentUser.username : userName}
                 </div>
               </div>
 
-              {/* Opsi Pengaturan (Ganti nama akun & password) */}
               <button
                 type="button"
                 onClick={() => {
                   setIsAccountMenuOpen(false);
                   if (onOpenSettings) onOpenSettings();
                 }}
-                className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-slate-700 hover:text-amber-900 hover:bg-amber-50 rounded-xl transition cursor-pointer"
+                className="w-full flex items-center gap-2.5 px-3 py-2.5 text-xs font-extrabold text-slate-700 hover:bg-slate-100 rounded-xl transition cursor-pointer"
               >
-                <IoSettingsOutline className="text-sm text-amber-600" />
-                <span>Pengaturan Akun</span>
+                <IoSettingsOutline className="text-base text-slate-500" />
+                <span>Pengaturan</span>
               </button>
 
-              {/* Opsi Admin (khusus admin) */}
               {currentUser?.role === 'admin' && (
                 <Link
                   href="/admin"
                   onClick={() => setIsAccountMenuOpen(false)}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-amber-800 hover:bg-amber-50 rounded-xl transition cursor-pointer"
+                  className="w-full flex items-center gap-2.5 px-3 py-2.5 text-xs font-extrabold text-amber-600 hover:bg-amber-50 rounded-xl transition cursor-pointer"
                 >
-                  <IoShieldCheckmark className="text-sm text-amber-600" />
-                  <span>Panel Administrasi</span>
+                  <IoShieldCheckmark className="text-base" />
+                  <span>Panel Admin</span>
                 </Link>
               )}
 
-              {/* Opsi Logout */}
               {currentUser ? (
                 <button
                   type="button"
@@ -206,56 +149,47 @@ export default function LingoraSidebar({
                     setIsAccountMenuOpen(false);
                     if (onLogout) onLogout();
                   }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 rounded-xl transition cursor-pointer border-t border-slate-100 mt-1"
+                  className="w-full flex items-center gap-2.5 px-3 py-2.5 text-xs font-extrabold text-rose-500 hover:bg-rose-50 rounded-xl transition cursor-pointer"
                 >
-                  <IoLogOutOutline className="text-sm" />
-                  <span>Keluar (Logout)</span>
+                  <IoLogOutOutline className="text-base" />
+                  <span>Keluar</span>
                 </button>
               ) : (
                 <Link
                   href="/login"
                   onClick={() => setIsAccountMenuOpen(false)}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-amber-700 hover:bg-amber-50 rounded-xl transition cursor-pointer"
+                  className="w-full flex items-center gap-2.5 px-3 py-2.5 text-xs font-extrabold text-amber-600 hover:bg-amber-50 rounded-xl transition cursor-pointer"
                 >
-                  <IoLogInOutline className="text-sm" />
-                  <span>Masuk Akun</span>
+                  <IoLogInOutline className="text-base" />
+                  <span>Masuk</span>
                 </Link>
               )}
             </div>
           )}
 
-          {/* Trigger: Clickable Info Akun Card */}
           <div
             onClick={() => setIsAccountMenuOpen(!isAccountMenuOpen)}
-            className={`flex items-center justify-between p-2 rounded-2xl border transition-all duration-200 cursor-pointer select-none ${
+            className={`flex items-center justify-between p-2.5 rounded-2xl border-2 transition cursor-pointer select-none ${
               isAccountMenuOpen
-                ? 'bg-amber-50 border-amber-300 shadow-xs'
-                : 'hover:bg-amber-50/60 border-transparent hover:border-amber-200/70'
+                ? 'bg-amber-50 border-amber-300'
+                : 'border-transparent hover:bg-slate-100'
             }`}
-            title="Klik untuk membuka menu akun"
           >
             <div className="flex items-center gap-2.5 min-w-0">
-              <div className="w-9 h-9 rounded-full overflow-hidden border border-amber-200/80 flex items-center justify-center bg-amber-50 shadow-xs shrink-0 text-amber-800">
-                <IoPersonCircle className="text-3xl" />
-              </div>
+              <IoPersonCircle className="text-3xl text-amber-500 shrink-0" />
               <div className="min-w-0 flex-1">
-                <div className="text-xs font-bold text-slate-900 truncate flex items-center gap-1">
+                <div className="text-xs font-extrabold text-slate-800 truncate flex items-center gap-1">
                   <span>{currentUser ? currentUser.username : userName}</span>
                   {currentUser?.role === 'admin' && (
-                    <span title="Administrator">
-                      <IoShieldCheckmark className="text-amber-600 text-xs shrink-0" />
-                    </span>
+                    <IoShieldCheckmark className="text-amber-500 text-xs shrink-0" />
                   )}
                 </div>
-                <div className="text-[10px] text-amber-700/80 font-medium">
-                  {currentUser?.role === 'admin' ? 'Administrator' : 'Pengguna Aktif'}
+                <div className="text-[10px] text-slate-400 font-bold uppercase">
+                  {currentUser?.role === 'admin' ? 'Admin' : 'Akun'}
                 </div>
               </div>
             </div>
-
-            <div className="text-slate-400 hover:text-slate-600 pl-1 shrink-0">
-              <IoSettingsOutline className={`text-base transition-transform duration-200 ${isAccountMenuOpen ? 'rotate-45 text-amber-700' : ''}`} />
-            </div>
+            <IoSettingsOutline className="text-base text-slate-400 shrink-0" />
           </div>
         </div>
       </div>

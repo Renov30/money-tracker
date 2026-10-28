@@ -33,7 +33,6 @@ export default function LoginPage() {
         return;
       }
 
-      // If user is admin, can redirect to dashboard or admin
       if (data.user?.role === 'admin') {
         router.push('/admin');
       } else {
@@ -48,27 +47,21 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#faf7f2] flex flex-col justify-center items-center p-4">
-      <div className="w-full max-w-md bg-white rounded-3xl p-6 sm:p-8 border border-amber-100 shadow-xl space-y-6 relative overflow-hidden">
-        {/* Decorative Top Accent */}
-        <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-amber-400 via-amber-500 to-orange-500" />
-
+    <div className="min-h-screen bg-white flex flex-col justify-center items-center p-4">
+      <div className="w-full max-w-sm bg-white rounded-2xl p-6 sm:p-8 border-2 border-slate-200 space-y-6">
         {/* Mascot & Branding Header */}
         <div className="text-center space-y-2">
-          <div className="w-16 h-16 rounded-2xl bg-amber-50 border border-amber-200/80 mx-auto flex items-center justify-center shadow-xs">
+          <div className="w-16 h-16 rounded-2xl bg-amber-50 border-2 border-amber-200 mx-auto flex items-center justify-center">
             <WallabyMascot size={48} mood="happy" />
           </div>
-          <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
-            Masuk ke WallyTracker
+          <h1 className="text-xl font-black text-slate-800 tracking-tight">
+            Masuk ke Wally
           </h1>
-          <p className="text-xs text-amber-800/80 font-medium">
-            Kelola tabungan, transaksi, dan target celengan impianmu!
-          </p>
         </div>
 
         {/* Error Alert */}
         {error && (
-          <div className="flex items-center gap-2 p-3 bg-rose-50 border border-rose-200 rounded-2xl text-xs text-rose-700 font-semibold">
+          <div className="flex items-center gap-2 p-3 bg-rose-50 border-2 border-rose-200 rounded-xl text-xs text-rose-600 font-bold">
             <IoAlertCircle className="text-lg shrink-0" />
             <span>{error}</span>
           </div>
@@ -77,7 +70,7 @@ export default function LoginPage() {
         {/* Login Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1.5">
+            <label className="block text-xs font-extrabold uppercase tracking-wider text-slate-500 mb-1.5">
               Username
             </label>
             <div className="relative">
@@ -88,15 +81,15 @@ export default function LoginPage() {
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="Masukkan username Anda"
+                placeholder="Username"
                 required
-                className="w-full bg-slate-50 border border-slate-200 rounded-2xl pl-10 pr-3.5 py-3 text-slate-900 text-xs focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition"
+                className="w-full bg-slate-50 border-2 border-slate-200 rounded-xl pl-10 pr-3.5 py-3 text-slate-800 font-bold text-xs focus:outline-none focus:border-amber-500 transition"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1.5">
+            <label className="block text-xs font-extrabold uppercase tracking-wider text-slate-500 mb-1.5">
               Password
             </label>
             <div className="relative">
@@ -107,9 +100,9 @@ export default function LoginPage() {
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Masukkan password Anda"
+                placeholder="Password"
                 required
-                className="w-full bg-slate-50 border border-slate-200 rounded-2xl pl-10 pr-10 py-3 text-slate-900 text-xs focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition"
+                className="w-full bg-slate-50 border-2 border-slate-200 rounded-xl pl-10 pr-10 py-3 text-slate-800 font-bold text-xs focus:outline-none focus:border-amber-500 transition"
               />
               <button
                 type="button"
@@ -124,22 +117,22 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3.5 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white font-bold text-xs rounded-2xl shadow-xs shadow-amber-600/30 transition active:scale-95 cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
+            className="w-full py-3.5 bg-amber-500 hover:bg-amber-400 text-white font-extrabold text-xs uppercase tracking-wider rounded-xl border-b-4 border-amber-600 active:border-b-0 active:translate-y-1 transition cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
           >
-            <span>{loading ? 'Memeriksa kredensial...' : 'Masuk Sekarang'}</span>
+            <span>{loading ? 'MEMPROSES...' : 'MASUK'}</span>
             {!loading && <IoArrowForward className="text-sm" />}
           </button>
         </form>
 
         {/* Footer Link to Register */}
-        <div className="pt-2 text-center border-t border-slate-100">
-          <p className="text-xs text-slate-600">
+        <div className="pt-3 text-center border-t-2 border-slate-100">
+          <p className="text-xs font-bold text-slate-500">
             Belum punya akun?{' '}
             <Link
               href="/register"
-              className="font-bold text-amber-700 hover:text-amber-800 underline underline-offset-2 transition"
+              className="font-extrabold text-amber-500 hover:text-amber-600 uppercase tracking-wide"
             >
-              Daftar akun baru di sini
+              DAFTAR
             </Link>
           </p>
         </div>
@@ -147,4 +140,3 @@ export default function LoginPage() {
     </div>
   );
 }
-

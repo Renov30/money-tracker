@@ -26,117 +26,115 @@ export default function LingoraRightRail({
   );
 
   const days = [
-    { day: 'Mon', checked: true },
-    { day: 'Tue', checked: true },
-    { day: 'Wed', checked: true },
-    { day: 'Thu', checked: true },
-    { day: 'Fri', checked: false },
-    { day: 'Sat', checked: false },
-    { day: 'Sun', checked: false },
+    { day: 'Sen', checked: true },
+    { day: 'Sel', checked: true },
+    { day: 'Rab', checked: true },
+    { day: 'Kam', checked: true },
+    { day: 'Jum', checked: false },
+    { day: 'Sab', checked: false },
+    { day: 'Min', checked: false },
   ];
 
   const leaders = [
-    { rank: 1, name: 'Sophie', score: '98% Hemat', isUser: false },
-    { rank: 2, name: 'You (Alex)', score: '92% Hemat', isUser: true },
-    { rank: 3, name: 'Daniel', score: '85% Hemat', isUser: false },
-    { rank: 4, name: 'Maya', score: '81% Hemat', isUser: false },
-    { rank: 5, name: 'Liam', score: '76% Hemat', isUser: false },
+    { rank: 1, name: 'Sophie', score: '980 XP', isUser: false },
+    { rank: 2, name: 'Kamu', score: '920 XP', isUser: true },
+    { rank: 3, name: 'Daniel', score: '850 XP', isUser: false },
+    { rank: 4, name: 'Maya', score: '810 XP', isUser: false },
+    { rank: 5, name: 'Liam', score: '760 XP', isUser: false },
   ];
 
   return (
-    <aside className="w-full xl:w-72 space-y-4 shrink-0">
-      
-      {/* 1. Your Daily Goal Card (Warm Amber Accent) */}
-      <div className="bg-white rounded-3xl p-5 border border-amber-100 shadow-xs space-y-4">
-        <div className="flex items-center justify-between">
-          <h4 className="text-xs font-black uppercase tracking-wider text-slate-800">
-            Batas Belanja Harian
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* 1. Streak & Misi Harian */}
+      <div className="space-y-4">
+        <div className="bg-white rounded-2xl p-5 border-2 border-slate-200 space-y-4">
+          <div className="flex items-center justify-between">
+            <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-400">
+              BERUNTUN (STREAK)
+            </h4>
+            <div className="flex items-center gap-1 text-orange-500 font-black text-sm">
+              <IoFlame className="text-lg" />
+              <span>{streakDays} Hari</span>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between pt-1">
+            {days.map((item, index) => (
+              <div key={index} className="flex flex-col items-center gap-1.5">
+                <span className="text-[11px] font-extrabold text-slate-400">{item.day}</span>
+                <div
+                  className={`w-7 h-7 rounded-full flex items-center justify-center ${
+                    item.checked ? 'text-amber-500' : 'bg-slate-100 text-slate-300'
+                  }`}
+                >
+                  {item.checked ? (
+                    <IoCheckmarkCircle className="text-2xl text-amber-500" />
+                  ) : (
+                    <span className="w-2 h-2 rounded-full bg-slate-300" />
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Misi Harian */}
+        <div className="bg-white border-2 border-slate-200 rounded-2xl p-5 space-y-4">
+          <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-400">
+            MISI HARIAN
           </h4>
-          <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-100">
-            Aman
-          </span>
-        </div>
 
-        {/* Circular Progress Ring in Warm Amber with Ionicons Flame */}
-        <div className="flex items-center justify-between gap-4">
-          <div className="relative w-20 h-20 flex items-center justify-center shrink-0">
-            <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
-              <path
-                className="text-amber-50"
-                strokeWidth="3.5"
-                stroke="currentColor"
-                fill="none"
-                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-              />
-              <path
-                className="text-amber-500"
-                strokeDasharray={`${percentage}, 100`}
-                strokeWidth="3.5"
-                strokeLinecap="round"
-                stroke="currentColor"
-                fill="none"
-                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-              />
-            </svg>
-            <div className="absolute flex flex-col items-center justify-center">
-              <IoFlame className="text-orange-500 text-lg" />
-              <div className="text-[10px] font-black text-amber-950 font-mono mt-0.5">
-                {percentage}%
+          <div className="flex items-center gap-3.5">
+            <div className="w-12 h-12 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0">
+              <IoGift className="text-2xl" />
+            </div>
+            <div className="flex-1 space-y-1.5">
+              <div className="flex justify-between text-xs font-extrabold text-slate-800">
+                <span>Catat 3 Transaksi</span>
+                <span className="text-amber-600">2 / 3</span>
+              </div>
+              <div className="w-full bg-slate-100 h-3 rounded-full overflow-hidden">
+                <div className="bg-amber-500 h-full rounded-full" style={{ width: '66%' }} />
               </div>
             </div>
           </div>
 
-          <div className="space-y-0.5">
-            <div className="text-xs font-bold text-slate-900">
-              Hebat sekali!
+          <div className="flex items-center gap-3.5">
+            <div className="w-12 h-12 rounded-xl bg-emerald-500 text-white flex items-center justify-center shrink-0">
+              <IoFlame className="text-2xl" />
             </div>
-            <p className="text-[11px] text-slate-500 font-medium leading-relaxed">
-              Kamu menjaga jajan di bawah Rp 50.000 selama {streakDays} hari berturut-turut!
-            </p>
-          </div>
-        </div>
-
-        {/* Week Streak Dots (Mon - Sun) with Ionicons Checkmark */}
-        <div className="flex items-center justify-between pt-2 border-t border-amber-50">
-          {days.map((item, index) => (
-            <div key={index} className="flex flex-col items-center gap-1">
-              <span className="text-[9px] font-bold text-slate-400">{item.day}</span>
-              <div
-                className={`w-6 h-6 rounded-full flex items-center justify-center transition-all ${
-                  item.checked
-                    ? 'text-amber-600'
-                    : 'bg-amber-50 text-amber-200'
-                }`}
-              >
-                {item.checked ? (
-                  <IoCheckmarkCircle className="text-xl text-amber-600" />
-                ) : (
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-200/80"></span>
-                )}
+            <div className="flex-1 space-y-1.5">
+              <div className="flex justify-between text-xs font-extrabold text-slate-800">
+                <span>Jajan di Bawah Rp 50rb</span>
+                <span className="text-emerald-600">{percentage}%</span>
+              </div>
+              <div className="w-full bg-slate-100 h-3 rounded-full overflow-hidden">
+                <div className="bg-emerald-500 h-full rounded-full" style={{ width: `${percentage}%` }} />
               </div>
             </div>
-          ))}
+          </div>
         </div>
       </div>
 
-      {/* 2. Leaderboard Card with Ionicons Medals & Sparkles */}
-      <div className="bg-white rounded-3xl p-5 border border-amber-100 shadow-xs space-y-3">
+      {/* 2. Papan Skor (Leaderboard) */}
+      <div className="bg-white rounded-2xl p-5 border-2 border-slate-200 space-y-4">
         <div className="flex items-center justify-between">
-          <h4 className="text-xs font-black uppercase tracking-wider text-slate-800">
-            Peringkat Hemat
+          <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-400">
+            PAPAN SKOR MINGGU INI
           </h4>
-          <span className="text-[10px] font-bold text-amber-700/80">Minggu Ini</span>
         </div>
 
         <div className="space-y-2">
           {leaders.map((user) => (
             <div
               key={user.rank}
-              className={`flex items-center justify-between p-2 rounded-2xl transition ${
-                user.isUser ? 'bg-amber-50/90 border border-amber-200/80' : 'hover:bg-amber-50/40'
+              className={`flex items-center justify-between p-3 rounded-xl border-2 transition ${
+                user.isUser
+                  ? 'bg-amber-50 border-amber-300'
+                  : 'bg-white border-slate-100'
               }`}
             >
-              <div className="flex items-center gap-2.5">
+              <div className="flex items-center gap-3">
                 <div className="w-6 h-6 flex items-center justify-center shrink-0">
                   {user.rank === 1 ? (
                     <IoSparkles className="text-amber-500 text-lg" />
@@ -145,41 +143,22 @@ export default function LingoraRightRail({
                   ) : user.rank === 3 ? (
                     <IoMedal className="text-amber-700 text-lg" />
                   ) : (
-                    <span className="w-5 h-5 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-400">
+                    <span className="text-xs font-extrabold text-slate-400">
                       {user.rank}
                     </span>
                   )}
                 </div>
-                <span className="text-xs font-bold text-slate-800">
+                <span className="text-sm font-extrabold text-slate-800">
                   {user.name}
                 </span>
               </div>
-              <span className="text-[10px] font-bold text-slate-500 font-mono">
+              <span className="text-xs font-extrabold text-amber-600">
                 {user.score}
               </span>
             </div>
           ))}
         </div>
       </div>
-
-      {/* 3. Gift Box / Mystery Quest Box with Ionicons Gift */}
-      <div className="bg-gradient-to-br from-amber-50 to-orange-50/70 border border-amber-200/80 rounded-3xl p-4 shadow-xs flex items-center gap-3">
-        <div className="w-12 h-12 rounded-2xl bg-white border border-amber-200 flex items-center justify-center shadow-xs shrink-0 animate-bounce text-amber-600">
-          <IoGift className="text-2xl" />
-        </div>
-        <div className="space-y-1">
-          <div className="text-xs font-bold text-slate-900 leading-tight">
-            Peti Koin Rahasia
-          </div>
-          <p className="text-[10px] text-amber-900/80 font-medium">
-            Catat 3 transaksi hari ini untuk membuka peti (2/3).
-          </p>
-          <div className="w-full bg-amber-100 h-1.5 rounded-full overflow-hidden mt-1">
-            <div className="bg-amber-500 h-full rounded-full" style={{ width: '66%' }}></div>
-          </div>
-        </div>
-      </div>
-
-    </aside>
+    </div>
   );
 }

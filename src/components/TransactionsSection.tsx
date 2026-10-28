@@ -34,7 +34,6 @@ export default function TransactionsSection({
 
   const activeFilter = forcedType !== 'all' ? forcedType : filterType;
 
-  // Filter Categories available based on active type including custom categories
   const customNames = customCategories
     .filter((c) => activeFilter === 'all' || c.type === activeFilter)
     .map((c) => c.name);
@@ -63,25 +62,21 @@ export default function TransactionsSection({
   ];
 
   const datePresetOptions: DropdownOption[] = [
-    { value: 'all', label: 'Semua Tanggal' },
+    { value: 'all', label: 'Semua Waktu' },
     { value: 'today', label: 'Hari Ini' },
-    { value: '7days', label: '7 Hari Terakhir' },
+    { value: '7days', label: '7 Hari' },
     { value: 'month', label: 'Bulan Ini' },
-    { value: 'custom', label: 'Pilih Tanggal...' },
+    { value: 'custom', label: 'Pilih Tanggal' },
   ];
 
-  // Filtering transactions
   const filtered = transactions.filter((tx) => {
-    // 1. Type Filter
     const matchesFilter = activeFilter === 'all' ? true : tx.type === activeFilter;
     if (!matchesFilter) return false;
 
-    // 2. Category Filter
     if (selectedCategory !== 'all' && tx.category !== selectedCategory) {
       return false;
     }
 
-    // 3. Search Query Filter
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       const matchesSearch =
@@ -90,7 +85,6 @@ export default function TransactionsSection({
       if (!matchesSearch) return false;
     }
 
-    // 4. Date Filter
     if (dateFilterPreset !== 'all') {
       const today = new Date();
       const todayStr = today.toISOString().split('T')[0];
@@ -123,62 +117,55 @@ export default function TransactionsSection({
   };
 
   return (
-    <div className="bg-white rounded-3xl p-5 border border-amber-100/70 shadow-xs space-y-4">
-      
-      {/* Header and Filter Controls (Sejajar dengan Judul) */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-amber-50">
-        <div>
-          <h3 className="text-sm font-black text-slate-900 tracking-tight">
-            {activeFilter === 'income'
-              ? 'Riwayat Pemasukan (Income)'
-              : activeFilter === 'expense'
-              ? 'Riwayat Pengeluaran (Expense)'
-              : 'Daftar Transaksi Terkini'}
-          </h3>
-          <p className="text-[11px] text-slate-400 font-medium">
-            Menampilkan {filtered.length} dari total {transactions.length} catatan
-          </p>
-        </div>
+    <div className="space-y-3">
+      {/* Header and Filter Controls */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <h3 className="text-xs font-extrabold uppercase tracking-wider text-slate-400">
+          {activeFilter === 'income'
+            ? 'RIWAYAT PEMASUKAN'
+            : activeFilter === 'expense'
+            ? 'RIWAYAT PENGELUARAN'
+            : 'TRANSAKSI TERKINI'}
+        </h3>
 
-        {/* Filter Controls (Sejajar dengan Judul) */}
         <div className="flex flex-wrap items-center gap-2">
           {/* Type Toggle only on Home Tab */}
           {forcedType === 'all' && (
-            <div className="flex items-center gap-1 p-1 bg-amber-50/80 rounded-full text-xs font-semibold">
+            <div className="flex items-center gap-1 p-1 bg-slate-100 rounded-xl text-xs font-extrabold">
               <button
                 onClick={() => setFilterType('all')}
-                className={`px-3 py-1 rounded-full transition cursor-pointer ${
+                className={`px-2.5 py-1 rounded-lg transition cursor-pointer ${
                   filterType === 'all'
-                    ? 'bg-white text-slate-900 shadow-xs'
-                    : 'text-amber-800 hover:text-slate-900'
+                    ? 'bg-white text-slate-800 shadow-2xs'
+                    : 'text-slate-500 hover:text-slate-800'
                 }`}
               >
                 Semua
               </button>
               <button
                 onClick={() => setFilterType('income')}
-                className={`px-3 py-1 rounded-full transition cursor-pointer ${
+                className={`px-2.5 py-1 rounded-lg transition cursor-pointer ${
                   filterType === 'income'
-                    ? 'bg-emerald-600 text-white shadow-xs'
-                    : 'text-emerald-700 hover:text-emerald-900'
+                    ? 'bg-emerald-500 text-white'
+                    : 'text-slate-500 hover:text-emerald-600'
                 }`}
               >
-                Pemasukan
+                Masuk
               </button>
               <button
                 onClick={() => setFilterType('expense')}
-                className={`px-3 py-1 rounded-full transition cursor-pointer ${
+                className={`px-2.5 py-1 rounded-lg transition cursor-pointer ${
                   filterType === 'expense'
-                    ? 'bg-rose-600 text-white shadow-xs'
-                    : 'text-rose-700 hover:text-rose-900'
+                    ? 'bg-rose-500 text-white'
+                    : 'text-slate-500 hover:text-rose-600'
                 }`}
               >
-                Pengeluaran
+                Keluar
               </button>
             </div>
           )}
 
-          {/* 1. Filter (Kategori) Custom Dropdown */}
+          {/* Filter Kategori */}
           <CustomDropdown
             value={selectedCategory}
             onChange={(val) => {
@@ -190,17 +177,15 @@ export default function TransactionsSection({
             }}
             options={categoryDropdownOptions}
             variant="pill"
-            prefixIcon={<IoFilter className="text-amber-700 text-xs shrink-0" />}
-            prefixLabel="Filter:"
+            prefixIcon={<IoFilter className="text-amber-600 text-xs shrink-0" />}
           />
 
-          {/* 2. Filter Waktu (Tanggal) Custom Dropdown */}
+          {/* Filter Waktu */}
           <CustomDropdown
             value={dateFilterPreset}
             onChange={(val) => setDateFilterPreset(val as any)}
             options={datePresetOptions}
             variant="pill"
-            prefixLabel="Waktu:"
           />
 
           {dateFilterPreset === 'custom' && (
@@ -208,40 +193,28 @@ export default function TransactionsSection({
               type="date"
               value={customDate}
               onChange={(e) => setCustomDate(e.target.value)}
-              className="bg-amber-50/70 border border-amber-200/80 text-slate-800 text-xs font-bold rounded-full px-3 py-1 focus:outline-none focus:ring-2 focus:ring-amber-500/20 transition cursor-pointer"
+              className="bg-white border-2 border-slate-200 text-slate-800 text-xs font-bold rounded-xl px-2.5 py-1 focus:outline-none focus:border-amber-500 cursor-pointer"
             />
           )}
 
-          {/* 3. Kelola Kategori Button (Prominent Pill Style) */}
+          {/* Kelola Kategori Button (Flat Duolingo Pill) */}
           {onOpenManageCategories && (
             <button
               type="button"
               onClick={onOpenManageCategories}
-              className="flex items-center gap-1.5 bg-gradient-to-r from-amber-50 to-orange-50/70 hover:from-amber-100 hover:to-orange-100 text-amber-900 border border-amber-200/90 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all duration-200 shadow-2xs hover:shadow-xs active:scale-95 cursor-pointer"
-              title="Buka Manajemen Kategori"
+              className="flex items-center gap-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 border-2 border-amber-200 rounded-xl px-3 py-1.5 text-xs font-extrabold transition cursor-pointer"
             >
-              <IoPricetagsOutline className="text-sm text-amber-700" />
-              <span>Kelola Kategori</span>
+              <IoPricetagsOutline className="text-sm" />
+              <span>Kategori</span>
             </button>
           )}
 
-          {/* Reset Filters button if any active */}
           {isFiltered && (
             <button
               onClick={resetFilters}
-              className="text-[10px] font-bold text-rose-600 hover:text-rose-700 bg-rose-50 border border-rose-200/60 px-2.5 py-1.5 rounded-full transition cursor-pointer active:scale-95"
+              className="text-xs font-extrabold text-rose-500 hover:text-rose-600 px-2 py-1 cursor-pointer"
             >
-              ✕ Reset
-            </button>
-          )}
-
-          {/* + Catat button only shown on Home tab */}
-          {forcedType === 'all' && (
-            <button
-              onClick={() => onOpenAddModal(filterType === 'all' ? 'expense' : filterType)}
-              className="px-4 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-full shadow-xs transition active:scale-95 cursor-pointer shrink-0"
-            >
-              + Catat Baru
+              Reset
             </button>
           )}
         </div>
@@ -249,75 +222,62 @@ export default function TransactionsSection({
 
       {/* List of Transactions */}
       {filtered.length === 0 ? (
-        <div className="text-center py-10 space-y-2">
-          <div className="flex justify-center text-amber-500">
-            <IoWalletOutline className="text-5xl" />
+        <div className="bg-white rounded-2xl border-2 border-slate-200 p-8 text-center space-y-2">
+          <div className="flex justify-center text-slate-300">
+            <IoWalletOutline className="text-4xl" />
           </div>
-          <div className="text-xs font-bold text-slate-600">
-            {isFiltered
-              ? 'Tidak ada transaksi dengan filter yang dipilih.'
-              : 'Belum ada transaksi ditemukan.'}
+          <div className="text-sm font-extrabold text-slate-600">
+            Belum ada transaksi
           </div>
-          <p className="text-[11px] text-slate-400">
-            {isFiltered
-              ? 'Coba ganti kategori atau rentang tanggal filter di atas.'
-              : 'Gunakan tombol catat di atas untuk menambahkan transaksi pertamamu!'}
-          </p>
-          {isFiltered && (
+          {forcedType === 'all' && (
             <button
-              onClick={resetFilters}
-              className="mt-2 text-xs font-bold text-amber-700 underline cursor-pointer"
+              onClick={() => onOpenAddModal('expense')}
+              className="mt-1 inline-block px-4 py-2 bg-amber-500 hover:bg-amber-400 text-white font-extrabold text-xs uppercase rounded-xl border-b-4 border-amber-600 active:border-b-0 active:translate-y-1 transition cursor-pointer"
             >
-              Reset semua filter
+              + Catat Sekarang
             </button>
           )}
         </div>
       ) : (
-        <div className="space-y-2.5">
+        <div className="space-y-2">
           {filtered.map((tx) => {
             const isExpense = tx.type === 'expense';
             const sign = isExpense ? '-' : '+';
-            const amountColor = isExpense ? 'text-rose-600' : 'text-emerald-600';
+            const amountColor = isExpense ? 'text-rose-500' : 'text-emerald-500';
             const badgeBg = isExpense
-              ? 'bg-rose-50 text-rose-700 border border-rose-100'
-              : 'bg-emerald-50 text-emerald-700 border border-emerald-100';
+              ? 'bg-rose-50 text-rose-600 border-2 border-rose-200'
+              : 'bg-emerald-50 text-emerald-600 border-2 border-emerald-200';
 
             return (
               <div
                 key={tx.id}
-                className="flex items-center justify-between p-3 rounded-2xl bg-amber-50/30 border border-amber-100/60 hover:bg-amber-50/60 transition"
+                className="flex items-center justify-between p-3.5 rounded-2xl bg-white border-2 border-slate-200 hover:border-slate-300 transition"
               >
                 <div className="flex items-center gap-3">
-                  <span className={`text-[10px] font-bold px-2.5 py-1 rounded-xl ${badgeBg}`}>
-                    {isExpense ? 'Pengeluaran' : 'Pemasukan'}
+                  <span className={`text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-xl ${badgeBg}`}>
+                    {isExpense ? 'Keluar' : 'Masuk'}
                   </span>
                   <div>
-                    <div className="text-xs font-bold text-slate-900">
+                    <div className="text-sm font-extrabold text-slate-800">
                       {tx.title}
                     </div>
-                    <div className="text-[10px] text-slate-400 font-medium">
-                      {tx.date} • {tx.category}
+                    <div className="text-xs text-slate-400 font-bold">
+                      {tx.category} • {tx.date}
                     </div>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <div className="text-right">
-                    <div className={`text-xs font-bold font-mono ${amountColor}`}>
-                      {sign}{formatRupiah(tx.amount)}
-                    </div>
-                    <div className="text-[10px] font-bold text-amber-600">
-                      +{tx.xpEarned} XP
-                    </div>
+                  <div className={`text-sm font-black ${amountColor}`}>
+                    {sign}{formatRupiah(tx.amount)}
                   </div>
 
-                  {/* Action buttons: Edit and Trash */}
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-1">
                     {onEdit && (
                       <button
                         onClick={() => onEdit(tx)}
-                        className="w-8 h-8 rounded-xl bg-amber-50 hover:bg-amber-100/90 text-amber-700 flex items-center justify-center transition active:scale-90 cursor-pointer shadow-xs border border-amber-200/60"
-                        title="Edit transaksi"
+                        className="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition cursor-pointer"
+                        title="Edit"
                       >
                         <IoPencil className="text-sm" />
                       </button>
@@ -325,8 +285,8 @@ export default function TransactionsSection({
 
                     <button
                       onClick={() => onDelete(tx.id)}
-                      className="w-8 h-8 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 flex items-center justify-center transition active:scale-90 cursor-pointer shadow-xs border border-rose-200/60"
-                      title="Hapus transaksi"
+                      className="w-8 h-8 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-500 flex items-center justify-center transition cursor-pointer"
+                      title="Hapus"
                     >
                       <IoTrashOutline className="text-base" />
                     </button>
@@ -340,4 +300,3 @@ export default function TransactionsSection({
     </div>
   );
 }
-

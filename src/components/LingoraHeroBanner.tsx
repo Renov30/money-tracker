@@ -13,36 +13,33 @@ export default function LingoraHeroBanner({
   onOpenAddModal,
 }: HeroBannerProps) {
   return (
-    <div className="relative rounded-3xl bg-gradient-to-r from-amber-100/90 via-amber-200/50 to-orange-100/80 p-6 md:p-8 overflow-hidden shadow-xs border border-amber-300/60 flex flex-col justify-between min-h-[200px]">
-      
-      {/* Greeting & Action Button */}
-      <div className="max-w-md z-10 space-y-3 mt-2 md:mt-0">
+    <div className="relative rounded-2xl bg-amber-500 border-b-4 border-amber-600 p-6 overflow-hidden flex items-center justify-between min-h-[170px]">
+      {/* Left Greeting & Duolingo 3D Button */}
+      <div className="z-10 space-y-4 max-w-xs sm:max-w-sm">
         <div>
-          <h2 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">
-            Selamat pagi, <span className="text-amber-700">{userName}!</span>
+          <span className="text-[11px] font-extrabold uppercase tracking-wider text-amber-100">
+            BERANDA UTAMA
+          </span>
+          <h2 className="text-2xl md:text-3xl font-black text-white tracking-tight mt-0.5">
+            Halo, {userName}!
           </h2>
-          <p className="text-xs md:text-sm text-amber-950/80 font-medium mt-1 leading-relaxed">
-            Wally si wallaby ceria siap membantumu mencatat pemasukan, mengontrol pengeluaran, dan memenuhi kantung tabungan impianmu!
+          <p className="text-sm text-amber-50 font-bold mt-1">
+            Yuk catat keuanganmu hari ini!
           </p>
         </div>
 
         <button
           onClick={onOpenAddModal}
-          className="inline-flex items-center gap-2 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs md:text-sm px-5 py-2.5 rounded-full shadow-sm shadow-amber-600/25 transition active:scale-95 cursor-pointer"
+          className="inline-flex items-center gap-2 bg-white hover:bg-slate-50 text-amber-600 font-extrabold text-xs uppercase tracking-wider px-5 py-3 rounded-2xl border-2 border-slate-200 border-b-4 active:border-b-2 active:translate-y-0.5 transition cursor-pointer"
         >
-          <span>+ Catat Keuangan</span>
-          <span className="text-base leading-none">➔</span>
+          <span>+ CATAT TRANSAKSI</span>
         </button>
       </div>
 
-      {/* Interactive Animated Wallaby Mascot on the Right (Shifted left and enlarged) */}
-      <div className="absolute right-8 sm:right-16 md:right-24 bottom-0 z-20">
-        <InteractiveMascot size={195} />
+      {/* Interactive Wallaby Mascot on the Right */}
+      <div className="absolute right-6 sm:right-12 md:right-16 bottom-0 z-20">
+        <InteractiveMascot size={185} />
       </div>
-
-      {/* Decorative Warm Sun/Cloud Shapes in Background */}
-      <div className="absolute right-36 bottom-6 w-24 h-12 bg-white/40 rounded-full blur-xs pointer-events-none"></div>
-      <div className="absolute right-8 top-8 w-16 h-8 bg-amber-300/30 rounded-full blur-xs pointer-events-none"></div>
     </div>
   );
 }
