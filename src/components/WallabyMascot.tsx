@@ -17,7 +17,7 @@ export default function WallabyMascot({
 }: WallabyMascotProps) {
   return (
     <div
-      className={`relative inline-block select-none ${animated ? 'animate-wally-idle' : ''} ${className}`}
+      className={`relative inline-block select-none ${className}`}
       style={{ width: size, height: size }}
     >
       <svg

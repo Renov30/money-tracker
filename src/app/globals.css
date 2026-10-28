@@ -47,15 +47,6 @@ button:focus-visible {
 }
 
 /* Mascot Animations */
-@keyframes wallyIdle {
-  0%, 100% {
-    transform: translateY(0px) rotate(0deg);
-  }
-  50% {
-    transform: translateY(-6px) rotate(1deg);
-  }
-}
-
 @keyframes wallyWave {
   0%, 100% {
     transform: rotate(0deg);
@@ -98,10 +89,6 @@ button:focus-visible {
   50% {
     transform: rotate(5deg);
   }
-}
-
-.animate-wally-idle {
-  animation: wallyIdle 3.5s ease-in-out infinite;
 }
 
 .animate-wally-wave {
