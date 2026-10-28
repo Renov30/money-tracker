@@ -14,6 +14,7 @@ import {
   IoRefreshOutline,
   IoPricetagsOutline,
 } from 'react-icons/io5';
+import CustomDropdown, { DropdownOption } from './CustomDropdown';
 
 interface AddTransactionModalProps {
   isOpen: boolean;
@@ -56,6 +57,13 @@ export default function AddTransactionModal({
   const allCategories = Array.from(
     new Set([...DEFAULT_CATEGORIES[type], ...typeCustomCats])
   );
+
+  const categoryDropdownOptions: (string | DropdownOption)[] = [
+    ...allCategories.map((cat) => ({ value: cat, label: cat })),
+    ...(onOpenManageCategories
+      ? [{ value: '__MANAGE__', label: '⚙️ Kelola / Tambah Kategori Baru...', isAction: true }]
+      : []),
+  ];
 
   useEffect(() => {
     if (isOpen) {
@@ -424,24 +432,18 @@ export default function AddTransactionModal({
               )}
             </div>
 
-            <select
+            <CustomDropdown
               value={category}
-              onChange={(e) => {
-                if (e.target.value === '__MANAGE__') {
+              onChange={(val) => {
+                if (val === '__MANAGE__') {
                   onOpenManageCategories?.();
                 } else {
-                  setCategory(e.target.value);
+                  setCategory(val);
                 }
               }}
-              className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3.5 py-2 text-slate-900 text-xs focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition"
-            >
-              {allCategories.map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat}
-                </option>
-              ))}
-              <option value="__MANAGE__">⚙️ Kelola / Tambah Kategori Baru...</option>
-            </select>
+              options={categoryDropdownOptions}
+              variant="input"
+            />
           </div>
 
           <button

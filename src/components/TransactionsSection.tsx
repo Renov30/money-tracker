@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Transaction, TransactionType, Category, CustomCategory, DEFAULT_CATEGORIES } from '@/types';
 import { formatRupiah } from '@/lib/storage';
 import { IoWalletOutline, IoTrashOutline, IoPencil, IoFilter, IoPricetagsOutline } from 'react-icons/io5';
+import CustomDropdown, { DropdownOption } from './CustomDropdown';
 
 interface TransactionsSectionProps {
   transactions: Transaction[];
@@ -52,6 +53,22 @@ export default function TransactionsSection({
   const availableCategories: Category[] = Array.from(
     new Set([...baseCategories, ...customNames, ...txCategories])
   );
+
+  const categoryDropdownOptions: (string | DropdownOption)[] = [
+    { value: 'all', label: 'Semua Kategori' },
+    ...availableCategories.map((cat) => ({ value: cat, label: cat })),
+    ...(onOpenManageCategories
+      ? [{ value: '__MANAGE__', label: '⚙️ Kelola Kategori...', isAction: true }]
+      : []),
+  ];
+
+  const datePresetOptions: DropdownOption[] = [
+    { value: 'all', label: 'Semua Tanggal' },
+    { value: 'today', label: 'Hari Ini' },
+    { value: '7days', label: '7 Hari Terakhir' },
+    { value: 'month', label: 'Bulan Ini' },
+    { value: 'custom', label: 'Pilih Tanggal...' },
+  ];
 
   // Filtering transactions
   const filtered = transactions.filter((tx) => {
@@ -161,50 +178,30 @@ export default function TransactionsSection({
             </div>
           )}
 
-          {/* 1. Filter (Kategori) */}
-          <div className="flex items-center gap-1.5 bg-amber-50/70 border border-amber-200/80 rounded-full px-3 py-1.5">
-            <IoFilter className="text-amber-700 text-xs shrink-0" />
-            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
-              Filter:
-            </span>
-            <select
-              value={selectedCategory}
-              onChange={(e) => {
-                if (e.target.value === '__MANAGE__') {
-                  onOpenManageCategories?.();
-                } else {
-                  setSelectedCategory(e.target.value);
-                }
-              }}
-              className="bg-transparent text-slate-800 text-xs font-bold focus:outline-none cursor-pointer pr-1"
-            >
-              <option value="all">Semua Kategori</option>
-              {availableCategories.map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat}
-                </option>
-              ))}
-              <option value="__MANAGE__">⚙️ Kelola Kategori...</option>
-            </select>
-          </div>
+          {/* 1. Filter (Kategori) Custom Dropdown */}
+          <CustomDropdown
+            value={selectedCategory}
+            onChange={(val) => {
+              if (val === '__MANAGE__') {
+                onOpenManageCategories?.();
+              } else {
+                setSelectedCategory(val);
+              }
+            }}
+            options={categoryDropdownOptions}
+            variant="pill"
+            prefixIcon={<IoFilter className="text-amber-700 text-xs shrink-0" />}
+            prefixLabel="Filter:"
+          />
 
-          {/* 2. Filter Waktu (Tanggal) */}
-          <div className="flex items-center gap-1.5 bg-amber-50/70 border border-amber-200/80 rounded-full px-3 py-1.5">
-            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
-              Waktu:
-            </span>
-            <select
-              value={dateFilterPreset}
-              onChange={(e) => setDateFilterPreset(e.target.value as any)}
-              className="bg-transparent text-slate-800 text-xs font-bold focus:outline-none cursor-pointer pr-1"
-            >
-              <option value="all">Semua Tanggal</option>
-              <option value="today">Hari Ini</option>
-              <option value="7days">7 Hari Terakhir</option>
-              <option value="month">Bulan Ini</option>
-              <option value="custom">Pilih Tanggal...</option>
-            </select>
-          </div>
+          {/* 2. Filter Waktu (Tanggal) Custom Dropdown */}
+          <CustomDropdown
+            value={dateFilterPreset}
+            onChange={(val) => setDateFilterPreset(val as any)}
+            options={datePresetOptions}
+            variant="pill"
+            prefixLabel="Waktu:"
+          />
 
           {dateFilterPreset === 'custom' && (
             <input
