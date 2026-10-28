@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   IoCheckmarkCircle,
   IoTrashOutline,
@@ -23,10 +23,39 @@ interface ToastNotificationProps {
 }
 
 export default function ToastNotification({ toast, onClose }: ToastNotificationProps) {
-  if (!toast) return null;
+  const [visible, setVisible] = useState(false);
+  const [currentToast, setCurrentToast] = useState<ToastData | null>(null);
+
+  useEffect(() => {
+    if (toast) {
+      setCurrentToast(toast);
+      // Trigger fade in next tick
+      const animTimer = setTimeout(() => {
+        setVisible(true);
+      }, 20);
+
+      // Mulai fade-out sebelum tertutup sepenuhnya
+      const hideTimer = setTimeout(() => {
+        setVisible(false);
+      }, 3300);
+
+      return () => {
+        clearTimeout(animTimer);
+        clearTimeout(hideTimer);
+      };
+    } else {
+      setVisible(false);
+      const clearTimer = setTimeout(() => {
+        setCurrentToast(null);
+      }, 300);
+      return () => clearTimeout(clearTimer);
+    }
+  }, [toast]);
+
+  if (!currentToast) return null;
 
   const getIcon = () => {
-    switch (toast.type) {
+    switch (currentToast.type) {
       case 'delete':
         return <IoTrashOutline className="text-xl text-rose-600" />;
       case 'edit':
@@ -42,30 +71,37 @@ export default function ToastNotification({ toast, onClose }: ToastNotificationP
   };
 
   const getBadgeStyle = () => {
-    switch (toast.type) {
+    switch (currentToast.type) {
       case 'delete':
-        return 'border-rose-300 bg-rose-50 text-rose-950 shadow-rose-900/10';
+        return 'border-rose-200 bg-rose-50 text-rose-950';
       case 'edit':
-        return 'border-amber-300 bg-amber-50 text-amber-950 shadow-amber-900/10';
+        return 'border-amber-200 bg-amber-50 text-amber-950';
       case 'warning':
-        return 'border-amber-300 bg-amber-50 text-amber-950 shadow-amber-900/10';
+        return 'border-amber-200 bg-amber-50 text-amber-950';
       case 'level-up':
-        return 'border-amber-400 bg-gradient-to-r from-amber-100 to-orange-100 text-amber-950 shadow-amber-900/15';
+        return 'border-amber-300 bg-amber-100 text-amber-950';
       case 'success':
       default:
-        return 'border-emerald-300 bg-emerald-50 text-emerald-950 shadow-emerald-900/10';
+        return 'border-emerald-200 bg-emerald-50 text-emerald-950';
     }
   };
 
   return (
-    <div className="fixed top-6 right-6 z-50 animate-bounce duration-300">
+    <div
+      className={`fixed bottom-6 right-6 z-50 transition-opacity duration-300 ease-in-out ${
+        visible ? 'opacity-100' : 'opacity-0 pointer-events-none'
+      }`}
+    >
       <div
-        className={`flex items-center gap-3 px-4 py-3 rounded-2xl border shadow-xl backdrop-blur-md transition-all ${getBadgeStyle()}`}
+        className={`flex items-center gap-3 px-4 py-3 rounded-2xl border-2 shadow-lg backdrop-blur-md ${getBadgeStyle()}`}
       >
         <div className="shrink-0">{getIcon()}</div>
-        <div className="text-xs font-bold leading-snug max-w-xs">{toast.message}</div>
+        <div className="text-xs font-extrabold leading-snug max-w-xs">{currentToast.message}</div>
         <button
-          onClick={onClose}
+          onClick={() => {
+            setVisible(false);
+            setTimeout(onClose, 300);
+          }}
           className="ml-2 text-slate-400 hover:text-slate-700 font-black text-xs cursor-pointer p-0.5 rounded-lg"
           title="Tutup notifikasi"
         >
@@ -75,4 +111,3 @@ export default function ToastNotification({ toast, onClose }: ToastNotificationP
     </div>
   );
 }
-
