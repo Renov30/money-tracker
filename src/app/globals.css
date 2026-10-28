@@ -25,6 +25,12 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+/* Hilangkan outline border hitam default bawaan browser saat tombol diklik / difokuskan */
+button:focus,
+button:focus-visible {
+  outline: none;
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;

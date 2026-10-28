@@ -68,24 +68,27 @@ export default function LingoraSidebar({
             return (
               <button
                 key={item.id}
+                type="button"
                 onClick={() => setActiveTab(item.id)}
-                className={`relative group w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all duration-300 ease-out cursor-pointer select-none ${
+                className={`relative group w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all duration-300 ease-out cursor-pointer select-none outline-none focus:outline-none focus-visible:outline-none border ${
                   isActive
-                    ? 'bg-gradient-to-r from-amber-100/90 via-amber-50 to-orange-50/70 text-amber-950 shadow-xs border border-amber-300/80 translate-x-1.5'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-amber-50/50 hover:translate-x-1 active:scale-[0.98]'
+                    ? 'bg-gradient-to-r from-amber-100/90 via-amber-50 to-orange-50/70 text-amber-950 shadow-xs border-amber-300/80 translate-x-1.5'
+                    : 'border-transparent text-slate-600 hover:text-slate-900 hover:bg-amber-50/50 hover:translate-x-1 active:scale-[0.98]'
                 }`}
               >
                 {/* Active Left Pill Accent Indicator */}
-                {isActive && (
-                  <span className="absolute -left-[1px] top-1/2 -translate-y-1/2 w-1.5 h-5 bg-gradient-to-b from-amber-500 to-amber-600 rounded-r-full shadow-xs shadow-amber-500/50 animate-fade-in" />
-                )}
+                <span
+                  className={`absolute -left-[1px] top-1/2 -translate-y-1/2 w-1.5 h-5 bg-gradient-to-b from-amber-500 to-amber-600 rounded-r-full shadow-xs shadow-amber-500/50 transition-all duration-300 pointer-events-none ${
+                    isActive ? 'opacity-100 scale-100' : 'opacity-0 scale-75'
+                  }`}
+                />
 
                 <div className="flex items-center gap-3">
                   <span
-                    className={`w-7 h-7 rounded-xl flex items-center justify-center transition-all duration-300 ${
+                    className={`w-7 h-7 rounded-xl flex items-center justify-center transition-all duration-300 border ${
                       isActive
-                        ? 'bg-white shadow-xs text-amber-700 scale-105 ring-1 ring-amber-200/50'
-                        : 'text-slate-500 group-hover:text-amber-700 group-hover:scale-110 group-hover:bg-white/70'
+                        ? 'bg-white shadow-xs text-amber-700 scale-105 border-amber-200/60'
+                        : 'border-transparent text-slate-500 group-hover:text-amber-700 group-hover:scale-110 group-hover:bg-white/70'
                     }`}
                   >
                     {item.icon}
@@ -101,10 +104,10 @@ export default function LingoraSidebar({
 
                 {item.badge !== null && item.badge !== undefined && (
                   <span
-                    className={`px-2 py-0.5 rounded-full text-[10px] font-black transition-all duration-300 ${
+                    className={`px-2 py-0.5 rounded-full text-[10px] font-black transition-all duration-300 border ${
                       isActive
-                        ? 'bg-rose-500 text-white shadow-xs scale-105'
-                        : 'bg-rose-100 text-rose-600 group-hover:bg-rose-500 group-hover:text-white'
+                        ? 'bg-rose-500 text-white shadow-xs scale-105 border-rose-600/20'
+                        : 'border-transparent bg-rose-100 text-rose-600 group-hover:bg-rose-500 group-hover:text-white'
                     }`}
                   >
                     {item.badge}
@@ -126,7 +129,10 @@ export default function LingoraSidebar({
           <p className="text-[11px] text-amber-900/80 font-medium leading-relaxed">
             Klaim bonus XP 2x lipat dan buka kantung tabungan tanpa batas.
           </p>
-          <button className="w-full py-2 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-xl shadow-xs shadow-amber-600/20 transition active:scale-95 cursor-pointer">
+          <button
+            type="button"
+            className="w-full py-2 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-xl shadow-xs shadow-amber-600/20 transition active:scale-95 cursor-pointer outline-none focus:outline-none"
+          >
             Tingkatkan Level
           </button>
         </div>
@@ -144,7 +150,11 @@ export default function LingoraSidebar({
               </div>
             </div>
           </div>
-          <button className="p-1 hover:bg-slate-100 rounded-lg transition cursor-pointer text-slate-500 hover:text-slate-800" title="Pengaturan">
+          <button
+            type="button"
+            className="p-1 hover:bg-slate-100 rounded-lg transition cursor-pointer text-slate-500 hover:text-slate-800 outline-none focus:outline-none"
+            title="Pengaturan"
+          >
             <IoSettingsOutline className="text-lg" />
           </button>
         </div>
