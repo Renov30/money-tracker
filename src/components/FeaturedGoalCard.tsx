@@ -3,6 +3,7 @@
 import React from 'react';
 import { Goal } from '@/types';
 import { formatRupiah } from '@/lib/storage';
+import { ClayGamepad } from './Clay3DIcons';
 
 interface FeaturedGoalCardProps {
   goal: Goal;
@@ -34,12 +35,12 @@ export default function FeaturedGoalCard({
         </button>
       </div>
 
-      {/* Wide White Card with Warm Accents */}
+      {/* Wide White Card with 3D Clay Controller */}
       <div className="bg-white rounded-3xl p-4 md:p-5 border border-amber-100 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        {/* Left Icon Badge */}
+        {/* Left Icon Badge with 3D Clay Gamepad */}
         <div className="flex items-center gap-4 w-full sm:w-auto">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-amber-400 to-yellow-300 flex items-center justify-center text-2xl shadow-xs shrink-0">
-            🎮
+          <div className="w-14 h-14 rounded-2xl bg-amber-50 border border-amber-200/80 flex items-center justify-center shadow-xs shrink-0">
+            <ClayGamepad size={36} />
           </div>
           <div className="space-y-1 flex-1">
             <h4 className="text-sm font-bold text-slate-900 leading-snug">
@@ -67,9 +68,9 @@ export default function FeaturedGoalCard({
         {/* Action Button: Setor Tabungan */}
         <button
           onClick={() => onTopUp(goal.id, 50000)}
-          className="w-full sm:w-auto px-5 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-full shadow-xs transition active:scale-95 cursor-pointer flex items-center justify-center gap-1.5 shrink-0"
+          className="w-full sm:w-auto px-5 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-full shadow-xs transition active:scale-95 cursor-pointer flex items-center justify-center gap-2 shrink-0"
         >
-          <span>▷</span>
+          <span className="text-sm">▷</span>
           <span>Setor Rp 50k (+25 XP)</span>
         </button>
       </div>

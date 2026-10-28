@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Category, Transaction, TransactionType } from '@/types';
 import WallabyMascot from './WallabyMascot';
+import { ClayExpense, ClayIncome } from './Clay3DIcons';
 
 interface AddTransactionModalProps {
   isOpen: boolean;
@@ -99,13 +100,14 @@ export default function AddTransactionModal({
               setType('expense');
               setCategory('Makanan & Minuman');
             }}
-            className={`py-2 rounded-full text-xs font-bold transition cursor-pointer ${
+            className={`py-2 rounded-full text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1.5 ${
               type === 'expense'
                 ? 'bg-rose-500 text-white shadow-xs'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            💸 Pengeluaran
+            <ClayExpense size={16} />
+            <span>Pengeluaran</span>
           </button>
           <button
             type="button"
@@ -113,13 +115,14 @@ export default function AddTransactionModal({
               setType('income');
               setCategory('Gaji & Usaha');
             }}
-            className={`py-2 rounded-full text-xs font-bold transition cursor-pointer ${
+            className={`py-2 rounded-full text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1.5 ${
               type === 'income'
                 ? 'bg-emerald-600 text-white shadow-xs'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            💰 Pemasukan
+            <ClayIncome size={16} />
+            <span>Pemasukan</span>
           </button>
         </div>
 

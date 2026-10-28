@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Transaction, TransactionType } from '@/types';
 import { formatRupiah } from '@/lib/storage';
+import { ClayCoin } from './Clay3DIcons';
 
 interface TransactionsSectionProps {
   transactions: Transaction[];
@@ -97,7 +98,9 @@ export default function TransactionsSection({
       {/* List of Transactions */}
       {filtered.length === 0 ? (
         <div className="text-center py-10 space-y-2">
-          <div className="text-3xl">🪙</div>
+          <div className="flex justify-center">
+            <ClayCoin size={48} />
+          </div>
           <div className="text-xs font-bold text-slate-600">
             Belum ada transaksi ditemukan.
           </div>

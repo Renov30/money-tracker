@@ -2,6 +2,16 @@
 
 import React from 'react';
 import WallabyMascot from './WallabyMascot';
+import {
+  ClayHome,
+  ClayIncome,
+  ClayExpense,
+  ClayTarget,
+  ClayTrophy,
+  ClayCrown,
+  ClayGear,
+  ClayAvatar,
+} from './Clay3DIcons';
 
 interface SidebarProps {
   activeTab: string;
@@ -17,11 +27,11 @@ export default function LingoraSidebar({
   userName,
 }: SidebarProps) {
   const navItems = [
-    { id: 'home', label: 'Home', icon: '🏠' },
-    { id: 'income', label: 'Pemasukan', icon: '💰' },
-    { id: 'expense', label: 'Pengeluaran', icon: '💸' },
-    { id: 'goals', label: 'Goals Tabungan', icon: '🎯' },
-    { id: 'leaderboard', label: 'Peringkat & Misi', icon: '🏆' },
+    { id: 'home', label: 'Home', icon: <ClayHome size={20} /> },
+    { id: 'income', label: 'Pemasukan', icon: <ClayIncome size={20} /> },
+    { id: 'expense', label: 'Pengeluaran', icon: <ClayExpense size={20} /> },
+    { id: 'goals', label: 'Goals Tabungan', icon: <ClayTarget size={20} /> },
+    { id: 'leaderboard', label: 'Peringkat & Misi', icon: <ClayTrophy size={20} /> },
   ];
 
   return (
@@ -52,11 +62,11 @@ export default function LingoraSidebar({
                 onClick={() => setActiveTab(item.id)}
                 className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-bold transition cursor-pointer ${
                   isActive
-                    ? 'bg-amber-50 text-amber-800 shadow-xs border border-amber-200/50'
-                    : 'text-slate-500 hover:text-slate-900 hover:bg-amber-50/50'
+                    ? 'bg-amber-50 text-amber-900 shadow-xs border border-amber-200/60'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-amber-50/40'
                 }`}
               >
-                <span className="text-base">{item.icon}</span>
+                <span className="shrink-0">{item.icon}</span>
                 <span>{item.label}</span>
               </button>
             );
@@ -65,12 +75,10 @@ export default function LingoraSidebar({
       </div>
 
       <div className="space-y-4 pt-4 border-t border-amber-100/60">
-        {/* Wally Plus Card (Warm Caramel Theme) */}
+        {/* Wally Plus Card (3D Clay Crown Theme) */}
         <div className="bg-gradient-to-b from-amber-50 to-orange-50/60 border border-amber-200/70 rounded-2xl p-3.5 space-y-2">
           <div className="flex items-center gap-2">
-            <span className="w-6 h-6 rounded-lg bg-amber-400 text-amber-950 flex items-center justify-center text-xs shadow-xs font-bold">
-              👑
-            </span>
+            <ClayCrown size={22} />
             <span className="text-xs font-black text-slate-900">Wally Plus</span>
           </div>
           <p className="text-[11px] text-amber-900/80 font-medium leading-relaxed">
@@ -84,8 +92,8 @@ export default function LingoraSidebar({
         {/* User Profile Footer Row */}
         <div className="flex items-center justify-between px-2 pt-1">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-full bg-amber-100/80 border border-amber-200 flex items-center justify-center text-sm font-bold text-amber-900 shadow-xs">
-              👨🏻
+            <div className="w-9 h-9 rounded-full overflow-hidden border border-amber-200/80 flex items-center justify-center shadow-xs shrink-0">
+              <ClayAvatar size={34} />
             </div>
             <div>
               <div className="text-xs font-bold text-slate-900">{userName}</div>
@@ -94,8 +102,8 @@ export default function LingoraSidebar({
               </div>
             </div>
           </div>
-          <button className="text-slate-400 hover:text-slate-600 transition cursor-pointer text-sm">
-            ⚙️
+          <button className="p-1 hover:bg-slate-100 rounded-lg transition cursor-pointer" title="Pengaturan">
+            <ClayGear size={18} />
           </button>
         </div>
       </div>

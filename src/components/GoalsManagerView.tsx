@@ -3,6 +3,7 @@
 import React from 'react';
 import { Goal } from '@/types';
 import { formatRupiah } from '@/lib/storage';
+import { ClayTarget } from './Clay3DIcons';
 
 interface GoalsManagerViewProps {
   goals: Goal[];
@@ -49,8 +50,8 @@ export default function GoalsManagerView({
             >
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-amber-400 to-yellow-300 flex items-center justify-center text-xl shadow-xs">
-                    🎯
+                  <div className="w-11 h-11 rounded-2xl bg-amber-50 border border-amber-200/80 flex items-center justify-center shadow-xs">
+                    <ClayTarget size={26} />
                   </div>
                   <div>
                     <h4 className="text-xs font-bold text-slate-900">
