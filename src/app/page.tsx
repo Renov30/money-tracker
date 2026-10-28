@@ -23,11 +23,13 @@ import AddTransactionModal from '@/components/AddTransactionModal';
 import AddGoalModal from '@/components/AddGoalModal';
 import ConfirmDialogModal from '@/components/ConfirmDialogModal';
 import ManageCategoriesModal from '@/components/ManageCategoriesModal';
+import TrashView from '@/components/TrashView';
 import ToastNotification, { ToastData, ToastType } from '@/components/ToastNotification';
 
 export default function Home() {
   const [stats, setStats] = useState<UserStats>(INITIAL_USER_STATS);
   const [transactions, setTransactions] = useState<Transaction[]>(INITIAL_TRANSACTIONS);
+  const [trashTransactions, setTrashTransactions] = useState<Transaction[]>([]);
   const [goals, setGoals] = useState<Goal[]>(INITIAL_GOALS);
   const [quests, setQuests] = useState<DailyQuest[]>(INITIAL_QUESTS);
   const [customCategories, setCustomCategories] = useState<CustomCategory[]>([]);
@@ -46,6 +48,7 @@ export default function Home() {
   
   // Custom Confirmation Dialog State (replacing native confirm)
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
+  const [deleteMode, setDeleteMode] = useState<'soft' | 'permanent' | 'empty_trash'>('soft');
   const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false);
 
   // Custom Toast State (replacing native alert)
@@ -55,18 +58,25 @@ export default function Home() {
   useEffect(() => {
     async function loadData() {
       try {
-        const [txRes, goalsRes, statsRes, catRes] = await Promise.all([
+        const [txRes, goalsRes, statsRes, catRes, trashRes] = await Promise.all([
           fetch('/api/transactions'),
           fetch('/api/goals'),
           fetch('/api/stats'),
           fetch('/api/categories'),
+          fetch('/api/transactions?trash=true'),
         ]);
 
         if (txRes.ok) {
           const txData = await txRes.json();
-          if (Array.isArray(txData) && txData.length > 0) {
+          if (Array.isArray(txData)) {
             setTransactions(txData);
             storage.saveTransactions(txData);
+          }
+        }
+        if (trashRes.ok) {
+          const trashData = await trashRes.json();
+          if (Array.isArray(trashData)) {
+            setTrashTransactions(trashData);
           }
         }
         if (goalsRes.ok) {
@@ -94,6 +104,7 @@ export default function Home() {
         console.warn('API fetch fallback to localStorage:', err);
         setStats(storage.getStats());
         setTransactions(storage.getTransactions());
+        setTrashTransactions(storage.getTrashTransactions());
         setGoals(storage.getGoals());
         setCustomCategories(storage.getCategories());
       }
@@ -200,26 +211,96 @@ export default function Home() {
     showToast(`Catatan keuangan tersimpan! +${xpReward} XP diperoleh.`);
   };
 
-  // Prompt Delete Transaction (Custom Confirmation Modal)
+  // Prompt Soft Delete (moves to trash)
   const promptDeleteTransaction = (id: string) => {
     setDeleteTargetId(id);
+    setDeleteMode('soft');
     setIsConfirmDeleteOpen(true);
   };
 
-  // Execute Delete Transaction
-  const handleExecuteDelete = async () => {
-    if (!deleteTargetId) return;
-    const id = deleteTargetId;
-    try {
-      await fetch(`/api/transactions?id=${id}`, { method: 'DELETE' });
-    } catch (e) {
-      console.warn('Delete transaction API failed:', e);
-    }
-    const updated = transactions.filter((tx) => tx.id !== id);
-    setTransactions(updated);
-    storage.saveTransactions(updated);
-    showToast('Catatan berhasil dihapus dari database.', 'delete');
+  // Prompt Permanent Delete (from trash)
+  const promptPermanentDelete = (id: string) => {
+    setDeleteTargetId(id);
+    setDeleteMode('permanent');
+    setIsConfirmDeleteOpen(true);
+  };
+
+  // Prompt Empty Trash
+  const promptEmptyTrash = () => {
     setDeleteTargetId(null);
+    setDeleteMode('empty_trash');
+    setIsConfirmDeleteOpen(true);
+  };
+
+  // Execute Deletes (Soft / Permanent / Empty)
+  const handleExecuteDelete = async () => {
+    if (deleteMode === 'soft' && deleteTargetId) {
+      const id = deleteTargetId;
+      const targetTx = transactions.find((t) => t.id === id);
+      try {
+        await fetch(`/api/transactions?id=${id}`, { method: 'DELETE' });
+      } catch (e) {
+        console.warn('Soft delete transaction API failed:', e);
+      }
+      const updatedActive = transactions.filter((tx) => tx.id !== id);
+      setTransactions(updatedActive);
+      storage.saveTransactions(updatedActive);
+
+      if (targetTx) {
+        const deletedItem: Transaction = {
+          ...targetTx,
+          deletedAt: new Date().toISOString(),
+        };
+        setTrashTransactions((prev) => [deletedItem, ...prev]);
+      }
+      showToast('Catatan dipindahkan ke Tempat Sampah (tersimpan 30 hari).', 'delete');
+    } else if (deleteMode === 'permanent' && deleteTargetId) {
+      const id = deleteTargetId;
+      try {
+        await fetch(`/api/transactions?id=${id}&permanent=true`, { method: 'DELETE' });
+      } catch (e) {
+        console.warn('Permanent delete transaction API failed:', e);
+      }
+      setTrashTransactions((prev) => prev.filter((tx) => tx.id !== id));
+      showToast('Catatan telah dihapus secara permanen.', 'delete');
+    } else if (deleteMode === 'empty_trash') {
+      try {
+        await fetch('/api/transactions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'empty_trash' }),
+        });
+      } catch (e) {
+        console.warn('Empty trash API failed:', e);
+      }
+      setTrashTransactions([]);
+      showToast('Tempat sampah berhasil dikosongkan.', 'delete');
+    }
+
+    setDeleteTargetId(null);
+  };
+
+  // Restore Transaction from Trash
+  const handleRestoreTransaction = async (id: string) => {
+    const targetTx = trashTransactions.find((tx) => tx.id === id);
+    if (!targetTx) return;
+
+    try {
+      await fetch('/api/transactions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'restore', id }),
+      });
+    } catch (e) {
+      console.warn('Restore transaction API failed:', e);
+    }
+
+    setTrashTransactions((prev) => prev.filter((tx) => tx.id !== id));
+    const restoredItem: Transaction = { ...targetTx, deletedAt: null };
+    const updatedActive = [restoredItem, ...transactions];
+    setTransactions(updatedActive);
+    storage.saveTransactions(updatedActive);
+    showToast(`Catatan "${targetTx.title}" berhasil dipulihkan!`, 'success');
   };
 
   // Open Edit Transaction Modal
@@ -479,6 +560,7 @@ export default function Home() {
         level={stats.level}
         userName={stats.name}
         onOpenManageCategories={() => handleOpenManageCategories('expense')}
+        trashCount={trashTransactions.length}
       />
 
       {/* Center & Right Content Shell */}
@@ -620,6 +702,15 @@ export default function Home() {
                 </div>
               )}
 
+              {activeTab === 'trash' && (
+                <TrashView
+                  trashItems={trashTransactions}
+                  onRestore={handleRestoreTransaction}
+                  onPermanentDelete={promptPermanentDelete}
+                  onEmptyTrash={promptEmptyTrash}
+                />
+              )}
+
             </div>
 
             {/* Right Sidebar Rail */}
@@ -672,9 +763,27 @@ export default function Home() {
           setDeleteTargetId(null);
         }}
         onConfirm={handleExecuteDelete}
-        title="Hapus Catatan Keuangan?"
-        message="Catatan keuangan ini akan dihapus secara permanen dari database. Tindakan ini tidak dapat dibatalkan."
-        confirmLabel="Ya, Hapus"
+        title={
+          deleteMode === 'empty_trash'
+            ? 'Kosongkan Tempat Sampah?'
+            : deleteMode === 'permanent'
+            ? 'Hapus Catatan Permanen?'
+            : 'Pindahkan ke Tempat Sampah?'
+        }
+        message={
+          deleteMode === 'empty_trash'
+            ? 'Semua catatan di tempat sampah akan dihapus secara permanen dari database. Tindakan ini tidak dapat dibatalkan.'
+            : deleteMode === 'permanent'
+            ? 'Catatan keuangan ini akan dihapus secara permanen dari database. Tindakan ini tidak dapat dibatalkan.'
+            : 'Catatan keuangan ini akan dipindahkan ke tempat sampah dan disimpan selama 30 hari sebelum terhapus secara otomatis.'
+        }
+        confirmLabel={
+          deleteMode === 'empty_trash'
+            ? 'Ya, Kosongkan'
+            : deleteMode === 'permanent'
+            ? 'Ya, Hapus Permanen'
+            : 'Pindahkan ke Sampah'
+        }
         cancelLabel="Batal"
         type="danger"
       />

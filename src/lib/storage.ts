@@ -148,7 +148,22 @@ export const storage = {
   getTransactions: (): Transaction[] => {
     if (typeof window === 'undefined') return INITIAL_TRANSACTIONS;
     const data = localStorage.getItem(KEYS.TRANSACTIONS);
-    return data ? JSON.parse(data) : INITIAL_TRANSACTIONS;
+    const list: Transaction[] = data ? JSON.parse(data) : INITIAL_TRANSACTIONS;
+    return list.filter((t) => !t.deletedAt);
+  },
+  getTrashTransactions: (): Transaction[] => {
+    if (typeof window === 'undefined') return [];
+    const data = localStorage.getItem(KEYS.TRANSACTIONS);
+    const list: Transaction[] = data ? JSON.parse(data) : INITIAL_TRANSACTIONS;
+    const now = Date.now();
+    const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
+    // Keep only items deleted within last 30 days
+    const validTrash = list.filter((t) => {
+      if (!t.deletedAt) return false;
+      const deletedTime = new Date(t.deletedAt).getTime();
+      return now - deletedTime < thirtyDaysMs;
+    });
+    return validTrash;
   },
   saveTransactions: (txs: Transaction[]) => {
     if (typeof window === 'undefined') return;

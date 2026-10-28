@@ -2,8 +2,16 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { Transaction } from '@/types';
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const isTrash = searchParams.get('trash') === 'true';
+
+    if (isTrash) {
+      const trashItems = await db.getTrashTransactions();
+      return NextResponse.json(trashItems);
+    }
+
     const transactions = await db.getTransactions();
     return NextResponse.json(transactions);
   } catch (error) {
@@ -15,6 +23,23 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
+
+    // 1. Action: Restore from trash
+    if (body.action === 'restore') {
+      if (!body.id) {
+        return NextResponse.json({ error: 'Transaction ID is required' }, { status: 400 });
+      }
+      await db.restoreTransaction(body.id);
+      return NextResponse.json({ success: true, id: body.id, action: 'restore' });
+    }
+
+    // 2. Action: Empty all trash
+    if (body.action === 'empty_trash') {
+      await db.emptyTrash();
+      return NextResponse.json({ success: true, action: 'empty_trash' });
+    }
+
+    // 3. Normal create transaction
     const xpReward = 25;
     const newTx: Transaction = {
       id: `tx-${Date.now()}`,
@@ -49,8 +74,8 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ transaction: saved, stats: updatedStats });
   } catch (error) {
-    console.error('Failed to create transaction:', error);
-    return NextResponse.json({ error: 'Failed to create transaction' }, { status: 500 });
+    console.error('Failed to create/handle transaction:', error);
+    return NextResponse.json({ error: 'Failed to handle transaction' }, { status: 500 });
   }
 }
 
@@ -83,12 +108,19 @@ export async function DELETE(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
+    const isPermanent = searchParams.get('permanent') === 'true';
+
     if (!id) {
       return NextResponse.json({ error: 'Transaction ID is required' }, { status: 400 });
     }
 
-    await db.deleteTransaction(id);
-    return NextResponse.json({ success: true, id });
+    if (isPermanent) {
+      await db.permanentDeleteTransaction(id);
+      return NextResponse.json({ success: true, id, permanent: true });
+    } else {
+      await db.deleteTransaction(id);
+      return NextResponse.json({ success: true, id, permanent: false });
+    }
   } catch (error) {
     console.error('Failed to delete transaction:', error);
     return NextResponse.json({ error: 'Failed to delete transaction' }, { status: 500 });

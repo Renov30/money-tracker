@@ -88,6 +88,21 @@ export async function initDb() {
         );
       `);
 
+      // Soft delete column and index
+      await client.query(`
+        ALTER TABLE transactions 
+        ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP WITH TIME ZONE NULL;
+      `);
+      await client.query(`
+        CREATE INDEX IF NOT EXISTS idx_transactions_deleted_at ON transactions(deleted_at);
+      `);
+
+      // Auto-purge trash items older than 30 days
+      await client.query(`
+        DELETE FROM transactions 
+        WHERE deleted_at IS NOT NULL AND deleted_at < NOW() - INTERVAL '30 days';
+      `);
+
       // Check if stats seeded
       const statsRes = await client.query('SELECT * FROM user_stats WHERE id = $1', ['current_user']);
       if (statsRes.rowCount === 0) {
@@ -143,20 +158,45 @@ export async function initDb() {
 
 // Data access operations
 export const db = {
-  // TRANSACTIONS
+  // TRANSACTIONS (Active Only)
   async getTransactions(): Promise<Transaction[]> {
     await initDb();
     try {
       const res = await pool.query(
-        'SELECT id, title, amount::bigint, type, category, date, xp_earned as "xpEarned" FROM transactions ORDER BY created_at DESC'
+        'SELECT id, title, amount::bigint, type, category, date, xp_earned as "xpEarned", deleted_at as "deletedAt" FROM transactions WHERE deleted_at IS NULL ORDER BY created_at DESC'
       );
       return res.rows.map(r => ({
         ...r,
         amount: Number(r.amount),
         xpEarned: Number(r.xpEarned),
+        deletedAt: r.deletedAt ? new Date(r.deletedAt).toISOString() : null,
       }));
     } catch {
       return INITIAL_TRANSACTIONS;
+    }
+  },
+
+  // TRASH TRANSACTIONS (Soft Deleted, auto purges > 30 days)
+  async getTrashTransactions(): Promise<Transaction[]> {
+    await initDb();
+    try {
+      // 30-day auto retention purge
+      await pool.query(
+        "DELETE FROM transactions WHERE deleted_at IS NOT NULL AND deleted_at < NOW() - INTERVAL '30 days'"
+      );
+
+      const res = await pool.query(
+        'SELECT id, title, amount::bigint, type, category, date, xp_earned as "xpEarned", deleted_at as "deletedAt" FROM transactions WHERE deleted_at IS NOT NULL ORDER BY deleted_at DESC'
+      );
+      return res.rows.map(r => ({
+        ...r,
+        amount: Number(r.amount),
+        xpEarned: Number(r.xpEarned),
+        deletedAt: r.deletedAt ? new Date(r.deletedAt).toISOString() : null,
+      }));
+    } catch (e) {
+      console.error('Error getting trash transactions:', e);
+      return [];
     }
   },
 
@@ -175,10 +215,44 @@ export const db = {
     }
   },
 
+  // Soft delete: sets deleted_at to NOW()
   async deleteTransaction(id: string): Promise<boolean> {
     await initDb();
     try {
+      await pool.query('UPDATE transactions SET deleted_at = CURRENT_TIMESTAMP WHERE id = $1', [id]);
+      return true;
+    } catch {
+      return false;
+    }
+  },
+
+  // Restore transaction from trash
+  async restoreTransaction(id: string): Promise<boolean> {
+    await initDb();
+    try {
+      await pool.query('UPDATE transactions SET deleted_at = NULL WHERE id = $1', [id]);
+      return true;
+    } catch {
+      return false;
+    }
+  },
+
+  // Permanent delete
+  async permanentDeleteTransaction(id: string): Promise<boolean> {
+    await initDb();
+    try {
       await pool.query('DELETE FROM transactions WHERE id = $1', [id]);
+      return true;
+    } catch {
+      return false;
+    }
+  },
+
+  // Empty trash
+  async emptyTrash(): Promise<boolean> {
+    await initDb();
+    try {
+      await pool.query('DELETE FROM transactions WHERE deleted_at IS NOT NULL');
       return true;
     } catch {
       return false;

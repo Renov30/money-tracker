@@ -12,6 +12,7 @@ import {
   IoSettingsOutline,
   IoPersonCircle,
   IoPricetagsOutline,
+  IoTrashBinOutline,
 } from 'react-icons/io5';
 
 interface SidebarProps {
@@ -20,6 +21,7 @@ interface SidebarProps {
   level: number;
   userName: string;
   onOpenManageCategories?: () => void;
+  trashCount?: number;
 }
 
 export default function LingoraSidebar({
@@ -28,6 +30,7 @@ export default function LingoraSidebar({
   level,
   userName,
   onOpenManageCategories,
+  trashCount = 0,
 }: SidebarProps) {
   const navItems = [
     { id: 'home', label: 'Home', icon: <IoHome className="text-lg" /> },
@@ -40,6 +43,12 @@ export default function LingoraSidebar({
       label: 'Kelola Kategori',
       icon: <IoPricetagsOutline className="text-lg text-amber-700" />,
       onClick: onOpenManageCategories,
+    },
+    {
+      id: 'trash',
+      label: 'Tempat Sampah',
+      icon: <IoTrashBinOutline className="text-lg text-rose-500" />,
+      badge: trashCount > 0 ? trashCount : null,
     },
   ];
 
@@ -75,14 +84,21 @@ export default function LingoraSidebar({
                     setActiveTab(item.id);
                   }
                 }}
-                className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-bold transition cursor-pointer ${
+                className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition cursor-pointer ${
                   isActive
                     ? 'bg-amber-50 text-amber-900 shadow-xs border border-amber-200/60'
                     : 'text-slate-600 hover:text-slate-900 hover:bg-amber-50/40'
                 }`}
               >
-                <span className="shrink-0">{item.icon}</span>
-                <span>{item.label}</span>
+                <div className="flex items-center gap-3">
+                  <span className="shrink-0">{item.icon}</span>
+                  <span>{item.label}</span>
+                </div>
+                {item.badge !== null && item.badge !== undefined && (
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-500 text-white shadow-xs">
+                    {item.badge}
+                  </span>
+                )}
               </button>
             );
           })}

@@ -31,6 +31,7 @@ export interface Transaction {
   category: Category;
   date: string;
   xpEarned: number;
+  deletedAt?: string | null;
 }
 
 export interface Goal {
