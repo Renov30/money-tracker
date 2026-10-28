@@ -1,97 +1,234 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Transaction, TransactionType } from '@/types';
+import { Transaction, TransactionType, Category } from '@/types';
 import { formatRupiah } from '@/lib/storage';
-import { ClayCoin } from './Clay3DIcons';
+import { ClayCoin, ClayTrash, ClayEdit } from './Clay3DIcons';
 
 interface TransactionsSectionProps {
   transactions: Transaction[];
   onDelete: (id: string) => void;
+  onEdit?: (transaction: Transaction) => void;
   onOpenAddModal: (defaultType?: TransactionType) => void;
   searchQuery: string;
   forcedType?: TransactionType | 'all';
 }
 
+const CATEGORIES_BY_TYPE: Record<TransactionType, Category[]> = {
+  expense: [
+    'Makanan & Minuman',
+    'Transportasi',
+    'Belanja',
+    'Tagihan & Utilitas',
+    'Hiburan',
+    'Lainnya',
+  ],
+  income: [
+    'Gaji & Usaha',
+    'Lainnya',
+  ],
+};
+
 export default function TransactionsSection({
   transactions,
   onDelete,
+  onEdit,
   onOpenAddModal,
   searchQuery,
   forcedType = 'all',
 }: TransactionsSectionProps) {
   const [filterType, setFilterType] = useState<TransactionType | 'all'>(forcedType);
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [dateFilterPreset, setDateFilterPreset] = useState<'all' | 'today' | '7days' | 'month' | 'custom'>('all');
+  const [customDate, setCustomDate] = useState<string>('');
 
   const activeFilter = forcedType !== 'all' ? forcedType : filterType;
 
+  // Filter Categories available based on active type
+  const availableCategories: Category[] =
+    activeFilter === 'income'
+      ? CATEGORIES_BY_TYPE.income
+      : activeFilter === 'expense'
+      ? CATEGORIES_BY_TYPE.expense
+      : Array.from(new Set([...CATEGORIES_BY_TYPE.income, ...CATEGORIES_BY_TYPE.expense]));
+
+  // Filtering transactions
   const filtered = transactions.filter((tx) => {
-    const matchesFilter =
-      activeFilter === 'all' ? true : tx.type === activeFilter;
-    const matchesSearch =
-      tx.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      tx.category.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesFilter && matchesSearch;
+    // 1. Type Filter
+    const matchesFilter = activeFilter === 'all' ? true : tx.type === activeFilter;
+    if (!matchesFilter) return false;
+
+    // 2. Category Filter
+    if (selectedCategory !== 'all' && tx.category !== selectedCategory) {
+      return false;
+    }
+
+    // 3. Search Query Filter
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      const matchesSearch =
+        tx.title.toLowerCase().includes(q) ||
+        tx.category.toLowerCase().includes(q);
+      if (!matchesSearch) return false;
+    }
+
+    // 4. Date Filter
+    if (dateFilterPreset !== 'all') {
+      const today = new Date();
+      const todayStr = today.toISOString().split('T')[0];
+
+      if (dateFilterPreset === 'today') {
+        if (tx.date !== todayStr) return false;
+      } else if (dateFilterPreset === '7days') {
+        const txTime = new Date(tx.date).getTime();
+        const nowTime = today.getTime();
+        const diffDays = (nowTime - txTime) / (1000 * 60 * 60 * 24);
+        if (diffDays > 7 || diffDays < 0) return false;
+      } else if (dateFilterPreset === 'month') {
+        const txMonth = tx.date.slice(0, 7);
+        const curMonth = todayStr.slice(0, 7);
+        if (txMonth !== curMonth) return false;
+      } else if (dateFilterPreset === 'custom' && customDate) {
+        if (tx.date !== customDate) return false;
+      }
+    }
+
+    return true;
   });
+
+  const isFiltered = selectedCategory !== 'all' || dateFilterPreset !== 'all';
+
+  const resetFilters = () => {
+    setSelectedCategory('all');
+    setDateFilterPreset('all');
+    setCustomDate('');
+  };
 
   return (
     <div className="bg-white rounded-3xl p-5 border border-amber-100/70 shadow-xs space-y-4">
-      {/* Header and Filter Tabs */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-amber-50">
-        <div>
-          <h3 className="text-sm font-black text-slate-900 tracking-tight">
-            {activeFilter === 'income'
-              ? 'Riwayat Pemasukan (Income)'
-              : activeFilter === 'expense'
-              ? 'Riwayat Pengeluaran (Expense)'
-              : 'Daftar Transaksi Terkini'}
-          </h3>
-          <p className="text-[11px] text-slate-400 font-medium">
-            Total {filtered.length} catatan keuangan
-          </p>
-        </div>
+      
+      {/* Header and Filter Controls */}
+      <div className="flex flex-col gap-3 pb-3 border-b border-amber-50">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h3 className="text-sm font-black text-slate-900 tracking-tight">
+              {activeFilter === 'income'
+                ? 'Riwayat Pemasukan (Income)'
+                : activeFilter === 'expense'
+                ? 'Riwayat Pengeluaran (Expense)'
+                : 'Daftar Transaksi Terkini'}
+            </h3>
+            <p className="text-[11px] text-slate-400 font-medium">
+              Menampilkan {filtered.length} dari total {transactions.length} catatan
+            </p>
+          </div>
 
-        <div className="flex items-center gap-2">
+          {/* Type Toggle only on Home Tab */}
           {forcedType === 'all' && (
-            <div className="flex items-center gap-1 p-1 bg-amber-50/80 rounded-full text-xs font-semibold">
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1 p-1 bg-amber-50/80 rounded-full text-xs font-semibold">
+                <button
+                  onClick={() => setFilterType('all')}
+                  className={`px-3 py-1 rounded-full transition cursor-pointer ${
+                    filterType === 'all'
+                      ? 'bg-white text-slate-900 shadow-xs'
+                      : 'text-amber-800 hover:text-slate-900'
+                  }`}
+                >
+                  Semua
+                </button>
+                <button
+                  onClick={() => setFilterType('income')}
+                  className={`px-3 py-1 rounded-full transition cursor-pointer ${
+                    filterType === 'income'
+                      ? 'bg-emerald-600 text-white shadow-xs'
+                      : 'text-emerald-700 hover:text-emerald-900'
+                  }`}
+                >
+                  Pemasukan
+                </button>
+                <button
+                  onClick={() => setFilterType('expense')}
+                  className={`px-3 py-1 rounded-full transition cursor-pointer ${
+                    filterType === 'expense'
+                      ? 'bg-rose-600 text-white shadow-xs'
+                      : 'text-rose-700 hover:text-rose-900'
+                  }`}
+                >
+                  Pengeluaran
+                </button>
+              </div>
+
+              {/* + Catat button only shown on Home tab */}
               <button
-                onClick={() => setFilterType('all')}
-                className={`px-3 py-1 rounded-full transition cursor-pointer ${
-                  filterType === 'all'
-                    ? 'bg-white text-slate-900 shadow-xs'
-                    : 'text-amber-800 hover:text-slate-900'
-                }`}
+                onClick={() => onOpenAddModal(filterType === 'all' ? 'expense' : filterType)}
+                className="px-4 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-full shadow-xs transition active:scale-95 cursor-pointer shrink-0"
               >
-                Semua
-              </button>
-              <button
-                onClick={() => setFilterType('income')}
-                className={`px-3 py-1 rounded-full transition cursor-pointer ${
-                  filterType === 'income'
-                    ? 'bg-emerald-600 text-white shadow-xs'
-                    : 'text-emerald-700 hover:text-emerald-900'
-                }`}
-              >
-                Pemasukan
-              </button>
-              <button
-                onClick={() => setFilterType('expense')}
-                className={`px-3 py-1 rounded-full transition cursor-pointer ${
-                  filterType === 'expense'
-                    ? 'bg-rose-600 text-white shadow-xs'
-                    : 'text-rose-700 hover:text-rose-900'
-                }`}
-              >
-                Pengeluaran
+                + Catat Baru
               </button>
             </div>
           )}
+        </div>
 
-          <button
-            onClick={() => onOpenAddModal(activeFilter === 'all' ? 'expense' : activeFilter)}
-            className="px-4 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-full shadow-xs transition active:scale-95 cursor-pointer shrink-0"
-          >
-            + Catat {activeFilter === 'income' ? 'Pemasukan' : activeFilter === 'expense' ? 'Pengeluaran' : 'Baru'}
-          </button>
+        {/* Filter Tanggal & Filter Kategori Bar (Replacing duplicate button) */}
+        <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-amber-50/60">
+          
+          {/* 1. Filter Kategori */}
+          <div className="flex items-center gap-1.5">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+              Kategori:
+            </span>
+            <select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="bg-amber-50/70 hover:bg-amber-50 border border-amber-200/80 text-slate-800 text-xs font-bold rounded-full px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-amber-500/20 cursor-pointer transition"
+            >
+              <option value="all">Semua Kategori</option>
+              {availableCategories.map((cat) => (
+                <option key={cat} value={cat}>
+                  {cat}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* 2. Filter Tanggal */}
+          <div className="flex items-center gap-1.5">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+              Waktu:
+            </span>
+            <select
+              value={dateFilterPreset}
+              onChange={(e) => setDateFilterPreset(e.target.value as any)}
+              className="bg-amber-50/70 hover:bg-amber-50 border border-amber-200/80 text-slate-800 text-xs font-bold rounded-full px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-amber-500/20 cursor-pointer transition"
+            >
+              <option value="all">Semua Tanggal</option>
+              <option value="today">Hari Ini</option>
+              <option value="7days">7 Hari Terakhir</option>
+              <option value="month">Bulan Ini</option>
+              <option value="custom">Pilih Tanggal...</option>
+            </select>
+
+            {dateFilterPreset === 'custom' && (
+              <input
+                type="date"
+                value={customDate}
+                onChange={(e) => setCustomDate(e.target.value)}
+                className="bg-amber-50/70 border border-amber-200/80 text-slate-800 text-xs font-bold rounded-full px-3 py-1 focus:outline-none focus:ring-2 focus:ring-amber-500/20 transition cursor-pointer"
+              />
+            )}
+          </div>
+
+          {/* Reset Filters button if any active */}
+          {isFiltered && (
+            <button
+              onClick={resetFilters}
+              className="text-[10px] font-bold text-rose-600 hover:text-rose-700 bg-rose-50 border border-rose-200/60 px-2.5 py-1 rounded-full transition cursor-pointer active:scale-95"
+            >
+              ✕ Reset Filter
+            </button>
+          )}
+
         </div>
       </div>
 
@@ -102,11 +239,23 @@ export default function TransactionsSection({
             <ClayCoin size={48} />
           </div>
           <div className="text-xs font-bold text-slate-600">
-            Belum ada transaksi ditemukan.
+            {isFiltered
+              ? 'Tidak ada transaksi dengan filter yang dipilih.'
+              : 'Belum ada transaksi ditemukan.'}
           </div>
           <p className="text-[11px] text-slate-400">
-            Klik tombol &quot;+ Catat Baru&quot; untuk menambahkan catatan keuangan pertamamu!
+            {isFiltered
+              ? 'Coba ganti kategori atau rentang tanggal filter di atas.'
+              : 'Gunakan tombol catat di atas untuk menambahkan transaksi pertamamu!'}
           </p>
+          {isFiltered && (
+            <button
+              onClick={resetFilters}
+              className="mt-2 text-xs font-bold text-amber-700 underline cursor-pointer"
+            >
+              Reset semua filter
+            </button>
+          )}
         </div>
       ) : (
         <div className="space-y-2.5">
@@ -147,14 +296,26 @@ export default function TransactionsSection({
                     </div>
                   </div>
 
-                  {/* Clean delete button */}
-                  <button
-                    onClick={() => onDelete(tx.id)}
-                    className="w-7 h-7 rounded-xl bg-slate-100 hover:bg-rose-50 hover:text-rose-600 text-slate-400 flex items-center justify-center text-xs transition cursor-pointer"
-                    title="Hapus transaksi"
-                  >
-                    ✕
-                  </button>
+                  {/* Action buttons: Edit and Trash */}
+                  <div className="flex items-center gap-1.5">
+                    {onEdit && (
+                      <button
+                        onClick={() => onEdit(tx)}
+                        className="w-8 h-8 rounded-xl bg-amber-50 hover:bg-amber-100/90 text-amber-700 flex items-center justify-center transition active:scale-90 cursor-pointer shadow-xs border border-amber-200/60"
+                        title="Edit transaksi"
+                      >
+                        <ClayEdit size={16} />
+                      </button>
+                    )}
+
+                    <button
+                      onClick={() => onDelete(tx.id)}
+                      className="w-8 h-8 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 flex items-center justify-center transition active:scale-90 cursor-pointer shadow-xs border border-rose-200/60"
+                      title="Hapus transaksi"
+                    >
+                      <ClayTrash size={16} />
+                    </button>
+                  </div>
                 </div>
               </div>
             );
@@ -164,3 +325,4 @@ export default function TransactionsSection({
     </div>
   );
 }
+

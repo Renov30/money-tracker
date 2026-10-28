@@ -541,3 +541,99 @@ export function ClayWallet({ size = 24, className = '' }: IconProps) {
     </svg>
   );
 }
+
+// 18. 3D Clay Trash (Tempat Sampah)
+export function ClayTrash({ size = 24, className = '' }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 64 64" fill="none" className={`inline-block select-none ${className}`}>
+      <defs>
+        <radialGradient id="trashBody" cx="35%" cy="30%" r="70%">
+          <stop offset="0%" stopColor="#fb7185" />
+          <stop offset="65%" stopColor="#e11d48" />
+          <stop offset="100%" stopColor="#9f1239" />
+        </radialGradient>
+        <radialGradient id="trashLid" cx="35%" cy="30%" r="70%">
+          <stop offset="0%" stopColor="#fda4af" />
+          <stop offset="65%" stopColor="#f43f5e" />
+          <stop offset="100%" stopColor="#be123c" />
+        </radialGradient>
+      </defs>
+      {/* Lid Handle */}
+      <path d="M26 14 C26 10, 38 10, 38 14" stroke="#e11d48" strokeWidth="4" strokeLinecap="round" fill="none" />
+      {/* Lid Rim */}
+      <rect x="12" y="14" width="40" height="8" rx="4" fill="url(#trashLid)" />
+      {/* Lid Highlight */}
+      <ellipse cx="28" cy="16" rx="12" ry="2" fill="#ffffff" fillOpacity="0.4" />
+      {/* Can Body */}
+      <path d="M16 22 L20 54 C20.5 58, 23 60, 27 60 H37 C41 60, 43.5 58, 44 54 L48 22 Z" fill="url(#trashBody)" />
+      {/* Body Highlight */}
+      <ellipse cx="24" cy="36" rx="3" ry="12" fill="#ffffff" fillOpacity="0.25" transform="rotate(-5 24 36)" />
+      {/* Vertical Ribs */}
+      <path d="M26 28 L28 52" stroke="#881337" strokeWidth="2.5" strokeLinecap="round" strokeOpacity="0.4" />
+      <path d="M32 28 L32 52" stroke="#881337" strokeWidth="2.5" strokeLinecap="round" strokeOpacity="0.4" />
+      <path d="M38 28 L36 52" stroke="#881337" strokeWidth="2.5" strokeLinecap="round" strokeOpacity="0.4" />
+    </svg>
+  );
+}
+
+// 19. 3D Clay Edit (Pencil / Ubah)
+export function ClayEdit({ size = 24, className = '' }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 64 64" fill="none" className={`inline-block select-none ${className}`}>
+      <defs>
+        <radialGradient id="pencilWood" cx="35%" cy="30%" r="70%">
+          <stop offset="0%" stopColor="#fef08a" />
+          <stop offset="60%" stopColor="#f59e0b" />
+          <stop offset="100%" stopColor="#b45309" />
+        </radialGradient>
+        <radialGradient id="pencilEraser" cx="35%" cy="30%" r="70%">
+          <stop offset="0%" stopColor="#fca5a5" />
+          <stop offset="100%" stopColor="#ef4444" />
+        </radialGradient>
+        <radialGradient id="pencilMetal" cx="35%" cy="30%" r="70%">
+          <stop offset="0%" stopColor="#f1f5f9" />
+          <stop offset="100%" stopColor="#94a3b8" />
+        </radialGradient>
+      </defs>
+      <g transform="rotate(45 32 32)">
+        {/* Eraser */}
+        <rect x="26" y="8" width="12" height="10" rx="4" fill="url(#pencilEraser)" />
+        {/* Metal Ferrule */}
+        <rect x="25" y="16" width="14" height="6" rx="2" fill="url(#pencilMetal)" />
+        {/* Pencil Shaft */}
+        <rect x="26" y="21" width="12" height="26" rx="3" fill="url(#pencilWood)" />
+        {/* Specular Highlight */}
+        <ellipse cx="29" cy="32" rx="1.5" ry="10" fill="#ffffff" fillOpacity="0.4" />
+        {/* Sharpened Tip */}
+        <path d="M26 47 L32 58 L38 47 Z" fill="#fed7aa" />
+        {/* Graphite Point */}
+        <path d="M30 54 L32 58 L34 54 Z" fill="#1e293b" />
+      </g>
+    </svg>
+  );
+}
+
+// 20. 3D Clay Alert / Warning
+export function ClayAlert({ size = 24, className = '' }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 64 64" fill="none" className={`inline-block select-none ${className}`}>
+      <defs>
+        <radialGradient id="alertYellow" cx="35%" cy="30%" r="70%">
+          <stop offset="0%" stopColor="#fef08a" />
+          <stop offset="60%" stopColor="#f59e0b" />
+          <stop offset="100%" stopColor="#d97706" />
+        </radialGradient>
+      </defs>
+      {/* Rounded Triangle Base */}
+      <path
+        d="M32 8 C34 4, 38 4, 40 8 L59 46 C61 50, 59 56, 54 56 H10 C5 56, 3 50, 5 46 L24 8 Z"
+        fill="url(#alertYellow)"
+      />
+      {/* Highlight */}
+      <ellipse cx="28" cy="20" rx="8" ry="3" fill="#ffffff" fillOpacity="0.4" transform="rotate(-30 28 20)" />
+      {/* Exclamation Mark */}
+      <rect x="30" y="22" width="4" height="15" rx="2" fill="#78350f" />
+      <circle cx="32" cy="44" r="2.8" fill="#78350f" />
+    </svg>
+  );
+}

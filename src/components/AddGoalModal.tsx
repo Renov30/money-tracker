@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import WallabyMascot from './WallabyMascot';
+import { ClayAlert } from './Clay3DIcons';
 
 interface AddGoalModalProps {
   isOpen: boolean;
@@ -16,17 +17,23 @@ export default function AddGoalModal({
 }: AddGoalModalProps) {
   const [title, setTitle] = useState('');
   const [targetAmount, setTargetAmount] = useState('');
+  const [error, setError] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const amount = parseInt(targetAmount, 10);
-    if (!title.trim() || !amount || amount <= 0) {
-      alert('Mohon isi judul dan target nominal yang valid!');
+    if (!title.trim()) {
+      setError('Mohon isi nama target impian.');
+      return;
+    }
+    if (!amount || amount <= 0) {
+      setError('Mohon isi target nominal yang lebih dari 0.');
       return;
     }
 
+    setError(null);
     onAddGoal(title.trim(), amount);
     setTitle('');
     setTargetAmount('');
@@ -52,6 +59,13 @@ export default function AddGoalModal({
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {error && (
+            <div className="flex items-center gap-2 p-2.5 bg-rose-50 border border-rose-200 rounded-2xl text-xs text-rose-700 font-semibold">
+              <ClayAlert size={18} />
+              <span>{error}</span>
+            </div>
+          )}
+
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1">
               Nama Target Impian

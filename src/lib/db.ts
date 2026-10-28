@@ -162,6 +162,22 @@ export const db = {
     }
   },
 
+  async updateTransaction(tx: Transaction): Promise<Transaction> {
+    await initDb();
+    try {
+      await pool.query(
+        `UPDATE transactions 
+         SET title = $1, amount = $2, type = $3, category = $4, date = $5
+         WHERE id = $6`,
+        [tx.title, tx.amount, tx.type, tx.category, tx.date, tx.id]
+      );
+      return tx;
+    } catch (e) {
+      console.error('Error updating transaction in DB:', e);
+      return tx;
+    }
+  },
+
   // GOALS
   async getGoals(): Promise<Goal[]> {
     await initDb();

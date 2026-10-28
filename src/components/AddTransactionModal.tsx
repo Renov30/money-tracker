@@ -3,12 +3,14 @@
 import React, { useState, useEffect } from 'react';
 import { Category, Transaction, TransactionType } from '@/types';
 import WallabyMascot from './WallabyMascot';
-import { ClayExpense, ClayIncome } from './Clay3DIcons';
+import { ClayExpense, ClayIncome, ClayEdit, ClayAlert } from './Clay3DIcons';
 
 interface AddTransactionModalProps {
   isOpen: boolean;
   onClose: () => void;
   onAddTransaction: (tx: Omit<Transaction, 'id' | 'xpEarned'>) => void;
+  onUpdateTransaction?: (tx: Transaction) => void;
+  editingTransaction?: Transaction | null;
   initialType?: TransactionType;
 }
 
@@ -31,19 +33,32 @@ export default function AddTransactionModal({
   isOpen,
   onClose,
   onAddTransaction,
+  onUpdateTransaction,
+  editingTransaction = null,
   initialType = 'expense',
 }: AddTransactionModalProps) {
   const [type, setType] = useState<TransactionType>(initialType);
   const [amount, setAmount] = useState<string>('');
   const [title, setTitle] = useState<string>('');
   const [category, setCategory] = useState<Category>('Makanan & Minuman');
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (isOpen) {
-      setType(initialType);
-      setCategory(initialType === 'income' ? 'Gaji & Usaha' : 'Makanan & Minuman');
+      setError(null);
+      if (editingTransaction) {
+        setType(editingTransaction.type);
+        setAmount(editingTransaction.amount.toString());
+        setTitle(editingTransaction.title);
+        setCategory(editingTransaction.category);
+      } else {
+        setType(initialType);
+        setAmount('');
+        setTitle('');
+        setCategory(initialType === 'income' ? 'Gaji & Usaha' : 'Makanan & Minuman');
+      }
     }
-  }, [isOpen, initialType]);
+  }, [isOpen, initialType, editingTransaction]);
 
   if (!isOpen) return null;
 
@@ -51,17 +66,29 @@ export default function AddTransactionModal({
     e.preventDefault();
     const numAmount = parseInt(amount, 10);
     if (!numAmount || numAmount <= 0) {
-      alert('Masukkan nominal yang valid!');
+      setError('Nominal harus lebih besar dari 0.');
       return;
     }
 
-    onAddTransaction({
-      title: title.trim() || (type === 'expense' ? 'Pengeluaran' : 'Pemasukan'),
-      amount: numAmount,
-      type,
-      category,
-      date: new Date().toISOString().split('T')[0],
-    });
+    setError(null);
+
+    if (editingTransaction && onUpdateTransaction) {
+      onUpdateTransaction({
+        ...editingTransaction,
+        title: title.trim() || (type === 'expense' ? 'Pengeluaran' : 'Pemasukan'),
+        amount: numAmount,
+        type,
+        category,
+      });
+    } else {
+      onAddTransaction({
+        title: title.trim() || (type === 'expense' ? 'Pengeluaran' : 'Pemasukan'),
+        amount: numAmount,
+        type,
+        category,
+        date: new Date().toISOString().split('T')[0],
+      });
+    }
 
     setAmount('');
     setTitle('');
@@ -72,17 +99,30 @@ export default function AddTransactionModal({
     setAmount(val.toString());
   };
 
+  const isEditing = Boolean(editingTransaction);
+
   return (
     <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
       <div className="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl border border-slate-100 relative">
         
-        {/* Header with mini mascot */}
+        {/* Header with mini mascot or edit icon */}
         <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
           <div className="flex items-center gap-2.5">
-            <WallabyMascot size={34} mood="happy" />
-            <h3 className="text-sm font-black text-slate-900">
-              Catat {type === 'income' ? 'Pemasukan' : 'Pengeluaran'} (+25 XP)
-            </h3>
+            {isEditing ? (
+              <div className="w-9 h-9 rounded-2xl bg-amber-50 border border-amber-200/80 flex items-center justify-center shadow-xs">
+                <ClayEdit size={20} />
+              </div>
+            ) : (
+              <WallabyMascot size={34} mood="happy" />
+            )}
+            <div>
+              <h3 className="text-sm font-black text-slate-900">
+                {isEditing ? 'Ubah Catatan Keuangan' : `Catat ${type === 'income' ? 'Pemasukan' : 'Pengeluaran'} (+25 XP)`}
+              </h3>
+              {isEditing && (
+                <p className="text-[10px] text-amber-700 font-medium">Perbarui rincian transaksi</p>
+              )}
+            </div>
           </div>
           <button
             onClick={onClose}
@@ -91,6 +131,14 @@ export default function AddTransactionModal({
             ✕
           </button>
         </div>
+
+        {/* In-Form Error Alert (Custom, No Browser alert) */}
+        {error && (
+          <div className="mb-4 flex items-center gap-2 p-3 bg-rose-50 border border-rose-200 rounded-2xl text-xs text-rose-700 font-semibold animate-pulse">
+            <ClayAlert size={18} />
+            <span>{error}</span>
+          </div>
+        )}
 
         {/* Type Toggle Pills */}
         <div className="grid grid-cols-2 gap-2 mb-4 p-1 bg-slate-100 rounded-full">
@@ -198,7 +246,7 @@ export default function AddTransactionModal({
             type="submit"
             className="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 rounded-full text-xs shadow-sm shadow-amber-600/25 transition active:scale-95 cursor-pointer mt-2"
           >
-            Simpan Catatan (+25 XP)
+            {isEditing ? 'Simpan Perubahan' : 'Simpan Catatan (+25 XP)'}
           </button>
         </form>
       </div>

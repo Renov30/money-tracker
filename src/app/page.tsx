@@ -21,6 +21,8 @@ import GoalsManagerView from '@/components/GoalsManagerView';
 import LingoraRightRail from '@/components/LingoraRightRail';
 import AddTransactionModal from '@/components/AddTransactionModal';
 import AddGoalModal from '@/components/AddGoalModal';
+import ConfirmDialogModal from '@/components/ConfirmDialogModal';
+import ToastNotification, { ToastData, ToastType } from '@/components/ToastNotification';
 
 export default function Home() {
   const [stats, setStats] = useState<UserStats>(INITIAL_USER_STATS);
@@ -32,9 +34,16 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState<string>('');
 
   const [isAddTxOpen, setIsAddTxOpen] = useState(false);
+  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [addTxType, setAddTxType] = useState<TransactionType>('expense');
   const [isAddGoalOpen, setIsAddGoalOpen] = useState(false);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  
+  // Custom Confirmation Dialog State (replacing native confirm)
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
+  const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false);
+
+  // Custom Toast State (replacing native alert)
+  const [toast, setToast] = useState<ToastData | null>(null);
 
   // Load from Backend Database via API (with localStorage fallback)
   useEffect(() => {
@@ -78,11 +87,11 @@ export default function Home() {
     loadData();
   }, []);
 
-  const showToast = (msg: string) => {
-    setToastMessage(msg);
+  const showToast = (message: string, type: ToastType = 'success') => {
+    setToast({ message, type });
     setTimeout(() => {
-      setToastMessage(null);
-    }, 3500);
+      setToast(null);
+    }, 3800);
   };
 
   // Add XP & check Level Up
@@ -96,7 +105,7 @@ export default function Home() {
         newLevel += 1;
         newXp = newXp - prev.xpToNextLevel;
         newTitle = `Pengatur Bijak (Level ${newLevel})`;
-        showToast(`🎉 LEVEL UP! Selamat, kamu naik ke Level ${newLevel}!`);
+        showToast(`LEVEL UP! Selamat, kamu naik ke Level ${newLevel}!`, 'level-up');
 
         if (typeof window !== 'undefined') {
           confetti({
@@ -176,9 +185,16 @@ export default function Home() {
     showToast(`Catatan keuangan tersimpan! +${xpReward} XP diperoleh.`);
   };
 
-  // Delete Transaction from Database
-  const handleDeleteTransaction = async (id: string) => {
-    if (!confirm('Apakah kamu yakin ingin menghapus catatan ini?')) return;
+  // Prompt Delete Transaction (Custom Confirmation Modal)
+  const promptDeleteTransaction = (id: string) => {
+    setDeleteTargetId(id);
+    setIsConfirmDeleteOpen(true);
+  };
+
+  // Execute Delete Transaction
+  const handleExecuteDelete = async () => {
+    if (!deleteTargetId) return;
+    const id = deleteTargetId;
     try {
       await fetch(`/api/transactions?id=${id}`, { method: 'DELETE' });
     } catch (e) {
@@ -187,7 +203,45 @@ export default function Home() {
     const updated = transactions.filter((tx) => tx.id !== id);
     setTransactions(updated);
     storage.saveTransactions(updated);
-    showToast('Catatan telah dihapus dari database.');
+    showToast('Catatan berhasil dihapus dari database.', 'delete');
+    setDeleteTargetId(null);
+  };
+
+  // Open Edit Transaction Modal
+  const handleOpenEditModal = (tx: Transaction) => {
+    setEditingTransaction(tx);
+    setAddTxType(tx.type);
+    setIsAddTxOpen(true);
+  };
+
+  // Update Transaction in Database
+  const handleUpdateTransaction = async (tx: Transaction) => {
+    try {
+      const res = await fetch('/api/transactions', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(tx),
+      });
+
+      if (res.ok) {
+        const json = await res.json();
+        const updated = transactions.map((t) => (t.id === tx.id ? json.transaction : t));
+        setTransactions(updated);
+        storage.saveTransactions(updated);
+        showToast(`Catatan "${tx.title}" berhasil diperbarui!`, 'edit');
+        setEditingTransaction(null);
+        return;
+      }
+    } catch (e) {
+      console.warn('Update transaction API error:', e);
+    }
+
+    // Local fallback
+    const updated = transactions.map((t) => (t.id === tx.id ? tx : t));
+    setTransactions(updated);
+    storage.saveTransactions(updated);
+    showToast(`Catatan "${tx.title}" berhasil diperbarui!`, 'edit');
+    setEditingTransaction(null);
   };
 
   // Add Goal to Database
@@ -273,6 +327,7 @@ export default function Home() {
   };
 
   const openAddModalWithType = (type: TransactionType = 'expense') => {
+    setEditingTransaction(null);
     setAddTxType(type);
     setIsAddTxOpen(true);
   };
@@ -288,12 +343,8 @@ export default function Home() {
   return (
     <div className="bg-[#faf7f2] min-h-screen w-full flex flex-col md:flex-row font-sans antialiased text-slate-800">
       
-      {/* Toast Notification */}
-      {toastMessage && (
-        <div className="fixed top-6 right-6 z-50 bg-slate-900/95 backdrop-blur-xs text-white text-xs font-bold px-4 py-3 rounded-2xl shadow-xl border border-slate-700 animate-bounce">
-          {toastMessage}
-        </div>
-      )}
+      {/* Custom Toast Notification */}
+      <ToastNotification toast={toast} onClose={() => setToast(null)} />
 
       {/* Left Sidebar */}
       <LingoraSidebar
@@ -349,7 +400,8 @@ export default function Home() {
                   {/* Recent Transactions List */}
                   <TransactionsSection
                     transactions={transactions}
-                    onDelete={handleDeleteTransaction}
+                    onDelete={promptDeleteTransaction}
+                    onEdit={handleOpenEditModal}
                     onOpenAddModal={openAddModalWithType}
                     searchQuery={searchQuery}
                     forcedType="all"
@@ -370,7 +422,7 @@ export default function Home() {
                     </div>
                     <button
                       onClick={() => openAddModalWithType('income')}
-                      className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-full shadow-xs transition"
+                      className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-full shadow-xs transition cursor-pointer"
                     >
                       + Tambah Pemasukan
                     </button>
@@ -378,7 +430,8 @@ export default function Home() {
 
                   <TransactionsSection
                     transactions={transactions}
-                    onDelete={handleDeleteTransaction}
+                    onDelete={promptDeleteTransaction}
+                    onEdit={handleOpenEditModal}
                     onOpenAddModal={openAddModalWithType}
                     searchQuery={searchQuery}
                     forcedType="income"
@@ -399,7 +452,7 @@ export default function Home() {
                     </div>
                     <button
                       onClick={() => openAddModalWithType('expense')}
-                      className="px-5 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-full shadow-xs transition"
+                      className="px-5 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-full shadow-xs transition cursor-pointer"
                     >
                       - Catat Pengeluaran
                     </button>
@@ -407,7 +460,8 @@ export default function Home() {
 
                   <TransactionsSection
                     transactions={transactions}
-                    onDelete={handleDeleteTransaction}
+                    onDelete={promptDeleteTransaction}
+                    onEdit={handleOpenEditModal}
                     onOpenAddModal={openAddModalWithType}
                     searchQuery={searchQuery}
                     forcedType="expense"
@@ -449,8 +503,13 @@ export default function Home() {
       {/* Modals */}
       <AddTransactionModal
         isOpen={isAddTxOpen}
-        onClose={() => setIsAddTxOpen(false)}
+        onClose={() => {
+          setIsAddTxOpen(false);
+          setEditingTransaction(null);
+        }}
         onAddTransaction={handleAddTransaction}
+        onUpdateTransaction={handleUpdateTransaction}
+        editingTransaction={editingTransaction}
         initialType={addTxType}
       />
 
@@ -458,6 +517,21 @@ export default function Home() {
         isOpen={isAddGoalOpen}
         onClose={() => setIsAddGoalOpen(false)}
         onAddGoal={handleAddGoal}
+      />
+
+      {/* Custom Confirmation Modal (No Browser Confirm) */}
+      <ConfirmDialogModal
+        isOpen={isConfirmDeleteOpen}
+        onClose={() => {
+          setIsConfirmDeleteOpen(false);
+          setDeleteTargetId(null);
+        }}
+        onConfirm={handleExecuteDelete}
+        title="Hapus Catatan Keuangan?"
+        message="Catatan keuangan ini akan dihapus secara permanen dari database. Tindakan ini tidak dapat dibatalkan."
+        confirmLabel="Ya, Hapus"
+        cancelLabel="Batal"
+        type="danger"
       />
 
     </div>

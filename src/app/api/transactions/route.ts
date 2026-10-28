@@ -54,6 +54,31 @@ export async function POST(request: Request) {
   }
 }
 
+export async function PUT(request: Request) {
+  try {
+    const body = await request.json();
+    if (!body.id) {
+      return NextResponse.json({ error: 'Transaction ID is required' }, { status: 400 });
+    }
+
+    const updatedTx: Transaction = {
+      id: body.id,
+      title: body.title,
+      amount: Number(body.amount),
+      type: body.type,
+      category: body.category,
+      date: body.date || new Date().toISOString().split('T')[0],
+      xpEarned: Number(body.xpEarned) || 25,
+    };
+
+    const saved = await db.updateTransaction(updatedTx);
+    return NextResponse.json({ transaction: saved });
+  } catch (error) {
+    console.error('Failed to update transaction:', error);
+    return NextResponse.json({ error: 'Failed to update transaction' }, { status: 500 });
+  }
+}
+
 export async function DELETE(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
