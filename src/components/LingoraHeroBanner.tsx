@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import WallabyMascot from './WallabyMascot';
+import InteractiveMascot from './InteractiveMascot';
 import { IoFlag } from 'react-icons/io5';
 
 interface HeroBannerProps {
@@ -16,7 +16,7 @@ export default function LingoraHeroBanner({
   activeGoalTitle,
 }: HeroBannerProps) {
   return (
-    <div className="relative rounded-3xl bg-gradient-to-r from-amber-100/90 via-amber-200/50 to-orange-100/80 p-6 md:p-8 overflow-hidden shadow-xs border border-amber-300/60 flex flex-col justify-between min-h-[200px]">
+    <div className="relative rounded-3xl bg-gradient-to-r from-amber-100/90 via-amber-200/50 to-orange-100/80 p-6 md:p-8 overflow-hidden shadow-xs border border-amber-300/60 flex flex-col justify-between min-h-[220px]">
       
       {/* Target Tag at Top Right with Ionicons Flag */}
       <div className="self-end z-10">
@@ -46,9 +46,13 @@ export default function LingoraHeroBanner({
         </button>
       </div>
 
-      {/* Wallaby Mascot on the Right */}
-      <div className="absolute right-2 sm:right-6 -bottom-1 z-10 pointer-events-none">
-        <WallabyMascot size={185} mood="waving" />
+      {/* Interactive Animated Wallaby Mascot on the Right */}
+      <div className="absolute right-2 sm:right-6 bottom-0 z-20">
+        <InteractiveMascot
+          userName={userName}
+          activeGoalTitle={activeGoalTitle}
+          size={175}
+        />
       </div>
 
       {/* Decorative Warm Sun/Cloud Shapes in Background */}

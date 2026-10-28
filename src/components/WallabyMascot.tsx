@@ -5,33 +5,37 @@ import React from 'react';
 interface WallabyMascotProps {
   className?: string;
   size?: number;
-  mood?: 'happy' | 'waving' | 'excited' | 'money-love';
+  mood?: 'happy' | 'waving' | 'excited' | 'money-love' | 'surprised';
+  animated?: boolean;
 }
 
 export default function WallabyMascot({
   className = '',
   size = 120,
   mood = 'waving',
+  animated = true,
 }: WallabyMascotProps) {
   return (
     <div
-      className={`relative inline-block select-none ${className}`}
+      className={`relative inline-block select-none ${animated ? 'animate-wally-idle' : ''} ${className}`}
       style={{ width: size, height: size }}
     >
       <svg
         viewBox="0 0 200 200"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        className="w-full h-full drop-shadow-md"
+        className="w-full h-full drop-shadow-md overflow-visible"
       >
         {/* Soft Ground Shadow */}
         <ellipse cx="100" cy="184" rx="55" ry="12" fill="#000000" fillOpacity="0.12" />
 
-        {/* Long Wallaby Tail (Curving back and down) */}
-        <path
-          d="M75 145 C50 150, 20 162, 16 178 C25 182, 45 174, 82 165 Z"
-          fill="#b45309"
-        />
+        {/* Long Wallaby Tail (Curving back and down) with wag animation */}
+        <g className={animated ? 'animate-wally-tail' : ''}>
+          <path
+            d="M75 145 C50 150, 20 162, 16 178 C25 182, 45 174, 82 165 Z"
+            fill="#b45309"
+          />
+        </g>
 
         {/* Big Wallaby Feet (Macropod feet) */}
         <ellipse cx="74" cy="180" rx="18" ry="8" fill="#92400e" />
@@ -44,26 +48,30 @@ export default function WallabyMascot({
         <ellipse cx="132" cy="148" rx="20" ry="24" transform="rotate(15 132 148)" fill="#b45309" />
 
         {/* Wallaby Tall Left Ear */}
-        <path
-          d="M72 75 C60 40, 52 18, 65 14 C78 10, 84 38, 86 68 Z"
-          fill="#b45309"
-        />
-        {/* Left Inner Ear (Pink) */}
-        <path
-          d="M72 65 C64 42, 58 24, 66 22 C73 20, 78 38, 80 62 Z"
-          fill="#fca5a5"
-        />
+        <g className={animated ? 'animate-wally-ear-left' : ''}>
+          <path
+            d="M72 75 C60 40, 52 18, 65 14 C78 10, 84 38, 86 68 Z"
+            fill="#b45309"
+          />
+          {/* Left Inner Ear (Pink) */}
+          <path
+            d="M72 65 C64 42, 58 24, 66 22 C73 20, 78 38, 80 62 Z"
+            fill="#fca5a5"
+          />
+        </g>
 
         {/* Wallaby Tall Right Ear */}
-        <path
-          d="M128 75 C140 40, 148 18, 135 14 C122 10, 116 38, 114 68 Z"
-          fill="#b45309"
-        />
-        {/* Right Inner Ear (Pink) */}
-        <path
-          d="M128 65 C136 42, 142 24, 134 22 C127 20, 122 38, 120 62 Z"
-          fill="#fca5a5"
-        />
+        <g className={animated ? 'animate-wally-ear-right' : ''}>
+          <path
+            d="M128 75 C140 40, 148 18, 135 14 C122 10, 116 38, 114 68 Z"
+            fill="#b45309"
+          />
+          {/* Right Inner Ear (Pink) */}
+          <path
+            d="M128 65 C136 42, 142 24, 134 22 C127 20, 122 38, 120 62 Z"
+            fill="#fca5a5"
+          />
+        </g>
 
         {/* Wallaby Main Body (Warm Golden-Brown Fur) */}
         <ellipse cx="100" cy="132" rx="46" ry="48" fill="#d97706" />
@@ -77,14 +85,28 @@ export default function WallabyMascot({
         {/* Dark Nose */}
         <ellipse cx="100" cy="89" rx="6" ry="4" fill="#451a03" />
 
-        {/* Cute Smile */}
-        <path
-          d="M94 96 Q100 101 106 96"
-          stroke="#451a03"
-          strokeWidth="2"
-          strokeLinecap="round"
-          fill="none"
-        />
+        {/* Cute Smile / Mouth expression depending on mood */}
+        {mood === 'money-love' || mood === 'excited' ? (
+          /* Big Happy Open Mouth */
+          <path
+            d="M93 95 Q100 106 107 95 Z"
+            fill="#dc2626"
+            stroke="#451a03"
+            strokeWidth="1.5"
+          />
+        ) : mood === 'surprised' ? (
+          /* O-shaped mouth */
+          <ellipse cx="100" cy="98" rx="4" ry="5" fill="#451a03" />
+        ) : (
+          /* Cute gentle smile */
+          <path
+            d="M94 96 Q100 101 106 96"
+            stroke="#451a03"
+            strokeWidth="2"
+            strokeLinecap="round"
+            fill="none"
+          />
+        )}
 
         {/* Cream Belly & Wallaby Pouch */}
         <ellipse cx="100" cy="138" rx="32" ry="36" fill="#fef3c7" />
@@ -97,8 +119,8 @@ export default function WallabyMascot({
           strokeWidth="2"
         />
 
-        {/* Shiny Gold Coin Peeking Out of Pouch */}
-        <g transform="translate(85, 122)">
+        {/* Shiny Gold Coin Peeking Out of Pouch with pulse/sparkle */}
+        <g transform="translate(85, 122)" className={animated ? 'animate-wally-coin' : ''}>
           <circle cx="15" cy="15" r="14" fill="#f59e0b" stroke="#b45309" strokeWidth="1.5" />
           <circle cx="15" cy="15" r="11" fill="#fbbf24" />
           <text
@@ -119,14 +141,35 @@ export default function WallabyMascot({
           />
         </g>
 
-        {/* Eyes (Large, expressive macropod eyes) */}
-        <circle cx="85" cy="78" r="8" fill="#1c1917" />
-        <circle cx="115" cy="78" r="8" fill="#1c1917" />
-        {/* Eye Catchlights */}
-        <circle cx="87" cy="75" r="3" fill="#ffffff" />
-        <circle cx="117" cy="75" r="3" fill="#ffffff" />
-        <circle cx="83" cy="81" r="1.5" fill="#ffffff" />
-        <circle cx="113" cy="81" r="1.5" fill="#ffffff" />
+        {/* Eyes: Dynamic based on Mood */}
+        {mood === 'money-love' ? (
+          /* Green dollar eyes! */
+          <>
+            <text x="85" y="85" textAnchor="middle" fill="#059669" fontSize="16" fontWeight="900" fontFamily="Arial">
+              $
+            </text>
+            <text x="115" y="85" textAnchor="middle" fill="#059669" fontSize="16" fontWeight="900" fontFamily="Arial">
+              $
+            </text>
+          </>
+        ) : mood === 'excited' ? (
+          /* Starry / Wink Eyes */
+          <>
+            <path d="M78 78 Q85 71 92 78" stroke="#1c1917" strokeWidth="3" strokeLinecap="round" fill="none" />
+            <path d="M108 78 Q115 71 122 78" stroke="#1c1917" strokeWidth="3" strokeLinecap="round" fill="none" />
+          </>
+        ) : (
+          /* Standard big shiny macropod eyes */
+          <>
+            <circle cx="85" cy="78" r="8" fill="#1c1917" />
+            <circle cx="115" cy="78" r="8" fill="#1c1917" />
+            {/* Eye Catchlights */}
+            <circle cx="87" cy="75" r="3" fill="#ffffff" />
+            <circle cx="117" cy="75" r="3" fill="#ffffff" />
+            <circle cx="83" cy="81" r="1.5" fill="#ffffff" />
+            <circle cx="113" cy="81" r="1.5" fill="#ffffff" />
+          </>
+        )}
 
         {/* Rosy Cheeks */}
         <ellipse cx="73" cy="88" rx="6" ry="4" fill="#f87171" fillOpacity="0.6" />
@@ -149,12 +192,14 @@ export default function WallabyMascot({
         {/* Front Paws / Arms */}
         {mood === 'waving' ? (
           <>
-            {/* Left Hand: Waving Up high! */}
-            <path
-              d="M68 116 C52 100, 38 82, 45 74 C53 66, 68 90, 78 110 Z"
-              fill="#b45309"
-            />
-            <ellipse cx="44" cy="75" rx="6" ry="7" fill="#92400e" />
+            {/* Left Hand: Waving Up high with wave animation! */}
+            <g className={animated ? 'animate-wally-wave' : ''}>
+              <path
+                d="M68 116 C52 100, 38 82, 45 74 C53 66, 68 90, 78 110 Z"
+                fill="#b45309"
+              />
+              <ellipse cx="44" cy="75" rx="6" ry="7" fill="#92400e" />
+            </g>
 
             {/* Right Hand: Resting gently near pouch coin */}
             <path
@@ -162,6 +207,18 @@ export default function WallabyMascot({
               fill="#b45309"
             />
             <circle cx="134" cy="140" r="5" fill="#92400e" />
+          </>
+        ) : mood === 'excited' || mood === 'money-love' ? (
+          <>
+            {/* Both hands up cheering! */}
+            <g className={animated ? 'animate-wally-wave' : ''}>
+              <path d="M68 116 C52 100, 38 82, 45 74 C53 66, 68 90, 78 110 Z" fill="#b45309" />
+              <ellipse cx="44" cy="75" rx="6" ry="7" fill="#92400e" />
+            </g>
+            <g style={{ transformOrigin: '125px 110px', animation: animated ? 'wallyWave 1.6s ease-in-out infinite 0.4s' : 'none' }}>
+              <path d="M132 116 C148 100, 162 82, 155 74 C147 66, 132 90, 122 110 Z" fill="#b45309" />
+              <ellipse cx="156" cy="75" rx="6" ry="7" fill="#92400e" />
+            </g>
           </>
         ) : (
           <>
@@ -174,4 +231,3 @@ export default function WallabyMascot({
     </div>
   );
 }
-

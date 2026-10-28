@@ -169,3 +169,4 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Terjadi kesalahan sistem saat proses otentikasi.' }, { status: 500 });
   }
 }
+

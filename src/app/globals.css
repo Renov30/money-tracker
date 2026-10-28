@@ -45,3 +45,85 @@ button:focus-visible {
 .animate-fade-in {
   animation: fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
+/* Mascot Animations */
+@keyframes wallyIdle {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-6px) rotate(1deg);
+  }
+}
+
+@keyframes wallyWave {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-18deg);
+  }
+  75% {
+    transform: rotate(14deg);
+  }
+}
+
+@keyframes wallyEarWiggle {
+  0%, 85%, 100% {
+    transform: rotate(0deg);
+  }
+  90% {
+    transform: rotate(-7deg);
+  }
+  95% {
+    transform: rotate(6deg);
+  }
+}
+
+@keyframes coinSparkle {
+  0%, 100% {
+    transform: scale(1) translateY(0);
+    filter: drop-shadow(0 0 2px rgba(245, 158, 11, 0.4));
+  }
+  50% {
+    transform: scale(1.08) translateY(-3px);
+    filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.8));
+  }
+}
+
+@keyframes tailWag {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(5deg);
+  }
+}
+
+.animate-wally-idle {
+  animation: wallyIdle 3.5s ease-in-out infinite;
+}
+
+.animate-wally-wave {
+  transform-origin: 75px 110px;
+  animation: wallyWave 1.6s ease-in-out infinite;
+}
+
+.animate-wally-ear-left {
+  transform-origin: 80px 70px;
+  animation: wallyEarWiggle 4s ease-in-out infinite;
+}
+
+.animate-wally-ear-right {
+  transform-origin: 120px 70px;
+  animation: wallyEarWiggle 4s ease-in-out infinite 0.5s;
+}
+
+.animate-wally-coin {
+  animation: coinSparkle 2.5s ease-in-out infinite;
+}
+
+.animate-wally-tail {
+  transform-origin: 75px 145px;
+  animation: tailWag 2.5s ease-in-out infinite;
+}
