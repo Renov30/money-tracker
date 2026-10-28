@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Goal } from '@/types';
 import { formatRupiah } from '@/lib/storage';
 import {
@@ -29,6 +29,15 @@ export default function GoalsManagerView({
   onDeleteGoal,
   onLockInGoal,
 }: GoalsManagerViewProps) {
+  const [animatingGoalId, setAnimatingGoalId] = useState<string | null>(null);
+
+  const handleToggleLock = (goalId: string) => {
+    setAnimatingGoalId(goalId);
+    onLockInGoal(goalId);
+    setTimeout(() => {
+      setAnimatingGoalId(null);
+    }, 600);
+  };
   return (
     <div className="space-y-4">
       {/* Header */}
@@ -73,39 +82,33 @@ export default function GoalsManagerView({
               Math.round((goal.currentAmount / goal.targetAmount) * 100)
             );
             const isMain = Boolean(goal.isMain);
+            const isAnimating = animatingGoalId === goal.id;
 
             return (
               <div
                 key={goal.id}
-                className={`rounded-2xl p-5 space-y-4 bg-white border-2 transition ${
+                className={`rounded-2xl p-5 space-y-4 bg-white border-2 transition-all duration-300 ${
                   isMain
-                    ? 'border-amber-400 border-b-4'
+                    ? 'border-amber-400 border-b-4 shadow-sm'
                     : 'border-slate-200'
-                }`}
+                } ${isAnimating ? 'animate-lock-in' : ''}`}
               >
                 {/* Header & Controls */}
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex items-center gap-3">
                     <div
-                      className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${
+                      className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 transition-transform duration-300 ${
                         isMain
-                          ? 'bg-amber-500 text-white'
+                          ? 'bg-amber-500 text-white scale-105'
                           : 'bg-slate-100 text-slate-600'
                       }`}
                     >
                       <IoFlag className="text-xl" />
                     </div>
                     <div>
-                      <div className="flex items-center gap-2">
-                        <h4 className="text-sm font-black text-slate-800">
-                          {goal.title}
-                        </h4>
-                        {isMain && (
-                          <span className="px-2 py-0.5 rounded-lg text-[10px] font-extrabold uppercase bg-amber-100 text-amber-700">
-                            UTAMA
-                          </span>
-                        )}
-                      </div>
+                      <h4 className="text-sm font-black text-slate-800">
+                        {goal.title}
+                      </h4>
                       <span className="text-xs text-slate-400 font-bold">
                         {goal.category}
                       </span>
@@ -116,15 +119,15 @@ export default function GoalsManagerView({
                   <div className="flex items-center gap-1 shrink-0">
                     <button
                       type="button"
-                      onClick={() => onLockInGoal(goal.id)}
-                      className={`p-2 rounded-xl text-xs font-extrabold transition cursor-pointer ${
+                      onClick={() => handleToggleLock(goal.id)}
+                      className={`p-2 rounded-xl text-xs font-extrabold transition-all duration-200 cursor-pointer active:scale-90 ${
                         isMain
-                          ? 'bg-amber-100 hover:bg-amber-200 text-amber-700'
+                          ? 'bg-amber-100 hover:bg-amber-200 text-amber-700 shadow-2xs'
                           : 'bg-slate-100 hover:bg-amber-50 text-slate-500 hover:text-amber-600'
                       }`}
                       title={isMain ? 'Lepas dari Target Utama (Klik untuk Unlock)' : 'Jadikan Target Utama (Lock In)'}
                     >
-                      {isMain ? <IoLockClosed className="text-sm text-amber-600" /> : <IoLockOpenOutline className="text-sm" />}
+                      {isMain ? <IoLockClosed className="text-sm text-amber-600 transition-transform" /> : <IoLockOpenOutline className="text-sm" />}
                     </button>
 
                     <button
