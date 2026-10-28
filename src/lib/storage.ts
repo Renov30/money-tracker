@@ -9,6 +9,8 @@ export const INITIAL_USER_STATS: UserStats = {
   streakDays: 12,
   lastActiveDate: '2026-10-27',
   monthlyBudget: 7000000,
+  totalCash: 0,
+  baseCash: 0,
 };
 
 export const INITIAL_TRANSACTIONS: Transaction[] = [

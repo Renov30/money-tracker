@@ -61,6 +61,8 @@ export interface UserStats {
   streakDays: number;
   lastActiveDate: string;
   monthlyBudget: number;
+  totalCash?: number;
+  baseCash?: number;
 }
 
 export type UserRole = 'user' | 'admin';

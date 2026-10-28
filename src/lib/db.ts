@@ -106,7 +106,25 @@ export async function initDb() {
         WHERE deleted_at IS NOT NULL AND deleted_at < NOW() - INTERVAL '30 days';
       `);
 
-      // Check if stats seeded
+      // Add total_cash and base_cash columns to user_stats if not exists
+      await client.query(`
+        ALTER TABLE user_stats 
+        ADD COLUMN IF NOT EXISTS total_cash BIGINT DEFAULT 0,
+        ADD COLUMN IF NOT EXISTS base_cash BIGINT DEFAULT 0;
+      `);
+
+      // Goal topups history table
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS goal_topups (
+          id VARCHAR(100) PRIMARY KEY,
+          goal_id VARCHAR(100) NOT NULL REFERENCES goals(id) ON DELETE CASCADE,
+          amount BIGINT NOT NULL,
+          date VARCHAR(50) NOT NULL,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+      `);
+
+      // Check if user_stats row exists
       const statsRes = await client.query('SELECT * FROM user_stats WHERE id = $1', ['current_user']);
       if (statsRes.rowCount === 0) {
         await client.query(
@@ -368,7 +386,7 @@ export const db = {
     }
   },
 
-  async topUpGoal(id: string, amount: number): Promise<boolean> {
+  async topUpGoal(id: string, amount: number, dateStr?: string): Promise<boolean> {
     await initDb();
     try {
       await pool.query(
@@ -377,9 +395,34 @@ export const db = {
          WHERE id = $2`,
         [amount, id]
       );
+
+      // Record topup history
+      const nowStr = dateStr || new Date().toISOString().split('T')[0];
+      await pool.query(
+        `INSERT INTO goal_topups (id, goal_id, amount, date)
+         VALUES ($1, $2, $3, $4)`,
+        [`topup-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`, id, amount, nowStr]
+      );
+
       return true;
-    } catch {
+    } catch (e) {
+      console.error('Error topUpGoal in DB:', e);
       return false;
+    }
+  },
+
+  async getGoalTopups(): Promise<{ id: string; goalId: string; amount: number; date: string }[]> {
+    await initDb();
+    try {
+      const res = await pool.query(
+        'SELECT id, goal_id as "goalId", amount::bigint, date FROM goal_topups ORDER BY created_at ASC'
+      );
+      return res.rows.map((r) => ({
+        ...r,
+        amount: Number(r.amount),
+      }));
+    } catch {
+      return [];
     }
   },
 
@@ -389,7 +432,9 @@ export const db = {
     try {
       const res = await pool.query(
         `SELECT name, title, level, current_xp as "currentXp", xp_to_next_level as "xpToNextLevel", 
-                streak_days as "streakDays", last_active_date as "lastActiveDate", monthly_budget as "monthlyBudget"
+                streak_days as "streakDays", last_active_date as "lastActiveDate", monthly_budget as "monthlyBudget",
+                COALESCE(total_cash, 0) as "totalCash",
+                COALESCE(base_cash, 0) as "baseCash"
          FROM user_stats WHERE id = 'current_user'`
       );
       if (res.rowCount && res.rowCount > 0) {
@@ -401,6 +446,8 @@ export const db = {
           xpToNextLevel: Number(r.xpToNextLevel),
           streakDays: Number(r.streakDays),
           monthlyBudget: Number(r.monthlyBudget),
+          totalCash: Number(r.totalCash || 0),
+          baseCash: Number(r.baseCash || 0),
         };
       }
       return INITIAL_USER_STATS;
@@ -415,7 +462,8 @@ export const db = {
       await pool.query(
         `UPDATE user_stats 
          SET name = $1, title = $2, level = $3, current_xp = $4, xp_to_next_level = $5, 
-             streak_days = $6, last_active_date = $7, monthly_budget = $8, updated_at = CURRENT_TIMESTAMP
+             streak_days = $6, last_active_date = $7, monthly_budget = $8, total_cash = $9, 
+             base_cash = $10, updated_at = CURRENT_TIMESTAMP
          WHERE id = 'current_user'`,
         [
           stats.name,
@@ -426,6 +474,8 @@ export const db = {
           stats.streakDays,
           stats.lastActiveDate,
           stats.monthlyBudget,
+          stats.totalCash || 0,
+          stats.baseCash || 0,
         ]
       );
       return stats;

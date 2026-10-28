@@ -9,6 +9,7 @@ import {
   INITIAL_TRANSACTIONS,
   INITIAL_GOALS,
   INITIAL_QUESTS,
+  formatRupiah,
 } from '@/lib/storage';
 import { Transaction, Goal, DailyQuest, UserStats, TransactionType, CustomCategory, AuthUser } from '@/types';
 
@@ -17,6 +18,7 @@ import LingoraTopBar from '@/components/LingoraTopBar';
 import LingoraHeroBanner from '@/components/LingoraHeroBanner';
 import FeaturedGoalCard from '@/components/FeaturedGoalCard';
 import FinancialSummaryCards from '@/components/FinancialSummaryCards';
+import FinancialReportsView from '@/components/FinancialReportsView';
 import TransactionsSection from '@/components/TransactionsSection';
 import GoalsManagerView from '@/components/GoalsManagerView';
 import LingoraRightRail from '@/components/LingoraRightRail';
@@ -37,17 +39,20 @@ export default function Home() {
   const [transactions, setTransactions] = useState<Transaction[]>(INITIAL_TRANSACTIONS);
   const [trashTransactions, setTrashTransactions] = useState<Transaction[]>([]);
   const [goals, setGoals] = useState<Goal[]>([]);
+  const [goalTopups, setGoalTopups] = useState<{ id: string; goalId: string; amount: number; date: string }[]>([]);
   const [quests, setQuests] = useState<DailyQuest[]>(INITIAL_QUESTS);
   const [customCategories, setCustomCategories] = useState<CustomCategory[]>([]);
   
   const [activeTab, setActiveTab] = useState<string>('home');
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [selectedMonth, setSelectedMonth] = useState<string>(() => {
+  const [selectedMonth, setSelectedMonth] = useState<string>('');
+
+  useEffect(() => {
     const today = new Date();
     const y = today.getFullYear();
     const m = String(today.getMonth() + 1).padStart(2, '0');
-    return `${y}-${m}`;
-  });
+    setSelectedMonth(`${y}-${m}`);
+  }, []);
 
   const [isAddTxOpen, setIsAddTxOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
@@ -73,13 +78,14 @@ export default function Home() {
   useEffect(() => {
     async function loadData() {
       try {
-        const [txRes, goalsRes, statsRes, catRes, trashRes, authRes] = await Promise.all([
+        const [txRes, goalsRes, statsRes, catRes, trashRes, authRes, topupsRes] = await Promise.all([
           fetch('/api/transactions'),
           fetch('/api/goals'),
           fetch('/api/stats'),
           fetch('/api/categories'),
           fetch('/api/transactions?trash=true'),
           fetch('/api/auth'),
+          fetch('/api/goals?topups=true'),
         ]);
 
         if (authRes.ok) {
@@ -115,6 +121,12 @@ export default function Home() {
           if (Array.isArray(goalsData)) {
             setGoals(goalsData);
             storage.saveGoals(goalsData);
+          }
+        }
+        if (topupsRes.ok) {
+          const topupsData = await topupsRes.json();
+          if (Array.isArray(topupsData)) {
+            setGoalTopups(topupsData);
           }
         }
         if (statsRes.ok) {
@@ -194,7 +206,7 @@ export default function Home() {
 
   // Financial Computations: Bulan Terpilih untuk Pemasukan & Pengeluaran, Tabungan Berjalan Terus
   const monthlyTransactions = transactions.filter((tx) =>
-    tx && typeof tx.date === 'string' && tx.date.startsWith(selectedMonth)
+    selectedMonth ? (tx && typeof tx.date === 'string' && tx.date.startsWith(selectedMonth)) : true
   );
 
   const monthlyIncome = monthlyTransactions
@@ -216,11 +228,46 @@ export default function Home() {
 
   const rawCashBalance = allTimeIncome - allTimeExpense;
 
+  // Total Uang Keseluruhan (Dinamis bertambah/berkurang sesuai transaksi pemasukan & pengeluaran):
+  // Jika user pernah menyetel saldo total uang, kita gunakan baseCash + rawCashBalance.
+  // Jika belum, default ke rawCashBalance (atau totalCash jika ada).
+  const hasBaseCash = stats.baseCash !== undefined && stats.baseCash !== null;
+  const currentTotalCash = hasBaseCash
+    ? Number(stats.baseCash) + rawCashBalance
+    : (stats.totalCash && stats.totalCash > 0 ? stats.totalCash : rawCashBalance);
+
   // Tabungan berjalan terus (total saldo terkumpul di seluruh celengan)
   const totalSavings = goals.reduce((acc, curr) => acc + (Number(curr.currentAmount) || 0), 0);
 
+  // Tabungan bulan ini (dari riwayat goal_topups pada bulan yang dipilih)
+  const monthlySavings = goalTopups
+    .filter((t) => t.date && t.date.startsWith(selectedMonth))
+    .reduce((acc, curr) => acc + (Number(curr.amount) || 0), 0);
+
   // Kas Siap Pakai (Uang yang bebas digunakan setelah disisihkan ke tabungan celengan)
-  const safeToSpend = rawCashBalance - totalSavings;
+  const safeToSpend = currentTotalCash - totalSavings;
+
+  const handleUpdateTotalCash = async (targetAmount: number) => {
+    // Hitung baseCash agar: targetAmount = newBaseCash + rawCashBalance
+    const newBaseCash = targetAmount - rawCashBalance;
+    const updated: UserStats = {
+      ...stats,
+      baseCash: newBaseCash,
+      totalCash: targetAmount,
+    };
+    setStats(updated);
+    storage.saveStats(updated);
+    try {
+      await fetch('/api/stats', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updated),
+      });
+      showToast('Total uang berhasil diperbarui!', 'success');
+    } catch (e) {
+      console.warn('Gagal sinkron stats ke server:', e);
+    }
+  };
 
   // Navigasi Bulan
   const handlePrevMonth = () => {
@@ -716,11 +763,13 @@ export default function Home() {
       if (!confirmSpend) return;
     }
 
+    const todayStr = new Date().toISOString().split('T')[0];
+
     try {
       const res = await fetch('/api/goals', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'topup', id: goalId, amount }),
+        body: JSON.stringify({ action: 'topup', id: goalId, amount, date: todayStr }),
       });
 
       if (res.ok) {
@@ -731,6 +780,15 @@ export default function Home() {
           setStats(json.stats);
           storage.saveStats(json.stats);
         }
+        setGoalTopups((prev) => [
+          ...prev,
+          {
+            id: 'topup_' + Date.now(),
+            goalId,
+            amount,
+            date: todayStr,
+          },
+        ]);
         showToast(`Berhasil menabung Rp ${amount.toLocaleString('id-ID')} ke database! +25 XP.`);
         return;
       }
@@ -751,6 +809,15 @@ export default function Home() {
     });
     setGoals(updated);
     storage.saveGoals(updated);
+    setGoalTopups((prev) => [
+      ...prev,
+      {
+        id: 'topup_' + Date.now(),
+        goalId,
+        amount,
+        date: todayStr,
+      },
+    ]);
     gainXp(xpReward);
     showToast(`Berhasil menabung Rp ${amount.toLocaleString('id-ID')} ke celengan! +${xpReward} XP.`);
   };
@@ -827,22 +894,24 @@ export default function Home() {
                     onOpenAddModal={() => openAddModalWithType('expense')}
                   />
 
-                  {/* Rangkuman Keuangan: Kas Siap Pakai & Total Tabungan Tertahan */}
+                  {/* Rangkuman Keuangan: Total Uang & Total Tabungan */}
                   <FinancialSummaryCards
-                    safeToSpend={safeToSpend}
-                    rawCashBalance={rawCashBalance}
+                    totalCash={currentTotalCash}
+                    onUpdateTotalCash={handleUpdateTotalCash}
+                    monthlyIncome={monthlyIncome}
+                    monthlyExpense={monthlyExpense}
                     totalSavings={totalSavings}
+                    monthlySavings={monthlySavings}
                     selectedMonth={selectedMonth}
                     onPrevMonth={handlePrevMonth}
                     onNextMonth={handleNextMonth}
-                    monthlyIncome={monthlyIncome}
-                    monthlyExpense={monthlyExpense}
                     onOpenAddTransaction={() => openAddModalWithType('expense')}
                     onOpenAddGoal={() => {
                       setEditingGoal(null);
                       setIsAddGoalOpen(true);
                     }}
                     onViewGoals={() => setActiveTab('goals')}
+                    onViewReports={() => setActiveTab('reports')}
                   />
 
                   {/* Target Tabungan Utama (Hanya Ditampilkan jika ada yang di-Lock In) */}
@@ -869,6 +938,20 @@ export default function Home() {
                     onNextMonth={handleNextMonth}
                   />
                 </>
+              )}
+
+              {activeTab === 'reports' && (
+                <FinancialReportsView
+                  transactions={transactions}
+                  goals={goals}
+                  goalTopups={goalTopups}
+                  stats={stats}
+                  totalCash={currentTotalCash}
+                  onUpdateTotalCash={handleUpdateTotalCash}
+                  selectedMonth={selectedMonth}
+                  onMonthChange={(m) => setSelectedMonth(m)}
+                  onOpenAddTransaction={openAddModalWithType}
+                />
               )}
 
               {activeTab === 'income' && (

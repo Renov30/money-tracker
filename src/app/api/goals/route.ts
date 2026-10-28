@@ -2,8 +2,13 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { Goal } from '@/types';
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const { searchParams } = new URL(request.url);
+    if (searchParams.get('topups') === 'true') {
+      const topups = await db.getGoalTopups();
+      return NextResponse.json(topups);
+    }
     const goals = await db.getGoals();
     return NextResponse.json(goals);
   } catch (error) {
@@ -24,8 +29,8 @@ export async function POST(request: Request) {
     }
 
     if (body.action === 'topup') {
-      const { id, amount } = body;
-      await db.topUpGoal(id, Number(amount));
+      const { id, amount, date } = body;
+      await db.topUpGoal(id, Number(amount), date);
 
       // Award XP
       const currentStats = await db.getStats();

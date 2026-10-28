@@ -45,7 +45,7 @@ export default function AdminPage() {
   const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false);
 
   const showToast = (message: string, type: 'success' | 'delete' | 'edit' = 'success') => {
-    setToast({ id: `toast-${Date.now()}`, message, type });
+    setToast({ message, type });
   };
 
   const roleOptions: DropdownOption[] = [
