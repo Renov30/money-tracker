@@ -713,8 +713,7 @@ export default function Home() {
       <LingoraSidebar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
-        level={stats.level}
-        userName={currentUser ? currentUser.name : stats.name}
+        userName={currentUser ? currentUser.username : stats.name}
         trashCount={trashTransactions.length}
         currentUser={currentUser}
         onLogout={handleLogout}
@@ -739,9 +738,8 @@ export default function Home() {
                 <>
                   {/* Hero Banner with Wallaby Mascot */}
                   <LingoraHeroBanner
-                    userName={stats.name}
+                    userName={currentUser ? currentUser.username : stats.name}
                     onOpenAddModal={() => openAddModalWithType('expense')}
-                    activeGoalTitle={activeMainGoal.title}
                   />
 
                   {/* Featured Goal (Continue Learning style) */}

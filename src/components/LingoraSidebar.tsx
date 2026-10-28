@@ -22,7 +22,6 @@ import { AuthUser } from '@/types';
 interface SidebarProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
-  level: number;
   userName: string;
   trashCount?: number;
   currentUser?: AuthUser | null;
@@ -32,7 +31,6 @@ interface SidebarProps {
 export default function LingoraSidebar({
   activeTab,
   setActiveTab,
-  level,
   userName,
   trashCount = 0,
   currentUser = null,
@@ -154,7 +152,7 @@ export default function LingoraSidebar({
             </div>
             <div className="min-w-0 flex-1">
               <div className="text-xs font-bold text-slate-900 truncate flex items-center gap-1">
-                <span>{currentUser ? currentUser.name : userName}</span>
+                <span>{currentUser ? currentUser.username : userName}</span>
                 {currentUser?.role === 'admin' && (
                   <span title="Administrator">
                     <IoShieldCheckmark className="text-amber-600 text-xs shrink-0" />
@@ -162,7 +160,7 @@ export default function LingoraSidebar({
                 )}
               </div>
               <div className="text-[10px] text-amber-700/80 font-medium">
-                {currentUser?.role === 'admin' ? 'Administrator' : `Level ${level}`}
+                {currentUser?.role === 'admin' ? 'Administrator' : 'Pengguna Aktif'}
               </div>
             </div>
           </div>

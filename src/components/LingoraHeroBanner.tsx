@@ -2,30 +2,19 @@
 
 import React from 'react';
 import InteractiveMascot from './InteractiveMascot';
-import { IoFlag } from 'react-icons/io5';
 
 interface HeroBannerProps {
   userName: string;
   onOpenAddModal: () => void;
-  activeGoalTitle: string;
 }
 
 export default function LingoraHeroBanner({
   userName,
   onOpenAddModal,
-  activeGoalTitle,
 }: HeroBannerProps) {
   return (
-    <div className="relative rounded-3xl bg-gradient-to-r from-amber-100/90 via-amber-200/50 to-orange-100/80 p-6 md:p-8 overflow-hidden shadow-xs border border-amber-300/60 flex flex-col justify-between min-h-[220px]">
+    <div className="relative rounded-3xl bg-gradient-to-r from-amber-100/90 via-amber-200/50 to-orange-100/80 p-6 md:p-8 overflow-hidden shadow-xs border border-amber-300/60 flex flex-col justify-between min-h-[200px]">
       
-      {/* Target Tag at Top Right with Ionicons Flag */}
-      <div className="self-end z-10">
-        <span className="bg-white/90 backdrop-blur-xs border border-amber-200/80 text-amber-950 text-[11px] font-bold px-3.5 py-1 rounded-full shadow-xs flex items-center gap-1.5 cursor-pointer hover:bg-white transition">
-          <IoFlag className="text-amber-600 text-sm" />
-          <span>Target: {activeGoalTitle} ›</span>
-        </span>
-      </div>
-
       {/* Greeting & Action Button */}
       <div className="max-w-md z-10 space-y-3 mt-2 md:mt-0">
         <div>
