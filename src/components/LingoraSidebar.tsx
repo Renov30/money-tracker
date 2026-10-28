@@ -26,6 +26,7 @@ interface SidebarProps {
   trashCount?: number;
   currentUser?: AuthUser | null;
   onLogout?: () => void;
+  onOpenSettings?: () => void;
 }
 
 export default function LingoraSidebar({
@@ -35,7 +36,21 @@ export default function LingoraSidebar({
   trashCount = 0,
   currentUser = null,
   onLogout,
+  onOpenSettings,
 }: SidebarProps) {
+  const [isAccountMenuOpen, setIsAccountMenuOpen] = React.useState(false);
+  const accountMenuRef = React.useRef<HTMLDivElement>(null);
+
+  // Close popup menu when clicking outside
+  React.useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (accountMenuRef.current && !accountMenuRef.current.contains(event.target as Node)) {
+        setIsAccountMenuOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
   const navItems = [
     { id: 'home', label: 'Home', icon: <IoHome className="text-lg" /> },
     { id: 'income', label: 'Pemasukan', icon: <IoTrendingUp className="text-lg text-emerald-600" /> },
@@ -144,56 +159,103 @@ export default function LingoraSidebar({
           </button>
         </div>
 
-        {/* User Profile Footer Row with Ionicons Avatar */}
-        <div className="flex items-center justify-between px-2 pt-1">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-9 h-9 rounded-full overflow-hidden border border-amber-200/80 flex items-center justify-center bg-amber-50 shadow-xs shrink-0 text-amber-800">
-              <IoPersonCircle className="text-3xl" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="text-xs font-bold text-slate-900 truncate flex items-center gap-1">
-                <span>{currentUser ? currentUser.username : userName}</span>
-                {currentUser?.role === 'admin' && (
-                  <span title="Administrator">
-                    <IoShieldCheckmark className="text-amber-600 text-xs shrink-0" />
-                  </span>
-                )}
+        {/* User Profile Footer Row with Interactive Popup Menu */}
+        <div className="relative" ref={accountMenuRef}>
+          {/* Popup Menu when info akun is clicked */}
+          {isAccountMenuOpen && (
+            <div className="absolute bottom-full left-0 right-0 mb-2 bg-white rounded-2xl shadow-xl border border-amber-200/80 p-2 z-50 space-y-1 animate-fade-in">
+              <div className="px-3 py-1.5 border-b border-amber-100/60 mb-1">
+                <div className="text-[11px] font-bold text-slate-800 truncate">
+                  {currentUser ? currentUser.name : userName}
+                </div>
+                <div className="text-[10px] text-amber-700 font-mono">
+                  @{currentUser ? currentUser.username : userName}
+                </div>
               </div>
-              <div className="text-[10px] text-amber-700/80 font-medium">
-                {currentUser?.role === 'admin' ? 'Administrator' : 'Pengguna Aktif'}
-              </div>
-            </div>
-          </div>
 
-          <div className="flex items-center gap-1 shrink-0">
-            {currentUser?.role === 'admin' && (
-              <Link
-                href="/admin"
-                className="p-1.5 hover:bg-amber-100 rounded-lg text-amber-700 transition cursor-pointer"
-                title="Panel Admin"
-              >
-                <IoShieldCheckmark className="text-base" />
-              </Link>
-            )}
-
-            {currentUser ? (
+              {/* Opsi Pengaturan (Ganti nama akun & password) */}
               <button
                 type="button"
-                onClick={onLogout}
-                className="p-1.5 hover:bg-rose-50 text-slate-400 hover:text-rose-600 rounded-lg transition cursor-pointer outline-none focus:outline-none"
-                title="Keluar (Logout)"
+                onClick={() => {
+                  setIsAccountMenuOpen(false);
+                  if (onOpenSettings) onOpenSettings();
+                }}
+                className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-slate-700 hover:text-amber-900 hover:bg-amber-50 rounded-xl transition cursor-pointer"
               >
-                <IoLogOutOutline className="text-base" />
+                <IoSettingsOutline className="text-sm text-amber-600" />
+                <span>Pengaturan Akun</span>
               </button>
-            ) : (
-              <Link
-                href="/login"
-                className="p-1.5 hover:bg-amber-100 text-slate-500 hover:text-amber-800 rounded-lg transition cursor-pointer"
-                title="Masuk / Login"
-              >
-                <IoLogInOutline className="text-base" />
-              </Link>
-            )}
+
+              {/* Opsi Admin (khusus admin) */}
+              {currentUser?.role === 'admin' && (
+                <Link
+                  href="/admin"
+                  onClick={() => setIsAccountMenuOpen(false)}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-amber-800 hover:bg-amber-50 rounded-xl transition cursor-pointer"
+                >
+                  <IoShieldCheckmark className="text-sm text-amber-600" />
+                  <span>Panel Administrasi</span>
+                </Link>
+              )}
+
+              {/* Opsi Logout */}
+              {currentUser ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsAccountMenuOpen(false);
+                    if (onLogout) onLogout();
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 rounded-xl transition cursor-pointer border-t border-slate-100 mt-1"
+                >
+                  <IoLogOutOutline className="text-sm" />
+                  <span>Keluar (Logout)</span>
+                </button>
+              ) : (
+                <Link
+                  href="/login"
+                  onClick={() => setIsAccountMenuOpen(false)}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-amber-700 hover:bg-amber-50 rounded-xl transition cursor-pointer"
+                >
+                  <IoLogInOutline className="text-sm" />
+                  <span>Masuk Akun</span>
+                </Link>
+              )}
+            </div>
+          )}
+
+          {/* Trigger: Clickable Info Akun Card */}
+          <div
+            onClick={() => setIsAccountMenuOpen(!isAccountMenuOpen)}
+            className={`flex items-center justify-between p-2 rounded-2xl border transition-all duration-200 cursor-pointer select-none ${
+              isAccountMenuOpen
+                ? 'bg-amber-50 border-amber-300 shadow-xs'
+                : 'hover:bg-amber-50/60 border-transparent hover:border-amber-200/70'
+            }`}
+            title="Klik untuk membuka menu akun"
+          >
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-9 h-9 rounded-full overflow-hidden border border-amber-200/80 flex items-center justify-center bg-amber-50 shadow-xs shrink-0 text-amber-800">
+                <IoPersonCircle className="text-3xl" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="text-xs font-bold text-slate-900 truncate flex items-center gap-1">
+                  <span>{currentUser ? currentUser.username : userName}</span>
+                  {currentUser?.role === 'admin' && (
+                    <span title="Administrator">
+                      <IoShieldCheckmark className="text-amber-600 text-xs shrink-0" />
+                    </span>
+                  )}
+                </div>
+                <div className="text-[10px] text-amber-700/80 font-medium">
+                  {currentUser?.role === 'admin' ? 'Administrator' : 'Pengguna Aktif'}
+                </div>
+              </div>
+            </div>
+
+            <div className="text-slate-400 hover:text-slate-600 pl-1 shrink-0">
+              <IoSettingsOutline className={`text-base transition-transform duration-200 ${isAccountMenuOpen ? 'rotate-45 text-amber-700' : ''}`} />
+            </div>
           </div>
         </div>
       </div>

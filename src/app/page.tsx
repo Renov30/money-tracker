@@ -24,6 +24,7 @@ import GoalModal from '@/components/GoalModal';
 import ConfirmDialogModal from '@/components/ConfirmDialogModal';
 import ManageCategoriesModal from '@/components/ManageCategoriesModal';
 import TrashView from '@/components/TrashView';
+import AccountSettingsModal from '@/components/AccountSettingsModal';
 import ToastNotification, { ToastData, ToastType } from '@/components/ToastNotification';
 
 export default function Home() {
@@ -43,6 +44,7 @@ export default function Home() {
   const [addTxType, setAddTxType] = useState<TransactionType>('expense');
   const [isAddGoalOpen, setIsAddGoalOpen] = useState(false);
   const [editingGoal, setEditingGoal] = useState<Goal | null>(null);
+  const [isAccountSettingsOpen, setIsAccountSettingsOpen] = useState(false);
 
   // Category Manager Modal State
   const [isManageCategoriesOpen, setIsManageCategoriesOpen] = useState(false);
@@ -717,6 +719,7 @@ export default function Home() {
         trashCount={trashTransactions.length}
         currentUser={currentUser}
         onLogout={handleLogout}
+        onOpenSettings={() => setIsAccountSettingsOpen(true)}
       />
 
       {/* Center & Right Content Shell */}
@@ -922,6 +925,17 @@ export default function Home() {
         }}
         onSaveGoal={handleSaveGoal}
         editingGoal={editingGoal}
+      />
+
+      {/* Account Settings Modal (Change Username & Password) */}
+      <AccountSettingsModal
+        isOpen={isAccountSettingsOpen}
+        onClose={() => setIsAccountSettingsOpen(false)}
+        currentUser={currentUser}
+        onUpdateSuccess={(updatedUser) => {
+          setCurrentUser(updatedUser);
+          showToast(`Akun berhasil diperbarui: @${updatedUser.username}!`, 'success');
+        }}
       />
 
       {/* Custom Confirmation Modal (No Browser Confirm) */}

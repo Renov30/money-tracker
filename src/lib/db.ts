@@ -596,6 +596,7 @@ export const db = {
 
   async updateUser(user: {
     id: string;
+    username?: string;
     name: string;
     role: UserRole;
     gender: UserGender;
@@ -604,20 +605,38 @@ export const db = {
   }): Promise<AuthUser | null> {
     await initDb();
     try {
-      if (user.passwordHash) {
-        await pool.query(
-          `UPDATE users
-           SET name = $1, role = $2, gender = $3, age = $4, password_hash = $5, updated_at = CURRENT_TIMESTAMP
-           WHERE id = $6`,
-          [user.name, user.role, user.gender, user.age, user.passwordHash, user.id]
-        );
+      if (user.username) {
+        if (user.passwordHash) {
+          await pool.query(
+            `UPDATE users
+             SET username = $1, name = $2, role = $3, gender = $4, age = $5, password_hash = $6, updated_at = CURRENT_TIMESTAMP
+             WHERE id = $7`,
+            [user.username.toLowerCase(), user.name, user.role, user.gender, user.age, user.passwordHash, user.id]
+          );
+        } else {
+          await pool.query(
+            `UPDATE users
+             SET username = $1, name = $2, role = $3, gender = $4, age = $5, updated_at = CURRENT_TIMESTAMP
+             WHERE id = $6`,
+            [user.username.toLowerCase(), user.name, user.role, user.gender, user.age, user.id]
+          );
+        }
       } else {
-        await pool.query(
-          `UPDATE users
-           SET name = $1, role = $2, gender = $3, age = $4, updated_at = CURRENT_TIMESTAMP
-           WHERE id = $5`,
-          [user.name, user.role, user.gender, user.age, user.id]
-        );
+        if (user.passwordHash) {
+          await pool.query(
+            `UPDATE users
+             SET name = $1, role = $2, gender = $3, age = $4, password_hash = $5, updated_at = CURRENT_TIMESTAMP
+             WHERE id = $6`,
+            [user.name, user.role, user.gender, user.age, user.passwordHash, user.id]
+          );
+        } else {
+          await pool.query(
+            `UPDATE users
+             SET name = $1, role = $2, gender = $3, age = $4, updated_at = CURRENT_TIMESTAMP
+             WHERE id = $5`,
+            [user.name, user.role, user.gender, user.age, user.id]
+          );
+        }
       }
       return this.getUserById(user.id);
     } catch (e) {

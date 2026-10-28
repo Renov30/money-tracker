@@ -163,6 +163,68 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: true, user: authUser });
     }
 
+    // ACTION: UPDATE PROFILE (Change username / password)
+    if (action === 'update_profile') {
+      const token = cookieStore.get('auth_session')?.value;
+      if (!token) {
+        return NextResponse.json({ error: 'Sesi login tidak valid' }, { status: 401 });
+      }
+
+      const currentUser = await db.getSessionUser(token);
+      if (!currentUser) {
+        return NextResponse.json({ error: 'Pengguna tidak ditemukan' }, { status: 401 });
+      }
+
+      const { newUsername, newPassword, currentPassword } = body;
+
+      // Verify current password first
+      const userRecord = await db.getUserByUsername(currentUser.username);
+      if (!userRecord) {
+        return NextResponse.json({ error: 'Akun tidak ditemukan' }, { status: 404 });
+      }
+
+      if (!currentPassword || !verifyPassword(currentPassword, userRecord.passwordHash)) {
+        return NextResponse.json(
+          { error: 'Password saat ini salah. Konfirmasi password saat ini diperlukan untuk menyimpan perubahan.' },
+          { status: 400 }
+        );
+      }
+
+      let targetUsername = currentUser.username;
+      if (newUsername && newUsername.trim().toLowerCase() !== currentUser.username.toLowerCase()) {
+        const clean = newUsername.trim().toLowerCase();
+        if (clean.length < 3) {
+          return NextResponse.json({ error: 'Username minimal 3 karakter.' }, { status: 400 });
+        }
+        // Check uniqueness
+        const exist = await db.getUserByUsername(clean);
+        if (exist && exist.id !== currentUser.id) {
+          return NextResponse.json({ error: 'Nama akun/username ini sudah digunakan oleh pengguna lain.' }, { status: 409 });
+        }
+        targetUsername = clean;
+      }
+
+      let newPasswordHash: string | undefined = undefined;
+      if (newPassword && newPassword.trim().length > 0) {
+        if (newPassword.trim().length < 6) {
+          return NextResponse.json({ error: 'Password baru minimal 6 karakter.' }, { status: 400 });
+        }
+        newPasswordHash = hashPassword(newPassword.trim());
+      }
+
+      const updated = await db.updateUser({
+        id: currentUser.id,
+        username: targetUsername,
+        name: currentUser.name,
+        role: currentUser.role,
+        gender: currentUser.gender,
+        age: currentUser.age,
+        passwordHash: newPasswordHash,
+      });
+
+      return NextResponse.json({ success: true, user: updated });
+    }
+
     return NextResponse.json({ error: 'Aksi auth tidak valid' }, { status: 400 });
   } catch (error) {
     console.error('Auth API error:', error);
