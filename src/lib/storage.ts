@@ -120,6 +120,7 @@ const KEYS = {
   QUESTS: 'penny_tracker_quests',
   CATEGORIES: 'penny_tracker_custom_categories',
   AMOUNT_PRESETS: 'penny_tracker_amount_presets',
+  CATEGORY_PRESETS: 'penny_tracker_category_presets',
 };
 
 export const DEFAULT_AMOUNT_PRESETS: Record<'expense' | 'income', number[]> = {
@@ -136,6 +137,50 @@ export const storage = {
   saveCategories: (cats: CustomCategory[]) => {
     if (typeof window === 'undefined') return;
     localStorage.setItem(KEYS.CATEGORIES, JSON.stringify(cats));
+  },
+
+  getCategoryList: (type: 'expense' | 'income'): string[] => {
+    if (typeof window === 'undefined') return [...DEFAULT_CATEGORIES[type]];
+    try {
+      const data = localStorage.getItem(KEYS.CATEGORY_PRESETS);
+      if (data) {
+        const parsed = JSON.parse(data);
+        if (parsed && Array.isArray(parsed[type]) && parsed[type].length > 0) {
+          return parsed[type];
+        }
+      }
+    } catch {
+      // ignore
+    }
+    return [...DEFAULT_CATEGORIES[type]];
+  },
+  saveCategoryList: (type: 'expense' | 'income', list: string[]) => {
+    if (typeof window === 'undefined') return;
+    try {
+      const data = localStorage.getItem(KEYS.CATEGORY_PRESETS);
+      const parsed = data
+        ? JSON.parse(data)
+        : {
+            expense: [...DEFAULT_CATEGORIES.expense],
+            income: [...DEFAULT_CATEGORIES.income],
+          };
+      parsed[type] = list;
+      localStorage.setItem(KEYS.CATEGORY_PRESETS, JSON.stringify(parsed));
+    } catch {
+      // ignore
+    }
+  },
+  resetCategoryList: (type: 'expense' | 'income'): string[] => {
+    if (typeof window === 'undefined') return [...DEFAULT_CATEGORIES[type]];
+    try {
+      const data = localStorage.getItem(KEYS.CATEGORY_PRESETS);
+      const parsed = data ? JSON.parse(data) : {};
+      parsed[type] = [...DEFAULT_CATEGORIES[type]];
+      localStorage.setItem(KEYS.CATEGORY_PRESETS, JSON.stringify(parsed));
+    } catch {
+      // ignore
+    }
+    return [...DEFAULT_CATEGORIES[type]];
   },
 
   getStats: (): UserStats => {
