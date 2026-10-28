@@ -87,9 +87,9 @@ export default function GoalsManagerView({
             return (
               <div
                 key={goal.id}
-                className={`rounded-2xl p-5 space-y-4 bg-white border-2 transition-all duration-300 ${
+                className={`rounded-2xl p-5 space-y-4 bg-white border-2 transition-all duration-500 ease-out ${
                   isMain
-                    ? 'border-amber-400 border-b-4 shadow-sm'
+                    ? 'border-amber-400 border-b-4 shadow-sm ring-2 ring-amber-300/40'
                     : 'border-slate-200'
                 } ${isAnimating ? 'animate-lock-in' : ''}`}
               >
@@ -97,9 +97,9 @@ export default function GoalsManagerView({
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex items-center gap-3">
                     <div
-                      className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 transition-transform duration-300 ${
+                      className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 transition-all duration-500 ease-out ${
                         isMain
-                          ? 'bg-amber-500 text-white scale-105'
+                          ? 'bg-amber-500 text-white scale-105 shadow-sm'
                           : 'bg-slate-100 text-slate-600'
                       }`}
                     >
@@ -120,14 +120,16 @@ export default function GoalsManagerView({
                     <button
                       type="button"
                       onClick={() => handleToggleLock(goal.id)}
-                      className={`p-2 rounded-xl text-xs font-extrabold transition-all duration-200 cursor-pointer active:scale-90 ${
+                      className={`p-2 rounded-xl text-xs font-extrabold transition-all duration-300 cursor-pointer active:scale-95 ${
                         isMain
                           ? 'bg-amber-100 hover:bg-amber-200 text-amber-700 shadow-2xs'
                           : 'bg-slate-100 hover:bg-amber-50 text-slate-500 hover:text-amber-600'
                       }`}
                       title={isMain ? 'Lepas dari Target Utama (Klik untuk Unlock)' : 'Jadikan Target Utama (Lock In)'}
                     >
-                      {isMain ? <IoLockClosed className="text-sm text-amber-600 transition-transform" /> : <IoLockOpenOutline className="text-sm" />}
+                      <span className={`inline-block transition-transform duration-300 ${isAnimating ? 'scale-125 rotate-12' : 'scale-100 rotate-0'}`}>
+                        {isMain ? <IoLockClosed className="text-sm text-amber-600" /> : <IoLockOpenOutline className="text-sm" />}
+                      </span>
                     </button>
 
                     <button

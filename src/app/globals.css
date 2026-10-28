@@ -45,21 +45,25 @@ button:focus-visible {
   animation: pureFadeIn 0.2s ease-out forwards;
 }
 
-/* Animasi Lock-In Pop & Glow */
-@keyframes lockInPop {
+/* Animasi Lock-In Halus & Luwes (Smooth Spring Lift & Settle) */
+@keyframes lockInSmooth {
   0% {
-    transform: scale(0.96);
+    transform: scale(0.98) translateY(0);
   }
-  50% {
-    transform: scale(1.02);
+  40% {
+    transform: scale(1.015) translateY(-3px);
+  }
+  70% {
+    transform: scale(1.005) translateY(-1px);
   }
   100% {
-    transform: scale(1);
+    transform: scale(1) translateY(0);
   }
 }
 
 .animate-lock-in {
-  animation: lockInPop 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  animation: lockInSmooth 0.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  will-change: transform;
 }
 
 /* Mascot Animations */
