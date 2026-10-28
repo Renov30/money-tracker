@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Category, Transaction, TransactionType, CustomCategory } from '@/types';
+import { Category, Transaction, TransactionType, CustomCategory, DEFAULT_CATEGORIES } from '@/types';
 import { storage, formatRupiah } from '@/lib/storage';
 import WallabyMascot from './WallabyMascot';
 import {
@@ -10,9 +10,9 @@ import {
   IoPencil,
   IoAlertCircle,
   IoClose,
-  IoAddCircleOutline,
   IoAdd,
   IoRefreshOutline,
+  IoPricetagsOutline,
 } from 'react-icons/io5';
 
 interface AddTransactionModalProps {
@@ -23,23 +23,8 @@ interface AddTransactionModalProps {
   editingTransaction?: Transaction | null;
   initialType?: TransactionType;
   customCategories?: CustomCategory[];
-  onAddCustomCategory?: (name: string, type: TransactionType) => Promise<string | void> | void;
+  onOpenManageCategories?: () => void;
 }
-
-const DEFAULT_CATEGORIES: Record<TransactionType, Category[]> = {
-  expense: [
-    'Makanan & Minuman',
-    'Transportasi',
-    'Belanja',
-    'Tagihan & Utilitas',
-    'Hiburan',
-    'Lainnya',
-  ],
-  income: [
-    'Gaji & Usaha',
-    'Lainnya',
-  ],
-};
 
 export default function AddTransactionModal({
   isOpen,
@@ -49,17 +34,13 @@ export default function AddTransactionModal({
   editingTransaction = null,
   initialType = 'expense',
   customCategories = [],
-  onAddCustomCategory,
+  onOpenManageCategories,
 }: AddTransactionModalProps) {
   const [type, setType] = useState<TransactionType>(initialType);
   const [amount, setAmount] = useState<string>('');
   const [title, setTitle] = useState<string>('');
   const [category, setCategory] = useState<Category>('Makanan & Minuman');
   const [error, setError] = useState<string | null>(null);
-
-  // Custom Category creation state
-  const [isAddingCategory, setIsAddingCategory] = useState(false);
-  const [newCategoryName, setNewCategoryName] = useState('');
 
   // Custom Amount Presets state
   const [amountPresets, setAmountPresets] = useState<number[]>([]);
@@ -79,8 +60,6 @@ export default function AddTransactionModal({
   useEffect(() => {
     if (isOpen) {
       setError(null);
-      setIsAddingCategory(false);
-      setNewCategoryName('');
       setIsAddingPreset(false);
       setIsManagingPresets(false);
       setNewPresetValue('');
@@ -111,25 +90,6 @@ export default function AddTransactionModal({
   }, [type, isOpen]);
 
   if (!isOpen) return null;
-
-  const handleSaveCustomCategory = async () => {
-    const trimmed = newCategoryName.trim();
-    if (!trimmed) {
-      setError('Nama kategori tidak boleh kosong.');
-      return;
-    }
-    if (allCategories.some((c) => c.toLowerCase() === trimmed.toLowerCase())) {
-      setError(`Kategori "${trimmed}" sudah ada.`);
-      return;
-    }
-    setError(null);
-    if (onAddCustomCategory) {
-      await onAddCustomCategory(trimmed, type);
-    }
-    setCategory(trimmed);
-    setNewCategoryName('');
-    setIsAddingCategory(false);
-  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -452,52 +412,23 @@ export default function AddTransactionModal({
               <label className="block text-xs font-semibold text-slate-700">
                 Kategori
               </label>
-              <button
-                type="button"
-                onClick={() => setIsAddingCategory(!isAddingCategory)}
-                className="text-[11px] font-bold text-amber-700 hover:text-amber-800 transition cursor-pointer flex items-center gap-1"
-              >
-                <IoAddCircleOutline className="text-sm" />
-                <span>{isAddingCategory ? 'Batal' : '+ Kategori Baru'}</span>
-              </button>
+              {onOpenManageCategories && (
+                <button
+                  type="button"
+                  onClick={onOpenManageCategories}
+                  className="text-[11px] font-bold text-amber-700 hover:text-amber-800 transition cursor-pointer flex items-center gap-1"
+                >
+                  <IoPricetagsOutline className="text-xs" />
+                  <span>Kelola Kategori</span>
+                </button>
+              )}
             </div>
-
-            {/* Inline Custom Category Creator */}
-            {isAddingCategory && (
-              <div className="mb-2 p-3 bg-amber-50/80 border border-amber-200/80 rounded-2xl space-y-2 animate-fade-in">
-                <span className="text-[10px] font-bold text-amber-900 block">
-                  Tambah Kategori Baru ({type === 'income' ? 'Pemasukan' : 'Pengeluaran'}):
-                </span>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="text"
-                    value={newCategoryName}
-                    onChange={(e) => setNewCategoryName(e.target.value)}
-                    placeholder="Contoh: Investasi, Kesehatan..."
-                    className="flex-1 bg-white border border-amber-200 rounded-xl px-3 py-1.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500/20"
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault();
-                        handleSaveCustomCategory();
-                      }
-                    }}
-                  />
-                  <button
-                    type="button"
-                    onClick={handleSaveCustomCategory}
-                    className="px-3.5 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-xl shadow-xs transition active:scale-95 cursor-pointer shrink-0"
-                  >
-                    Simpan
-                  </button>
-                </div>
-              </div>
-            )}
 
             <select
               value={category}
               onChange={(e) => {
-                if (e.target.value === '__NEW__') {
-                  setIsAddingCategory(true);
+                if (e.target.value === '__MANAGE__') {
+                  onOpenManageCategories?.();
                 } else {
                   setCategory(e.target.value);
                 }
@@ -509,7 +440,7 @@ export default function AddTransactionModal({
                   {cat}
                 </option>
               ))}
-              <option value="__NEW__">+ Buat Kategori Baru...</option>
+              <option value="__MANAGE__">⚙️ Kelola / Tambah Kategori Baru...</option>
             </select>
           </div>
 

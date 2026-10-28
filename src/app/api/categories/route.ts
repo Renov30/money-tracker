@@ -48,3 +48,21 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ error: 'Failed to delete category' }, { status: 500 });
   }
 }
+
+export async function PUT(request: Request) {
+  try {
+    const body = await request.json();
+    if (!body.id || !body.name || !body.name.trim()) {
+      return NextResponse.json({ error: 'Category ID and name are required' }, { status: 400 });
+    }
+
+    const updated = await db.updateCategory(body.id, body.name.trim());
+    if (!updated) {
+      return NextResponse.json({ error: 'Category not found or update failed' }, { status: 404 });
+    }
+    return NextResponse.json({ category: updated });
+  } catch (error) {
+    console.error('Failed to update category:', error);
+    return NextResponse.json({ error: 'Failed to update category' }, { status: 500 });
+  }
+}

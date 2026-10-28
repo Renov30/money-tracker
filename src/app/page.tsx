@@ -22,6 +22,7 @@ import LingoraRightRail from '@/components/LingoraRightRail';
 import AddTransactionModal from '@/components/AddTransactionModal';
 import AddGoalModal from '@/components/AddGoalModal';
 import ConfirmDialogModal from '@/components/ConfirmDialogModal';
+import ManageCategoriesModal from '@/components/ManageCategoriesModal';
 import ToastNotification, { ToastData, ToastType } from '@/components/ToastNotification';
 
 export default function Home() {
@@ -38,6 +39,10 @@ export default function Home() {
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [addTxType, setAddTxType] = useState<TransactionType>('expense');
   const [isAddGoalOpen, setIsAddGoalOpen] = useState(false);
+
+  // Category Manager Modal State
+  const [isManageCategoriesOpen, setIsManageCategoriesOpen] = useState(false);
+  const [manageCategoriesType, setManageCategoriesType] = useState<TransactionType>('expense');
   
   // Custom Confirmation Dialog State (replacing native confirm)
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
@@ -254,6 +259,14 @@ export default function Home() {
     setEditingTransaction(null);
   };
 
+  // Open Manage Categories Modal
+  const handleOpenManageCategories = (defaultType?: TransactionType) => {
+    if (defaultType) {
+      setManageCategoriesType(defaultType);
+    }
+    setIsManageCategoriesOpen(true);
+  };
+
   // Add Custom Category
   const handleAddCustomCategory = async (name: string, type: TransactionType) => {
     try {
@@ -285,6 +298,76 @@ export default function Home() {
     storage.saveCategories(updated);
     showToast(`Kategori "${name}" berhasil ditambahkan!`, 'success');
     return name;
+  };
+
+  // Update Custom Category
+  const handleUpdateCustomCategory = async (id: string, name: string) => {
+    const oldCat = customCategories.find((c) => c.id === id);
+    const oldName = oldCat ? oldCat.name : '';
+
+    try {
+      const res = await fetch('/api/categories', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, name }),
+      });
+      if (res.ok) {
+        const json = await res.json();
+        const updatedCats = customCategories.map((c) => (c.id === id ? json.category : c));
+        setCustomCategories(updatedCats);
+        storage.saveCategories(updatedCats);
+
+        // Update local transactions if category was renamed
+        if (oldName) {
+          const updatedTxs = transactions.map((t) => (t.category === oldName ? { ...t, category: name } : t));
+          setTransactions(updatedTxs);
+          storage.saveTransactions(updatedTxs);
+        }
+
+        showToast(`Kategori berhasil diubah menjadi "${name}"!`, 'edit');
+        return;
+      }
+    } catch (e) {
+      console.warn('Update category API error:', e);
+    }
+
+    // Local fallback
+    const updatedCats = customCategories.map((c) => (c.id === id ? { ...c, name } : c));
+    setCustomCategories(updatedCats);
+    storage.saveCategories(updatedCats);
+    if (oldName) {
+      const updatedTxs = transactions.map((t) => (t.category === oldName ? { ...t, category: name } : t));
+      setTransactions(updatedTxs);
+      storage.saveTransactions(updatedTxs);
+    }
+    showToast(`Kategori berhasil diubah menjadi "${name}"!`, 'edit');
+  };
+
+  // Delete Custom Category
+  const handleDeleteCustomCategory = async (id: string) => {
+    const catToDelete = customCategories.find((c) => c.id === id);
+    const catName = catToDelete ? catToDelete.name : 'Kategori';
+
+    try {
+      const res = await fetch(`/api/categories?id=${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+      });
+      if (res.ok) {
+        const updated = customCategories.filter((c) => c.id !== id);
+        setCustomCategories(updated);
+        storage.saveCategories(updated);
+        showToast(`Kategori "${catName}" berhasil dihapus.`, 'success');
+        return;
+      }
+    } catch (e) {
+      console.warn('Delete category API error:', e);
+    }
+
+    // Local fallback
+    const updated = customCategories.filter((c) => c.id !== id);
+    setCustomCategories(updated);
+    storage.saveCategories(updated);
+    showToast(`Kategori "${catName}" berhasil dihapus.`, 'success');
   };
 
   // Add Goal to Database
@@ -395,6 +478,7 @@ export default function Home() {
         setActiveTab={setActiveTab}
         level={stats.level}
         userName={stats.name}
+        onOpenManageCategories={() => handleOpenManageCategories('expense')}
       />
 
       {/* Center & Right Content Shell */}
@@ -449,6 +533,7 @@ export default function Home() {
                     searchQuery={searchQuery}
                     forcedType="all"
                     customCategories={customCategories}
+                    onOpenManageCategories={() => handleOpenManageCategories('expense')}
                   />
                 </>
               )}
@@ -480,6 +565,7 @@ export default function Home() {
                     searchQuery={searchQuery}
                     forcedType="income"
                     customCategories={customCategories}
+                    onOpenManageCategories={() => handleOpenManageCategories('income')}
                   />
                 </div>
               )}
@@ -511,6 +597,7 @@ export default function Home() {
                     searchQuery={searchQuery}
                     forcedType="expense"
                     customCategories={customCategories}
+                    onOpenManageCategories={() => handleOpenManageCategories('expense')}
                   />
                 </div>
               )}
@@ -558,7 +645,17 @@ export default function Home() {
         editingTransaction={editingTransaction}
         initialType={addTxType}
         customCategories={customCategories}
-        onAddCustomCategory={handleAddCustomCategory}
+        onOpenManageCategories={() => handleOpenManageCategories(addTxType)}
+      />
+
+      <ManageCategoriesModal
+        isOpen={isManageCategoriesOpen}
+        onClose={() => setIsManageCategoriesOpen(false)}
+        customCategories={customCategories}
+        onAddCategory={handleAddCustomCategory}
+        onUpdateCategory={handleUpdateCustomCategory}
+        onDeleteCategory={handleDeleteCustomCategory}
+        initialType={manageCategoriesType}
       />
 
       <AddGoalModal

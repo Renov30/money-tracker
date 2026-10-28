@@ -334,5 +334,22 @@ export const db = {
       return false;
     }
   },
+
+  async updateCategory(id: string, name: string): Promise<CustomCategory | null> {
+    await initDb();
+    try {
+      const oldRes = await pool.query('SELECT * FROM custom_categories WHERE id = $1', [id]);
+      if (oldRes.rowCount === 0) return null;
+      const oldCat = oldRes.rows[0];
+
+      await pool.query('UPDATE custom_categories SET name = $1 WHERE id = $2', [name, id]);
+      await pool.query('UPDATE transactions SET category = $1 WHERE category = $2', [name, oldCat.name]);
+
+      return { id, name, type: oldCat.type };
+    } catch (e) {
+      console.error('Error updating category:', e);
+      return null;
+    }
+  },
 };
 

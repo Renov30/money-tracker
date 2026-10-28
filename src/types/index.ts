@@ -8,6 +8,21 @@ export interface CustomCategory {
   type: TransactionType;
 }
 
+export const DEFAULT_CATEGORIES: Record<TransactionType, Category[]> = {
+  expense: [
+    'Makanan & Minuman',
+    'Transportasi',
+    'Belanja',
+    'Tagihan & Utilitas',
+    'Hiburan',
+    'Lainnya',
+  ],
+  income: [
+    'Gaji & Usaha',
+    'Lainnya',
+  ],
+};
+
 export interface Transaction {
   id: string;
   title: string;

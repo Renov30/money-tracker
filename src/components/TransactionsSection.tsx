@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Transaction, TransactionType, Category, CustomCategory } from '@/types';
+import { Transaction, TransactionType, Category, CustomCategory, DEFAULT_CATEGORIES } from '@/types';
 import { formatRupiah } from '@/lib/storage';
-import { IoWalletOutline, IoTrashOutline, IoPencil, IoFilter } from 'react-icons/io5';
+import { IoWalletOutline, IoTrashOutline, IoPencil, IoFilter, IoPricetagsOutline } from 'react-icons/io5';
 
 interface TransactionsSectionProps {
   transactions: Transaction[];
@@ -13,22 +13,8 @@ interface TransactionsSectionProps {
   searchQuery: string;
   forcedType?: TransactionType | 'all';
   customCategories?: CustomCategory[];
+  onOpenManageCategories?: () => void;
 }
-
-const CATEGORIES_BY_TYPE: Record<TransactionType, Category[]> = {
-  expense: [
-    'Makanan & Minuman',
-    'Transportasi',
-    'Belanja',
-    'Tagihan & Utilitas',
-    'Hiburan',
-    'Lainnya',
-  ],
-  income: [
-    'Gaji & Usaha',
-    'Lainnya',
-  ],
-};
 
 export default function TransactionsSection({
   transactions,
@@ -38,6 +24,7 @@ export default function TransactionsSection({
   searchQuery,
   forcedType = 'all',
   customCategories = [],
+  onOpenManageCategories,
 }: TransactionsSectionProps) {
   const [filterType, setFilterType] = useState<TransactionType | 'all'>(forcedType);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -53,10 +40,10 @@ export default function TransactionsSection({
 
   const baseCategories =
     activeFilter === 'income'
-      ? CATEGORIES_BY_TYPE.income
+      ? DEFAULT_CATEGORIES.income
       : activeFilter === 'expense'
-      ? CATEGORIES_BY_TYPE.expense
-      : Array.from(new Set([...CATEGORIES_BY_TYPE.income, ...CATEGORIES_BY_TYPE.expense]));
+      ? DEFAULT_CATEGORIES.expense
+      : Array.from(new Set([...DEFAULT_CATEGORIES.income, ...DEFAULT_CATEGORIES.expense]));
 
   const txCategories = transactions
     .filter((tx) => activeFilter === 'all' || tx.type === activeFilter)
@@ -174,7 +161,7 @@ export default function TransactionsSection({
             </div>
           )}
 
-          {/* 1. Filter (sebelumnya Kategori) */}
+          {/* 1. Filter (Kategori) */}
           <div className="flex items-center gap-1.5 bg-amber-50/70 border border-amber-200/80 rounded-full px-3 py-1.5">
             <IoFilter className="text-amber-700 text-xs shrink-0" />
             <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
@@ -182,7 +169,13 @@ export default function TransactionsSection({
             </span>
             <select
               value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
+              onChange={(e) => {
+                if (e.target.value === '__MANAGE__') {
+                  onOpenManageCategories?.();
+                } else {
+                  setSelectedCategory(e.target.value);
+                }
+              }}
               className="bg-transparent text-slate-800 text-xs font-bold focus:outline-none cursor-pointer pr-1"
             >
               <option value="all">Semua Kategori</option>
@@ -191,6 +184,7 @@ export default function TransactionsSection({
                   {cat}
                 </option>
               ))}
+              <option value="__MANAGE__">⚙️ Kelola Kategori...</option>
             </select>
           </div>
 
@@ -219,6 +213,19 @@ export default function TransactionsSection({
               onChange={(e) => setCustomDate(e.target.value)}
               className="bg-amber-50/70 border border-amber-200/80 text-slate-800 text-xs font-bold rounded-full px-3 py-1 focus:outline-none focus:ring-2 focus:ring-amber-500/20 transition cursor-pointer"
             />
+          )}
+
+          {/* 3. Kelola Kategori Button */}
+          {onOpenManageCategories && (
+            <button
+              type="button"
+              onClick={onOpenManageCategories}
+              className="flex items-center gap-1.5 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200/80 rounded-full px-3 py-1.5 text-xs font-bold transition cursor-pointer active:scale-95 shadow-2xs"
+              title="Buka Manajemen Kategori"
+            >
+              <IoPricetagsOutline className="text-sm" />
+              <span>Kelola Kategori</span>
+            </button>
           )}
 
           {/* Reset Filters button if any active */}
