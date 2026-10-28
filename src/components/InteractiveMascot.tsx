@@ -8,7 +8,7 @@ interface InteractiveMascotProps {
 }
 
 export default function InteractiveMascot({
-  size = 175,
+  size = 195,
 }: InteractiveMascotProps) {
   const [mood, setMood] = useState<'happy' | 'waving' | 'excited'>('waving');
   const [isReacting, setIsReacting] = useState(false);

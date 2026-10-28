@@ -111,35 +111,13 @@ export default function WallabyMascot({
         {/* Cream Belly & Wallaby Pouch */}
         <ellipse cx="100" cy="138" rx="32" ry="36" fill="#fef3c7" />
 
-        {/* Pouch Arc (The Kangaroo/Wallaby Pouch that holds money!) */}
+        {/* Pouch Arc (The Kangaroo/Wallaby Pouch) */}
         <path
           d="M76 135 C76 158, 124 158, 124 135 Z"
           fill="#fde68a"
           stroke="#d97706"
           strokeWidth="2"
         />
-
-        {/* Shiny Gold Coin Peeking Out of Pouch with pulse/sparkle */}
-        <g transform="translate(85, 122)" className={animated ? 'animate-wally-coin' : ''}>
-          <circle cx="15" cy="15" r="14" fill="#f59e0b" stroke="#b45309" strokeWidth="1.5" />
-          <circle cx="15" cy="15" r="11" fill="#fbbf24" />
-          <text
-            x="15"
-            y="20"
-            textAnchor="middle"
-            fill="#78350f"
-            fontSize="14"
-            fontWeight="bold"
-            fontFamily="Arial, sans-serif"
-          >
-            $
-          </text>
-          {/* Sparkle */}
-          <polygon
-            points="23,5 25,9 29,11 25,13 23,17 21,13 17,11 21,9"
-            fill="#ffffff"
-          />
-        </g>
 
         {/* Eyes: Dynamic based on Mood */}
         {mood === 'money-love' ? (

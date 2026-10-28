@@ -35,9 +35,9 @@ export default function LingoraHeroBanner({
         </button>
       </div>
 
-      {/* Interactive Animated Wallaby Mascot on the Right */}
-      <div className="absolute right-2 sm:right-6 bottom-0 z-20">
-        <InteractiveMascot size={175} />
+      {/* Interactive Animated Wallaby Mascot on the Right (Shifted left and enlarged) */}
+      <div className="absolute right-8 sm:right-16 md:right-24 bottom-0 z-20">
+        <InteractiveMascot size={195} />
       </div>
 
       {/* Decorative Warm Sun/Cloud Shapes in Background */}
