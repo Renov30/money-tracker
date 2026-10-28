@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import WallabyMascot from './WallabyMascot';
-import { ClayAlert } from './Clay3DIcons';
+import { IoAlertCircle, IoClose } from 'react-icons/io5';
 
 interface AddGoalModalProps {
   isOpen: boolean;
@@ -54,14 +54,14 @@ export default function AddGoalModal({
             onClick={onClose}
             className="w-7 h-7 rounded-full bg-slate-100 text-slate-500 hover:text-slate-800 flex items-center justify-center font-bold text-xs transition cursor-pointer"
           >
-            ✕
+            <IoClose className="text-base" />
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
             <div className="flex items-center gap-2 p-2.5 bg-rose-50 border border-rose-200 rounded-2xl text-xs text-rose-700 font-semibold">
-              <ClayAlert size={18} />
+              <IoAlertCircle className="text-lg shrink-0" />
               <span>{error}</span>
             </div>
           )}

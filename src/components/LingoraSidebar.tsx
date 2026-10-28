@@ -3,15 +3,15 @@
 import React from 'react';
 import WallabyMascot from './WallabyMascot';
 import {
-  ClayHome,
-  ClayIncome,
-  ClayExpense,
-  ClayTarget,
-  ClayTrophy,
-  ClayCrown,
-  ClayGear,
-  ClayAvatar,
-} from './Clay3DIcons';
+  IoHome,
+  IoTrendingUp,
+  IoTrendingDown,
+  IoFlag,
+  IoTrophy,
+  IoSparkles,
+  IoSettingsOutline,
+  IoPersonCircle,
+} from 'react-icons/io5';
 
 interface SidebarProps {
   activeTab: string;
@@ -27,11 +27,11 @@ export default function LingoraSidebar({
   userName,
 }: SidebarProps) {
   const navItems = [
-    { id: 'home', label: 'Home', icon: <ClayHome size={20} /> },
-    { id: 'income', label: 'Pemasukan', icon: <ClayIncome size={20} /> },
-    { id: 'expense', label: 'Pengeluaran', icon: <ClayExpense size={20} /> },
-    { id: 'goals', label: 'Goals Tabungan', icon: <ClayTarget size={20} /> },
-    { id: 'leaderboard', label: 'Peringkat & Misi', icon: <ClayTrophy size={20} /> },
+    { id: 'home', label: 'Home', icon: <IoHome className="text-lg" /> },
+    { id: 'income', label: 'Pemasukan', icon: <IoTrendingUp className="text-lg text-emerald-600" /> },
+    { id: 'expense', label: 'Pengeluaran', icon: <IoTrendingDown className="text-lg text-rose-600" /> },
+    { id: 'goals', label: 'Goals Tabungan', icon: <IoFlag className="text-lg text-amber-600" /> },
+    { id: 'leaderboard', label: 'Peringkat & Misi', icon: <IoTrophy className="text-lg text-amber-500" /> },
   ];
 
   return (
@@ -75,10 +75,10 @@ export default function LingoraSidebar({
       </div>
 
       <div className="space-y-4 pt-4 border-t border-amber-100/60">
-        {/* Wally Plus Card (3D Clay Crown Theme) */}
+        {/* Wally Plus Card (Ionicons Sparkles Theme) */}
         <div className="bg-gradient-to-b from-amber-50 to-orange-50/60 border border-amber-200/70 rounded-2xl p-3.5 space-y-2">
           <div className="flex items-center gap-2">
-            <ClayCrown size={22} />
+            <IoSparkles className="text-amber-500 text-lg" />
             <span className="text-xs font-black text-slate-900">Wally Plus</span>
           </div>
           <p className="text-[11px] text-amber-900/80 font-medium leading-relaxed">
@@ -89,11 +89,11 @@ export default function LingoraSidebar({
           </button>
         </div>
 
-        {/* User Profile Footer Row */}
+        {/* User Profile Footer Row with Ionicons Avatar */}
         <div className="flex items-center justify-between px-2 pt-1">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-full overflow-hidden border border-amber-200/80 flex items-center justify-center shadow-xs shrink-0">
-              <ClayAvatar size={34} />
+            <div className="w-9 h-9 rounded-full overflow-hidden border border-amber-200/80 flex items-center justify-center bg-amber-50 shadow-xs shrink-0 text-amber-800">
+              <IoPersonCircle className="text-3xl" />
             </div>
             <div>
               <div className="text-xs font-bold text-slate-900">{userName}</div>
@@ -102,8 +102,8 @@ export default function LingoraSidebar({
               </div>
             </div>
           </div>
-          <button className="p-1 hover:bg-slate-100 rounded-lg transition cursor-pointer" title="Pengaturan">
-            <ClayGear size={18} />
+          <button className="p-1 hover:bg-slate-100 rounded-lg transition cursor-pointer text-slate-500 hover:text-slate-800" title="Pengaturan">
+            <IoSettingsOutline className="text-lg" />
           </button>
         </div>
       </div>

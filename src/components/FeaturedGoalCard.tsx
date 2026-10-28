@@ -3,7 +3,7 @@
 import React from 'react';
 import { Goal } from '@/types';
 import { formatRupiah } from '@/lib/storage';
-import { ClayGamepad } from './Clay3DIcons';
+import { IoGameController } from 'react-icons/io5';
 
 interface FeaturedGoalCardProps {
   goal: Goal;
@@ -35,12 +35,12 @@ export default function FeaturedGoalCard({
         </button>
       </div>
 
-      {/* Wide White Card with 3D Clay Controller */}
+      {/* Wide White Card with Ionicons Game Controller */}
       <div className="bg-white rounded-3xl p-4 md:p-5 border border-amber-100 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        {/* Left Icon Badge with 3D Clay Gamepad */}
+        {/* Left Icon Badge with Ionicons GameController */}
         <div className="flex items-center gap-4 w-full sm:w-auto">
-          <div className="w-14 h-14 rounded-2xl bg-amber-50 border border-amber-200/80 flex items-center justify-center shadow-xs shrink-0">
-            <ClayGamepad size={36} />
+          <div className="w-14 h-14 rounded-2xl bg-amber-50 border border-amber-200/80 flex items-center justify-center shadow-xs shrink-0 text-amber-600">
+            <IoGameController className="text-3xl" />
           </div>
           <div className="space-y-1 flex-1">
             <h4 className="text-sm font-bold text-slate-900 leading-snug">

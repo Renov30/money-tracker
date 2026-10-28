@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Category, Transaction, TransactionType } from '@/types';
 import WallabyMascot from './WallabyMascot';
-import { ClayExpense, ClayIncome, ClayEdit, ClayAlert } from './Clay3DIcons';
+import { IoTrendingDown, IoTrendingUp, IoPencil, IoAlertCircle, IoClose } from 'react-icons/io5';
 
 interface AddTransactionModalProps {
   isOpen: boolean;
@@ -109,8 +109,8 @@ export default function AddTransactionModal({
         <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
           <div className="flex items-center gap-2.5">
             {isEditing ? (
-              <div className="w-9 h-9 rounded-2xl bg-amber-50 border border-amber-200/80 flex items-center justify-center shadow-xs">
-                <ClayEdit size={20} />
+              <div className="w-9 h-9 rounded-2xl bg-amber-50 border border-amber-200/80 flex items-center justify-center shadow-xs text-amber-600">
+                <IoPencil className="text-lg" />
               </div>
             ) : (
               <WallabyMascot size={34} mood="happy" />
@@ -128,14 +128,14 @@ export default function AddTransactionModal({
             onClick={onClose}
             className="w-7 h-7 rounded-full bg-slate-100 text-slate-500 hover:text-slate-800 flex items-center justify-center font-bold text-xs transition cursor-pointer"
           >
-            ✕
+            <IoClose className="text-base" />
           </button>
         </div>
 
         {/* In-Form Error Alert (Custom, No Browser alert) */}
         {error && (
           <div className="mb-4 flex items-center gap-2 p-3 bg-rose-50 border border-rose-200 rounded-2xl text-xs text-rose-700 font-semibold animate-pulse">
-            <ClayAlert size={18} />
+            <IoAlertCircle className="text-lg shrink-0" />
             <span>{error}</span>
           </div>
         )}
@@ -154,7 +154,7 @@ export default function AddTransactionModal({
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            <ClayExpense size={16} />
+            <IoTrendingDown className="text-base" />
             <span>Pengeluaran</span>
           </button>
           <button
@@ -169,7 +169,7 @@ export default function AddTransactionModal({
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            <ClayIncome size={16} />
+            <IoTrendingUp className="text-base" />
             <span>Pemasukan</span>
           </button>
         </div>

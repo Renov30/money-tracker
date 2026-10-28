@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect } from 'react';
-import { ClayTrash, ClayAlert } from './Clay3DIcons';
+import { IoTrashOutline, IoWarningOutline } from 'react-icons/io5';
 
 interface ConfirmDialogModalProps {
   isOpen: boolean;
@@ -42,9 +42,13 @@ export default function ConfirmDialogModal({
         className="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl border border-amber-100 relative space-y-5 text-center"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Top 3D Clay Icon Badge */}
+        {/* Top Ionicons Badge */}
         <div className="mx-auto w-16 h-16 rounded-2xl bg-rose-50 border border-rose-100 flex items-center justify-center shadow-xs">
-          {type === 'danger' ? <ClayTrash size={36} /> : <ClayAlert size={36} />}
+          {type === 'danger' ? (
+            <IoTrashOutline className="text-3xl text-rose-600" />
+          ) : (
+            <IoWarningOutline className="text-3xl text-amber-600" />
+          )}
         </div>
 
         {/* Text info */}

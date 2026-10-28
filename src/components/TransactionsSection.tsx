@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { Transaction, TransactionType, Category } from '@/types';
 import { formatRupiah } from '@/lib/storage';
-import { ClayCoin, ClayTrash, ClayEdit } from './Clay3DIcons';
+import { IoWalletOutline, IoTrashOutline, IoPencil } from 'react-icons/io5';
 
 interface TransactionsSectionProps {
   transactions: Transaction[];
@@ -235,8 +235,8 @@ export default function TransactionsSection({
       {/* List of Transactions */}
       {filtered.length === 0 ? (
         <div className="text-center py-10 space-y-2">
-          <div className="flex justify-center">
-            <ClayCoin size={48} />
+          <div className="flex justify-center text-amber-500">
+            <IoWalletOutline className="text-5xl" />
           </div>
           <div className="text-xs font-bold text-slate-600">
             {isFiltered
@@ -304,7 +304,7 @@ export default function TransactionsSection({
                         className="w-8 h-8 rounded-xl bg-amber-50 hover:bg-amber-100/90 text-amber-700 flex items-center justify-center transition active:scale-90 cursor-pointer shadow-xs border border-amber-200/60"
                         title="Edit transaksi"
                       >
-                        <ClayEdit size={16} />
+                        <IoPencil className="text-sm" />
                       </button>
                     )}
 
@@ -313,7 +313,7 @@ export default function TransactionsSection({
                       className="w-8 h-8 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 flex items-center justify-center transition active:scale-90 cursor-pointer shadow-xs border border-rose-200/60"
                       title="Hapus transaksi"
                     >
-                      <ClayTrash size={16} />
+                      <IoTrashOutline className="text-base" />
                     </button>
                   </div>
                 </div>

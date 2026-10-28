@@ -1,7 +1,14 @@
 'use client';
 
 import React from 'react';
-import { ClayCheck, ClayTrash, ClayAlert, ClayCoin, ClayStar, ClayEdit } from './Clay3DIcons';
+import {
+  IoCheckmarkCircle,
+  IoTrashOutline,
+  IoPencil,
+  IoAlertCircle,
+  IoSparkles,
+  IoClose,
+} from 'react-icons/io5';
 
 export type ToastType = 'success' | 'delete' | 'edit' | 'warning' | 'level-up';
 
@@ -21,16 +28,16 @@ export default function ToastNotification({ toast, onClose }: ToastNotificationP
   const getIcon = () => {
     switch (toast.type) {
       case 'delete':
-        return <ClayTrash size={22} />;
+        return <IoTrashOutline className="text-xl text-rose-600" />;
       case 'edit':
-        return <ClayEdit size={22} />;
+        return <IoPencil className="text-xl text-amber-600" />;
       case 'warning':
-        return <ClayAlert size={22} />;
+        return <IoAlertCircle className="text-xl text-amber-600" />;
       case 'level-up':
-        return <ClayStar size={24} />;
+        return <IoSparkles className="text-2xl text-amber-500 animate-spin" />;
       case 'success':
       default:
-        return <ClayCheck size={22} />;
+        return <IoCheckmarkCircle className="text-xl text-emerald-600" />;
     }
   };
 
@@ -62,7 +69,7 @@ export default function ToastNotification({ toast, onClose }: ToastNotificationP
           className="ml-2 text-slate-400 hover:text-slate-700 font-black text-xs cursor-pointer p-0.5 rounded-lg"
           title="Tutup notifikasi"
         >
-          ✕
+          <IoClose className="text-sm" />
         </button>
       </div>
     </div>

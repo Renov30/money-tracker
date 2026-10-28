@@ -1,7 +1,13 @@
 'use client';
 
 import React from 'react';
-import { ClayFlame, ClayGift, ClayMedal, ClayCrown, ClayCheck } from './Clay3DIcons';
+import {
+  IoFlame,
+  IoGift,
+  IoMedal,
+  IoSparkles,
+  IoCheckmarkCircle,
+} from 'react-icons/io5';
 
 interface RightRailProps {
   streakDays: number;
@@ -51,7 +57,7 @@ export default function LingoraRightRail({
           </span>
         </div>
 
-        {/* Circular Progress Ring in Warm Amber with 3D Clay Flame */}
+        {/* Circular Progress Ring in Warm Amber with Ionicons Flame */}
         <div className="flex items-center justify-between gap-4">
           <div className="relative w-20 h-20 flex items-center justify-center shrink-0">
             <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
@@ -73,7 +79,7 @@ export default function LingoraRightRail({
               />
             </svg>
             <div className="absolute flex flex-col items-center justify-center">
-              <ClayFlame size={18} />
+              <IoFlame className="text-orange-500 text-lg" />
               <div className="text-[10px] font-black text-amber-950 font-mono mt-0.5">
                 {percentage}%
               </div>
@@ -90,7 +96,7 @@ export default function LingoraRightRail({
           </div>
         </div>
 
-        {/* Week Streak Dots (Mon - Sun) */}
+        {/* Week Streak Dots (Mon - Sun) with Ionicons Checkmark */}
         <div className="flex items-center justify-between pt-2 border-t border-amber-50">
           {days.map((item, index) => (
             <div key={index} className="flex flex-col items-center gap-1">
@@ -98,12 +104,12 @@ export default function LingoraRightRail({
               <div
                 className={`w-6 h-6 rounded-full flex items-center justify-center transition-all ${
                   item.checked
-                    ? 'shadow-xs'
+                    ? 'text-amber-600'
                     : 'bg-amber-50 text-amber-200'
                 }`}
               >
                 {item.checked ? (
-                  <ClayCheck size={22} />
+                  <IoCheckmarkCircle className="text-xl text-amber-600" />
                 ) : (
                   <span className="w-1.5 h-1.5 rounded-full bg-amber-200/80"></span>
                 )}
@@ -113,7 +119,7 @@ export default function LingoraRightRail({
         </div>
       </div>
 
-      {/* 2. Leaderboard Card with 3D Clay Medals & Crown */}
+      {/* 2. Leaderboard Card with Ionicons Medals & Sparkles */}
       <div className="bg-white rounded-3xl p-5 border border-amber-100 shadow-xs space-y-3">
         <div className="flex items-center justify-between">
           <h4 className="text-xs font-black uppercase tracking-wider text-slate-800">
@@ -133,11 +139,11 @@ export default function LingoraRightRail({
               <div className="flex items-center gap-2.5">
                 <div className="w-6 h-6 flex items-center justify-center shrink-0">
                   {user.rank === 1 ? (
-                    <ClayCrown size={22} />
+                    <IoSparkles className="text-amber-500 text-lg" />
                   ) : user.rank === 2 ? (
-                    <ClayMedal size={22} rank={2} />
+                    <IoMedal className="text-slate-400 text-lg" />
                   ) : user.rank === 3 ? (
-                    <ClayMedal size={22} rank={3} />
+                    <IoMedal className="text-amber-700 text-lg" />
                   ) : (
                     <span className="w-5 h-5 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-400">
                       {user.rank}
@@ -156,10 +162,10 @@ export default function LingoraRightRail({
         </div>
       </div>
 
-      {/* 3. Gift Box / Mystery Quest Box with 3D Clay Gift */}
+      {/* 3. Gift Box / Mystery Quest Box with Ionicons Gift */}
       <div className="bg-gradient-to-br from-amber-50 to-orange-50/70 border border-amber-200/80 rounded-3xl p-4 shadow-xs flex items-center gap-3">
-        <div className="w-12 h-12 rounded-2xl bg-white border border-amber-200 flex items-center justify-center shadow-xs shrink-0 animate-bounce">
-          <ClayGift size={28} />
+        <div className="w-12 h-12 rounded-2xl bg-white border border-amber-200 flex items-center justify-center shadow-xs shrink-0 animate-bounce text-amber-600">
+          <IoGift className="text-2xl" />
         </div>
         <div className="space-y-1">
           <div className="text-xs font-bold text-slate-900 leading-tight">

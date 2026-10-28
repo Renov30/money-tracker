@@ -2,7 +2,7 @@
 
 import React from 'react';
 import WallabyMascot from './WallabyMascot';
-import { ClayTarget } from './Clay3DIcons';
+import { IoFlag } from 'react-icons/io5';
 
 interface HeroBannerProps {
   userName: string;
@@ -18,10 +18,10 @@ export default function LingoraHeroBanner({
   return (
     <div className="relative rounded-3xl bg-gradient-to-r from-amber-100/90 via-amber-200/50 to-orange-100/80 p-6 md:p-8 overflow-hidden shadow-xs border border-amber-300/60 flex flex-col justify-between min-h-[200px]">
       
-      {/* Target Tag at Top Right with 3D Clay Target */}
+      {/* Target Tag at Top Right with Ionicons Flag */}
       <div className="self-end z-10">
-        <span className="bg-white/90 backdrop-blur-xs border border-amber-200/80 text-amber-950 text-[11px] font-bold px-3.5 py-1 rounded-full shadow-xs flex items-center gap-2 cursor-pointer hover:bg-white transition">
-          <ClayTarget size={16} />
+        <span className="bg-white/90 backdrop-blur-xs border border-amber-200/80 text-amber-950 text-[11px] font-bold px-3.5 py-1 rounded-full shadow-xs flex items-center gap-1.5 cursor-pointer hover:bg-white transition">
+          <IoFlag className="text-amber-600 text-sm" />
           <span>Target: {activeGoalTitle} ›</span>
         </span>
       </div>
