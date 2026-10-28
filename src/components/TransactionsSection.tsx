@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { Transaction, TransactionType, Category, CustomCategory, DEFAULT_CATEGORIES } from '@/types';
 import { formatRupiah } from '@/lib/storage';
-import { IoWalletOutline, IoTrashOutline, IoPencil, IoFilter } from 'react-icons/io5';
+import { IoWalletOutline, IoTrashOutline, IoPencil, IoFilter, IoPricetagsOutline } from 'react-icons/io5';
 import CustomDropdown, { DropdownOption } from './CustomDropdown';
 
 interface TransactionsSectionProps {
@@ -212,14 +212,15 @@ export default function TransactionsSection({
             />
           )}
 
-          {/* 3. Kelola Kategori Button */}
+          {/* 3. Kelola Kategori Button (Prominent Pill Style) */}
           {onOpenManageCategories && (
             <button
               type="button"
               onClick={onOpenManageCategories}
-              className="text-[11px] font-semibold text-slate-400 hover:text-slate-600 transition cursor-pointer px-1.5 py-1"
+              className="flex items-center gap-1.5 bg-gradient-to-r from-amber-50 to-orange-50/70 hover:from-amber-100 hover:to-orange-100 text-amber-900 border border-amber-200/90 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all duration-200 shadow-2xs hover:shadow-xs active:scale-95 cursor-pointer"
               title="Buka Manajemen Kategori"
             >
+              <IoPricetagsOutline className="text-sm text-amber-700" />
               <span>Kelola Kategori</span>
             </button>
           )}
