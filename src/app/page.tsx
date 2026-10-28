@@ -565,10 +565,8 @@ export default function Home() {
       {/* Center & Right Content Shell */}
       <div className="flex-1 flex flex-col min-h-screen bg-[#faf7f2]">
           
-          {/* Top Search & Stats Bar */}
+          {/* Top Stats Bar */}
           <LingoraTopBar
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
             streakDays={stats.streakDays}
             xpCoins={stats.currentXp}
           />
