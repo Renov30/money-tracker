@@ -18,7 +18,7 @@ export async function POST(request: Request) {
 
     if (body.action === 'lock_in') {
       const { id } = body;
-      await db.lockInMainGoal(id);
+      await db.toggleLockInGoal(id);
       const updatedGoals = await db.getGoals();
       return NextResponse.json({ goals: updatedGoals });
     }

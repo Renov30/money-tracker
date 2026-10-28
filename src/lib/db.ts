@@ -329,19 +329,7 @@ export const db = {
   async deleteGoal(id: string): Promise<boolean> {
     await initDb();
     try {
-      // If deleted goal was the main goal, promote the next oldest goal to main
-      const res = await pool.query('SELECT is_main FROM goals WHERE id = $1', [id]);
-      const wasMain = res.rows[0]?.is_main;
-      
       await pool.query('DELETE FROM goals WHERE id = $1', [id]);
-
-      if (wasMain) {
-        await pool.query(`
-          UPDATE goals 
-          SET is_main = TRUE 
-          WHERE id = (SELECT id FROM goals ORDER BY created_at ASC LIMIT 1)
-        `);
-      }
       return true;
     } catch (e) {
       console.error('Error deleting goal in DB:', e);
@@ -349,15 +337,25 @@ export const db = {
     }
   },
 
-  async lockInMainGoal(id: string): Promise<boolean> {
+  async toggleLockInGoal(id: string): Promise<boolean> {
     await initDb();
     try {
-      // Reset all goals is_main to FALSE, then set target id to TRUE
+      // Cek apakah target ini sedang terkunci
+      const res = await pool.query('SELECT is_main FROM goals WHERE id = $1', [id]);
+      const currentIsMain = Boolean(res.rows[0]?.is_main);
+
+      // Selalu reset semua target lainnya menjadi FALSE
       await pool.query('UPDATE goals SET is_main = FALSE');
-      await pool.query('UPDATE goals SET is_main = TRUE WHERE id = $1', [id]);
+
+      // Jika sebelumnya belum terkunci, jadikan TRUE (Lock In)
+      // Jika sebelumnya sudah terkunci, biarkan tetap FALSE (Unlock)
+      if (!currentIsMain) {
+        await pool.query('UPDATE goals SET is_main = TRUE WHERE id = $1', [id]);
+      }
+
       return true;
     } catch (e) {
-      console.error('Error locking in main goal in DB:', e);
+      console.error('Error toggling lock in goal in DB:', e);
       return false;
     }
   },

@@ -119,12 +119,12 @@ export default function GoalsManagerView({
                       onClick={() => onLockInGoal(goal.id)}
                       className={`p-2 rounded-xl text-xs font-extrabold transition cursor-pointer ${
                         isMain
-                          ? 'bg-amber-100 text-amber-700'
+                          ? 'bg-amber-100 hover:bg-amber-200 text-amber-700'
                           : 'bg-slate-100 hover:bg-amber-50 text-slate-500 hover:text-amber-600'
                       }`}
-                      title={isMain ? 'Target Utama' : 'Jadikan Target Utama'}
+                      title={isMain ? 'Lepas dari Target Utama (Klik untuk Unlock)' : 'Jadikan Target Utama (Lock In)'}
                     >
-                      {isMain ? <IoLockClosed className="text-sm" /> : <IoLockOpenOutline className="text-sm" />}
+                      {isMain ? <IoLockClosed className="text-sm text-amber-600" /> : <IoLockOpenOutline className="text-sm" />}
                     </button>
 
                     <button

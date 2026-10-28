@@ -636,7 +636,7 @@ export default function Home() {
     }
   };
 
-  // Lock In Main Goal
+  // Lock In / Unlock Main Goal
   const handleLockInGoal = async (goalId: string) => {
     try {
       const res = await fetch('/api/goals', {
@@ -649,8 +649,12 @@ export default function Home() {
         if (json.goals) {
           setGoals(json.goals);
           storage.saveGoals(json.goals);
-          const lockedGoal = json.goals.find((g: Goal) => g.id === goalId);
-          showToast(`Target "${lockedGoal?.title || 'Goal'}" berhasil di-Lock In sebagai Target Utama!`, 'success');
+          const targetGoal = json.goals.find((g: Goal) => g.id === goalId);
+          if (targetGoal?.isMain) {
+            showToast(`Target "${targetGoal.title}" di-Lock In sebagai Target Utama!`, 'success');
+          } else {
+            showToast(`Target "${targetGoal?.title || 'Goal'}" dilepas dari Target Utama.`, 'edit');
+          }
           return;
         }
       }
@@ -659,16 +663,20 @@ export default function Home() {
     }
 
     // Local fallback
+    const targetGoal = goals.find((g) => g.id === goalId);
+    const willBeMain = !targetGoal?.isMain;
+
     const updated = goals.map((g) => ({
       ...g,
-      isMain: g.id === goalId,
+      isMain: g.id === goalId ? willBeMain : false,
     }));
-    // Reorder so main goal is first
-    const sorted = [...updated].sort((a, b) => (b.isMain ? 1 : 0) - (a.isMain ? 1 : 0));
-    setGoals(sorted);
-    storage.saveGoals(sorted);
-    const lockedGoal = sorted.find((g) => g.id === goalId);
-    showToast(`Target "${lockedGoal?.title || 'Goal'}" berhasil di-Lock In sebagai Target Utama!`, 'success');
+    setGoals(updated);
+    storage.saveGoals(updated);
+    if (willBeMain) {
+      showToast(`Target "${targetGoal?.title || 'Goal'}" di-Lock In sebagai Target Utama!`, 'success');
+    } else {
+      showToast(`Target "${targetGoal?.title || 'Goal'}" dilepas dari Target Utama.`, 'edit');
+    }
   };
 
   // Prompt Delete Goal
@@ -731,15 +739,8 @@ export default function Home() {
     setIsAddTxOpen(true);
   };
 
-  // Active Main Goal is the one marked with isMain: true, or the first goal
-  const activeMainGoal = goals.find((g) => g.isMain) || goals[0] || {
-    id: 'goal-default',
-    title: 'Celengan Target',
-    targetAmount: 5000000,
-    currentAmount: 2500000,
-    category: 'Target',
-    isMain: true,
-  };
+  // Active Main Goal is only the one explicitly marked with isMain: true
+  const activeMainGoal = goals.find((g) => g.isMain) || null;
 
   const handleLogout = async () => {
     try {
@@ -821,12 +822,14 @@ export default function Home() {
                     onViewGoals={() => setActiveTab('goals')}
                   />
 
-                  {/* Target Tabungan Utama (Berjalan Terus) */}
-                  <FeaturedGoalCard
-                    goal={activeMainGoal}
-                    onTopUp={handleTopUpGoal}
-                    onViewAllGoals={() => setActiveTab('goals')}
-                  />
+                  {/* Target Tabungan Utama (Hanya Ditampilkan jika ada yang di-Lock In) */}
+                  {activeMainGoal && (
+                    <FeaturedGoalCard
+                      goal={activeMainGoal}
+                      onTopUp={handleTopUpGoal}
+                      onViewAllGoals={() => setActiveTab('goals')}
+                    />
+                  )}
 
                   {/* Recent Transactions List (Bulan Terpilih) */}
                   <TransactionsSection
