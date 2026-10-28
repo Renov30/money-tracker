@@ -1,5 +1,5 @@
 import { Pool } from 'pg';
-import { Transaction, Goal, UserStats } from '@/types';
+import { Transaction, Goal, UserStats, CustomCategory } from '@/types';
 import {
   INITIAL_USER_STATS,
   INITIAL_TRANSACTIONS,
@@ -62,6 +62,16 @@ export async function initDb() {
           last_active_date VARCHAR(50) NOT NULL,
           monthly_budget BIGINT DEFAULT 7000000,
           updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+      `);
+
+      // 4. Custom Categories Table
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS custom_categories (
+          id VARCHAR(100) PRIMARY KEY,
+          name VARCHAR(100) NOT NULL,
+          type VARCHAR(20) NOT NULL,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
       `);
 
@@ -272,6 +282,43 @@ export const db = {
       return stats;
     } catch {
       return stats;
+    }
+  },
+
+  // CATEGORIES
+  async getCategories(): Promise<CustomCategory[]> {
+    await initDb();
+    try {
+      const res = await pool.query(
+        'SELECT id, name, type FROM custom_categories ORDER BY created_at ASC'
+      );
+      return res.rows;
+    } catch {
+      return [];
+    }
+  },
+
+  async addCategory(cat: CustomCategory): Promise<CustomCategory> {
+    await initDb();
+    try {
+      await pool.query(
+        'INSERT INTO custom_categories (id, name, type) VALUES ($1, $2, $3)',
+        [cat.id, cat.name, cat.type]
+      );
+      return cat;
+    } catch (e) {
+      console.error('Error adding category:', e);
+      return cat;
+    }
+  },
+
+  async deleteCategory(id: string): Promise<boolean> {
+    await initDb();
+    try {
+      await pool.query('DELETE FROM custom_categories WHERE id = $1', [id]);
+      return true;
+    } catch {
+      return false;
     }
   },
 };

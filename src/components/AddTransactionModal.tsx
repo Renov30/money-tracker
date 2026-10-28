@@ -1,9 +1,19 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Category, Transaction, TransactionType } from '@/types';
+import { Category, Transaction, TransactionType, CustomCategory } from '@/types';
+import { storage, formatRupiah } from '@/lib/storage';
 import WallabyMascot from './WallabyMascot';
-import { IoTrendingDown, IoTrendingUp, IoPencil, IoAlertCircle, IoClose } from 'react-icons/io5';
+import {
+  IoTrendingDown,
+  IoTrendingUp,
+  IoPencil,
+  IoAlertCircle,
+  IoClose,
+  IoAddCircleOutline,
+  IoAdd,
+  IoRefreshOutline,
+} from 'react-icons/io5';
 
 interface AddTransactionModalProps {
   isOpen: boolean;
@@ -12,9 +22,11 @@ interface AddTransactionModalProps {
   onUpdateTransaction?: (tx: Transaction) => void;
   editingTransaction?: Transaction | null;
   initialType?: TransactionType;
+  customCategories?: CustomCategory[];
+  onAddCustomCategory?: (name: string, type: TransactionType) => Promise<string | void> | void;
 }
 
-const CATEGORIES: Record<TransactionType, Category[]> = {
+const DEFAULT_CATEGORIES: Record<TransactionType, Category[]> = {
   expense: [
     'Makanan & Minuman',
     'Transportasi',
@@ -36,6 +48,8 @@ export default function AddTransactionModal({
   onUpdateTransaction,
   editingTransaction = null,
   initialType = 'expense',
+  customCategories = [],
+  onAddCustomCategory,
 }: AddTransactionModalProps) {
   const [type, setType] = useState<TransactionType>(initialType);
   const [amount, setAmount] = useState<string>('');
@@ -43,9 +57,36 @@ export default function AddTransactionModal({
   const [category, setCategory] = useState<Category>('Makanan & Minuman');
   const [error, setError] = useState<string | null>(null);
 
+  // Custom Category creation state
+  const [isAddingCategory, setIsAddingCategory] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
+
+  // Custom Amount Presets state
+  const [amountPresets, setAmountPresets] = useState<number[]>([]);
+  const [isAddingPreset, setIsAddingPreset] = useState(false);
+  const [newPresetValue, setNewPresetValue] = useState('');
+  const [isManagingPresets, setIsManagingPresets] = useState(false);
+  const [presetError, setPresetError] = useState<string | null>(null);
+
+  // Combine default categories with custom categories for current type
+  const typeCustomCats = customCategories
+    .filter((c) => c.type === type)
+    .map((c) => c.name);
+  const allCategories = Array.from(
+    new Set([...DEFAULT_CATEGORIES[type], ...typeCustomCats])
+  );
+
   useEffect(() => {
     if (isOpen) {
       setError(null);
+      setIsAddingCategory(false);
+      setNewCategoryName('');
+      setIsAddingPreset(false);
+      setIsManagingPresets(false);
+      setNewPresetValue('');
+      setPresetError(null);
+      setAmountPresets(storage.getAmountPresets(type));
+
       if (editingTransaction) {
         setType(editingTransaction.type);
         setAmount(editingTransaction.amount.toString());
@@ -60,7 +101,35 @@ export default function AddTransactionModal({
     }
   }, [isOpen, initialType, editingTransaction]);
 
+  // Update presets whenever type changes
+  useEffect(() => {
+    if (isOpen) {
+      setAmountPresets(storage.getAmountPresets(type));
+      setIsAddingPreset(false);
+      setPresetError(null);
+    }
+  }, [type, isOpen]);
+
   if (!isOpen) return null;
+
+  const handleSaveCustomCategory = async () => {
+    const trimmed = newCategoryName.trim();
+    if (!trimmed) {
+      setError('Nama kategori tidak boleh kosong.');
+      return;
+    }
+    if (allCategories.some((c) => c.toLowerCase() === trimmed.toLowerCase())) {
+      setError(`Kategori "${trimmed}" sudah ada.`);
+      return;
+    }
+    setError(null);
+    if (onAddCustomCategory) {
+      await onAddCustomCategory(trimmed, type);
+    }
+    setCategory(trimmed);
+    setNewCategoryName('');
+    setIsAddingCategory(false);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -97,6 +166,49 @@ export default function AddTransactionModal({
 
   const handleChip = (val: number) => {
     setAmount(val.toString());
+  };
+
+  const handleAddPreset = () => {
+    const raw = parseInt(newPresetValue.replace(/\D/g, ''), 10);
+    if (!raw || raw <= 0) {
+      setPresetError('Nominal harus lebih dari 0.');
+      return;
+    }
+    if (amountPresets.includes(raw)) {
+      setPresetError(`Nominal ${formatRupiah(raw)} sudah ada di daftar.`);
+      return;
+    }
+    const updated = [...amountPresets, raw].sort((a, b) => a - b);
+    setAmountPresets(updated);
+    storage.saveAmountPresets(type, updated);
+    setAmount(raw.toString());
+    setNewPresetValue('');
+    setIsAddingPreset(false);
+    setPresetError(null);
+  };
+
+  const handleDeletePreset = (valToDelete: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const updated = amountPresets.filter((v) => v !== valToDelete);
+    setAmountPresets(updated);
+    storage.saveAmountPresets(type, updated);
+  };
+
+  const handleResetPresets = () => {
+    const defaults = storage.resetAmountPresets(type);
+    setAmountPresets(defaults);
+  };
+
+  const formatChipLabel = (val: number) => {
+    if (val >= 1000000) {
+      const jt = val / 1000000;
+      return `${Number.isInteger(jt) ? jt : jt.toFixed(1).replace('.0', '')}jt`;
+    }
+    if (val >= 1000) {
+      const k = val / 1000;
+      return `${Number.isInteger(k) ? k : k.toFixed(1).replace('.0', '')}k`;
+    }
+    return val.toLocaleString('id-ID');
   };
 
   const isEditing = Boolean(editingTransaction);
@@ -193,22 +305,132 @@ export default function AddTransactionModal({
               />
             </div>
 
-            {/* Quick Chips */}
-            <div className="flex gap-1.5 mt-2 flex-wrap">
-              {[15000, 25000, 50000, 100000, 250000, 1000000].map((chip) => (
-                <button
-                  type="button"
-                  key={chip}
-                  onClick={() => handleChip(chip)}
-                  className="text-[11px] font-semibold px-2.5 py-1 bg-amber-50 hover:bg-amber-100 text-amber-900 rounded-xl transition cursor-pointer"
-                >
-                  {chip >= 1000000
-                    ? `${chip / 1000000}jt`
-                    : chip >= 1000
-                    ? `${chip / 1000}k`
-                    : chip}
-                </button>
-              ))}
+            {/* Quick Chips & Custom Amount Controls */}
+            <div className="mt-2.5">
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-[11px] font-bold text-slate-500">
+                  Nominal Default / Cepat:
+                </span>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsAddingPreset(!isAddingPreset);
+                      setPresetError(null);
+                    }}
+                    className="text-[11px] font-semibold text-amber-700 hover:text-amber-800 transition cursor-pointer flex items-center gap-0.5"
+                    title="Tambah nominal default baru"
+                  >
+                    <IoAdd className="text-xs" />
+                    <span>{isAddingPreset ? 'Batal' : '+ Nominal'}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsManagingPresets(!isManagingPresets)}
+                    className={`text-[11px] font-semibold transition cursor-pointer flex items-center gap-0.5 ${
+                      isManagingPresets
+                        ? 'text-rose-600 font-bold'
+                        : 'text-slate-400 hover:text-slate-600'
+                    }`}
+                    title="Kelola & hapus nominal default"
+                  >
+                    <span>{isManagingPresets ? 'Selesai' : 'Kelola'}</span>
+                  </button>
+                  {isManagingPresets && (
+                    <button
+                      type="button"
+                      onClick={handleResetPresets}
+                      className="text-[11px] font-semibold text-slate-400 hover:text-amber-700 transition cursor-pointer flex items-center gap-0.5"
+                      title="Kembalikan ke nominal standar"
+                    >
+                      <IoRefreshOutline className="text-xs" />
+                      <span>Reset</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Inline Custom Preset Creator */}
+              {isAddingPreset && (
+                <div className="mb-2 p-2.5 bg-amber-50/90 border border-amber-200/90 rounded-2xl space-y-1.5 animate-fade-in">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-bold text-amber-900">
+                      Tambah Nominal Default ({type === 'income' ? 'Pemasukan' : 'Pengeluaran'}):
+                    </span>
+                    {presetError && (
+                      <span className="text-[10px] text-rose-600 font-semibold">{presetError}</span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="relative flex-1">
+                      <span className="absolute left-2.5 top-1.5 text-xs font-bold text-amber-700">Rp</span>
+                      <input
+                        type="number"
+                        value={newPresetValue}
+                        onChange={(e) => setNewPresetValue(e.target.value)}
+                        placeholder={type === 'income' ? '1500000' : '75000'}
+                        className="w-full bg-white border border-amber-200 rounded-xl pl-8 pr-2.5 py-1.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500/20 font-mono"
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            handleAddPreset();
+                          }
+                        }}
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleAddPreset}
+                      className="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-xl shadow-xs transition active:scale-95 cursor-pointer shrink-0"
+                    >
+                      Tambah
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Chips List */}
+              <div className="flex gap-1.5 flex-wrap">
+                {amountPresets.map((chip) => {
+                  const isSelected = amount === chip.toString();
+                  return (
+                    <div key={chip} className="relative inline-flex items-center">
+                      <button
+                        type="button"
+                        onClick={() => handleChip(chip)}
+                        title={formatRupiah(chip)}
+                        className={`text-[11px] font-semibold px-2.5 py-1 rounded-xl transition cursor-pointer flex items-center gap-1 ${
+                          isSelected
+                            ? 'bg-amber-600 text-white shadow-xs font-bold ring-2 ring-amber-400/40'
+                            : 'bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200/50'
+                        } ${isManagingPresets ? 'pr-1.5' : ''}`}
+                      >
+                        <span>{formatChipLabel(chip)}</span>
+                        {isManagingPresets && (
+                          <span
+                            onClick={(e) => handleDeletePreset(chip, e)}
+                            title={`Hapus nominal ${formatRupiah(chip)}`}
+                            className="w-4 h-4 rounded-full bg-rose-500 hover:bg-rose-600 text-white flex items-center justify-center text-[10px] ml-1 transition"
+                          >
+                            <IoClose className="text-xs" />
+                          </span>
+                        )}
+                      </button>
+                    </div>
+                  );
+                })}
+                {!isAddingPreset && (
+                  <button
+                    type="button"
+                    onClick={() => setIsAddingPreset(true)}
+                    className="text-[11px] font-semibold px-2 py-1 border border-dashed border-amber-300 text-amber-700 hover:bg-amber-50 rounded-xl transition cursor-pointer flex items-center gap-0.5"
+                    title="Tambah nominal default baru"
+                  >
+                    <IoAdd className="text-xs" />
+                    <span>Nominal</span>
+                  </button>
+                )}
+              </div>
             </div>
           </div>
 
@@ -226,19 +448,68 @@ export default function AddTransactionModal({
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">
-              Kategori
-            </label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-xs font-semibold text-slate-700">
+                Kategori
+              </label>
+              <button
+                type="button"
+                onClick={() => setIsAddingCategory(!isAddingCategory)}
+                className="text-[11px] font-bold text-amber-700 hover:text-amber-800 transition cursor-pointer flex items-center gap-1"
+              >
+                <IoAddCircleOutline className="text-sm" />
+                <span>{isAddingCategory ? 'Batal' : '+ Kategori Baru'}</span>
+              </button>
+            </div>
+
+            {/* Inline Custom Category Creator */}
+            {isAddingCategory && (
+              <div className="mb-2 p-3 bg-amber-50/80 border border-amber-200/80 rounded-2xl space-y-2 animate-fade-in">
+                <span className="text-[10px] font-bold text-amber-900 block">
+                  Tambah Kategori Baru ({type === 'income' ? 'Pemasukan' : 'Pengeluaran'}):
+                </span>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={newCategoryName}
+                    onChange={(e) => setNewCategoryName(e.target.value)}
+                    placeholder="Contoh: Investasi, Kesehatan..."
+                    className="flex-1 bg-white border border-amber-200 rounded-xl px-3 py-1.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500/20"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleSaveCustomCategory();
+                      }
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={handleSaveCustomCategory}
+                    className="px-3.5 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-xl shadow-xs transition active:scale-95 cursor-pointer shrink-0"
+                  >
+                    Simpan
+                  </button>
+                </div>
+              </div>
+            )}
+
             <select
               value={category}
-              onChange={(e) => setCategory(e.target.value as Category)}
+              onChange={(e) => {
+                if (e.target.value === '__NEW__') {
+                  setIsAddingCategory(true);
+                } else {
+                  setCategory(e.target.value);
+                }
+              }}
               className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3.5 py-2 text-slate-900 text-xs focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition"
             >
-              {CATEGORIES[type].map((cat) => (
+              {allCategories.map((cat) => (
                 <option key={cat} value={cat}>
                   {cat}
                 </option>
               ))}
+              <option value="__NEW__">+ Buat Kategori Baru...</option>
             </select>
           </div>
 

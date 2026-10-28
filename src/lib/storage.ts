@@ -1,4 +1,4 @@
-import { Transaction, Goal, DailyQuest, UserStats } from '@/types';
+import { Transaction, Goal, DailyQuest, UserStats, CustomCategory } from '@/types';
 
 export const INITIAL_USER_STATS: UserStats = {
   name: 'Alex',
@@ -115,9 +115,26 @@ const KEYS = {
   TRANSACTIONS: 'penny_tracker_transactions',
   GOALS: 'penny_tracker_goals',
   QUESTS: 'penny_tracker_quests',
+  CATEGORIES: 'penny_tracker_custom_categories',
+  AMOUNT_PRESETS: 'penny_tracker_amount_presets',
+};
+
+export const DEFAULT_AMOUNT_PRESETS: Record<'expense' | 'income', number[]> = {
+  expense: [15000, 25000, 50000, 100000, 250000, 500000, 1000000],
+  income: [500000, 1000000, 2500000, 5000000, 10000000],
 };
 
 export const storage = {
+  getCategories: (): CustomCategory[] => {
+    if (typeof window === 'undefined') return [];
+    const data = localStorage.getItem(KEYS.CATEGORIES);
+    return data ? JSON.parse(data) : [];
+  },
+  saveCategories: (cats: CustomCategory[]) => {
+    if (typeof window === 'undefined') return;
+    localStorage.setItem(KEYS.CATEGORIES, JSON.stringify(cats));
+  },
+
   getStats: (): UserStats => {
     if (typeof window === 'undefined') return INITIAL_USER_STATS;
     const data = localStorage.getItem(KEYS.STATS);
@@ -156,6 +173,49 @@ export const storage = {
   saveQuests: (quests: DailyQuest[]) => {
     if (typeof window === 'undefined') return;
     localStorage.setItem(KEYS.QUESTS, JSON.stringify(quests));
+  },
+
+  getAmountPresets: (type: 'expense' | 'income'): number[] => {
+    if (typeof window === 'undefined') return DEFAULT_AMOUNT_PRESETS[type];
+    try {
+      const data = localStorage.getItem(KEYS.AMOUNT_PRESETS);
+      if (!data) return DEFAULT_AMOUNT_PRESETS[type];
+      const parsed = JSON.parse(data);
+      if (parsed && Array.isArray(parsed[type]) && parsed[type].length > 0) {
+        return parsed[type];
+      }
+    } catch {
+      // ignore JSON error
+    }
+    return DEFAULT_AMOUNT_PRESETS[type];
+  },
+  saveAmountPresets: (type: 'expense' | 'income', presets: number[]) => {
+    if (typeof window === 'undefined') return;
+    try {
+      const data = localStorage.getItem(KEYS.AMOUNT_PRESETS);
+      const parsed = data
+        ? JSON.parse(data)
+        : {
+            expense: [...DEFAULT_AMOUNT_PRESETS.expense],
+            income: [...DEFAULT_AMOUNT_PRESETS.income],
+          };
+      parsed[type] = presets;
+      localStorage.setItem(KEYS.AMOUNT_PRESETS, JSON.stringify(parsed));
+    } catch {
+      // ignore
+    }
+  },
+  resetAmountPresets: (type: 'expense' | 'income'): number[] => {
+    if (typeof window === 'undefined') return DEFAULT_AMOUNT_PRESETS[type];
+    try {
+      const data = localStorage.getItem(KEYS.AMOUNT_PRESETS);
+      const parsed = data ? JSON.parse(data) : {};
+      parsed[type] = [...DEFAULT_AMOUNT_PRESETS[type]];
+      localStorage.setItem(KEYS.AMOUNT_PRESETS, JSON.stringify(parsed));
+    } catch {
+      // ignore
+    }
+    return [...DEFAULT_AMOUNT_PRESETS[type]];
   },
 };
 

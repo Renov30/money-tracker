@@ -1,13 +1,12 @@
 export type TransactionType = 'expense' | 'income';
 
-export type Category =
-  | 'Makanan & Minuman'
-  | 'Transportasi'
-  | 'Belanja'
-  | 'Tagihan & Utilitas'
-  | 'Hiburan'
-  | 'Gaji & Usaha'
-  | 'Lainnya';
+export type Category = string;
+
+export interface CustomCategory {
+  id: string;
+  name: string;
+  type: TransactionType;
+}
 
 export interface Transaction {
   id: string;

@@ -9,7 +9,7 @@ import {
   INITIAL_GOALS,
   INITIAL_QUESTS,
 } from '@/lib/storage';
-import { Transaction, Goal, DailyQuest, UserStats, TransactionType } from '@/types';
+import { Transaction, Goal, DailyQuest, UserStats, TransactionType, CustomCategory } from '@/types';
 
 import LingoraSidebar from '@/components/LingoraSidebar';
 import LingoraTopBar from '@/components/LingoraTopBar';
@@ -29,6 +29,7 @@ export default function Home() {
   const [transactions, setTransactions] = useState<Transaction[]>(INITIAL_TRANSACTIONS);
   const [goals, setGoals] = useState<Goal[]>(INITIAL_GOALS);
   const [quests, setQuests] = useState<DailyQuest[]>(INITIAL_QUESTS);
+  const [customCategories, setCustomCategories] = useState<CustomCategory[]>([]);
   
   const [activeTab, setActiveTab] = useState<string>('home');
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -49,10 +50,11 @@ export default function Home() {
   useEffect(() => {
     async function loadData() {
       try {
-        const [txRes, goalsRes, statsRes] = await Promise.all([
+        const [txRes, goalsRes, statsRes, catRes] = await Promise.all([
           fetch('/api/transactions'),
           fetch('/api/goals'),
           fetch('/api/stats'),
+          fetch('/api/categories'),
         ]);
 
         if (txRes.ok) {
@@ -76,11 +78,19 @@ export default function Home() {
             storage.saveStats(statsData);
           }
         }
+        if (catRes.ok) {
+          const catData = await catRes.json();
+          if (Array.isArray(catData)) {
+            setCustomCategories(catData);
+            storage.saveCategories(catData);
+          }
+        }
       } catch (err) {
         console.warn('API fetch fallback to localStorage:', err);
         setStats(storage.getStats());
         setTransactions(storage.getTransactions());
         setGoals(storage.getGoals());
+        setCustomCategories(storage.getCategories());
       }
       setQuests(storage.getQuests());
     }
@@ -244,6 +254,39 @@ export default function Home() {
     setEditingTransaction(null);
   };
 
+  // Add Custom Category
+  const handleAddCustomCategory = async (name: string, type: TransactionType) => {
+    try {
+      const res = await fetch('/api/categories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, type }),
+      });
+      if (res.ok) {
+        const json = await res.json();
+        const updated = [...customCategories, json.category];
+        setCustomCategories(updated);
+        storage.saveCategories(updated);
+        showToast(`Kategori "${name}" berhasil ditambahkan!`, 'success');
+        return json.category.name;
+      }
+    } catch (e) {
+      console.warn('Add category API error:', e);
+    }
+
+    // Local fallback
+    const newCat: CustomCategory = {
+      id: `cat-${Date.now()}`,
+      name,
+      type,
+    };
+    const updated = [...customCategories, newCat];
+    setCustomCategories(updated);
+    storage.saveCategories(updated);
+    showToast(`Kategori "${name}" berhasil ditambahkan!`, 'success');
+    return name;
+  };
+
   // Add Goal to Database
   const handleAddGoal = async (title: string, targetAmount: number) => {
     try {
@@ -405,6 +448,7 @@ export default function Home() {
                     onOpenAddModal={openAddModalWithType}
                     searchQuery={searchQuery}
                     forcedType="all"
+                    customCategories={customCategories}
                   />
                 </>
               )}
@@ -435,6 +479,7 @@ export default function Home() {
                     onOpenAddModal={openAddModalWithType}
                     searchQuery={searchQuery}
                     forcedType="income"
+                    customCategories={customCategories}
                   />
                 </div>
               )}
@@ -465,6 +510,7 @@ export default function Home() {
                     onOpenAddModal={openAddModalWithType}
                     searchQuery={searchQuery}
                     forcedType="expense"
+                    customCategories={customCategories}
                   />
                 </div>
               )}
@@ -511,6 +557,8 @@ export default function Home() {
         onUpdateTransaction={handleUpdateTransaction}
         editingTransaction={editingTransaction}
         initialType={addTxType}
+        customCategories={customCategories}
+        onAddCustomCategory={handleAddCustomCategory}
       />
 
       <AddGoalModal
