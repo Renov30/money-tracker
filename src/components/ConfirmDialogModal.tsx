@@ -39,7 +39,7 @@ export default function ConfirmDialogModal({
   return (
     <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
       <div 
-        className="bg-white w-full max-w-sm rounded-2xl p-6 border-2 border-slate-200 shadow-xl relative space-y-5 text-center"
+        className="bg-white w-full max-w-md rounded-2xl p-6 border-2 border-slate-200 shadow-xl relative space-y-5 text-center"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Top Icon Badge */}
@@ -62,11 +62,11 @@ export default function ConfirmDialogModal({
         </div>
 
         {/* Duolingo 3D Action Buttons */}
-        <div className="grid grid-cols-2 gap-3 pt-1">
+        <div className="flex items-center justify-center gap-3 pt-1">
           <button
             type="button"
             onClick={onClose}
-            className="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold text-xs uppercase tracking-wider rounded-xl border-b-4 border-slate-300 active:border-b-0 active:translate-y-1 transition cursor-pointer"
+            className="w-1/3 py-3 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold text-xs uppercase tracking-wider rounded-xl border-b-4 border-slate-300 active:border-b-0 active:translate-y-1 transition cursor-pointer"
           >
             {cancelLabel}
           </button>
@@ -76,7 +76,7 @@ export default function ConfirmDialogModal({
               onConfirm();
               onClose();
             }}
-            className="w-full py-2.5 bg-rose-500 hover:bg-rose-400 text-white font-extrabold text-xs uppercase tracking-wider rounded-xl border-b-4 border-rose-600 active:border-b-0 active:translate-y-1 transition cursor-pointer"
+            className="flex-1 py-3 px-5 bg-rose-500 hover:bg-rose-400 text-white font-extrabold text-xs uppercase tracking-wider rounded-xl border-b-4 border-rose-600 active:border-b-0 active:translate-y-1 transition cursor-pointer whitespace-nowrap"
           >
             {confirmLabel}
           </button>
