@@ -197,18 +197,6 @@ export default function TransactionsSection({
             />
           )}
 
-          {/* Kelola Kategori Button (Flat Duolingo Pill) */}
-          {onOpenManageCategories && (
-            <button
-              type="button"
-              onClick={onOpenManageCategories}
-              className="flex items-center gap-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 border-2 border-amber-200 rounded-xl px-3 py-1.5 text-xs font-extrabold transition cursor-pointer"
-            >
-              <IoPricetagsOutline className="text-sm" />
-              <span>Kategori</span>
-            </button>
-          )}
-
           {isFiltered && (
             <button
               onClick={resetFilters}
