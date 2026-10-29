@@ -56,7 +56,7 @@ export default function LingoraSidebar({
     { id: 'income', label: 'PEMASUKAN', icon: <IoTrendingUp className="text-xl text-emerald-500" /> },
     { id: 'expense', label: 'PENGELUARAN', icon: <IoTrendingDown className="text-xl text-rose-500" /> },
     { id: 'goals', label: 'TARGET', icon: <IoFlag className="text-xl text-sky-500" /> },
-    { id: 'reports', label: 'REKAP', icon: <IoBarChart className="text-xl text-indigo-500" /> },
+    { id: 'reports', label: 'REKAP', icon: <IoBarChart className="text-xl text-violet-400" /> },
     { id: 'leaderboard', label: 'MISI & SKOR', icon: <IoTrophy className="text-xl text-amber-500" /> },
     {
       id: 'trash',

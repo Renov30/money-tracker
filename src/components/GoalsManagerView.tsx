@@ -38,26 +38,28 @@ export default function GoalsManagerView({
       setAnimatingGoalId(null);
     }, 600);
   };
+
+  const totalSavings = goals.reduce((acc, curr) => acc + (Number(curr.currentAmount) || 0), 0);
+
   return (
-    <div className="space-y-4">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+    <div className="space-y-6">
+      {/* Header Halaman Target (Sama Persis seperti Halaman Pemasukan) */}
+      <div className="bg-white rounded-2xl p-5 border-2 border-slate-200 flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-black text-slate-800">
-            Target Tabungan
+          <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
+            TOTAL TARGET TABUNGAN
+          </span>
+          <h2 className="text-2xl font-black text-amber-500 mt-0.5">
+            Rp {totalSavings.toLocaleString('id-ID')}
           </h2>
-          <p className="text-xs font-bold text-slate-400">
-            Pilih 1 target utama untuk ditampilkan di Beranda
-          </p>
         </div>
 
         <button
           type="button"
           onClick={onOpenAddGoal}
-          className="flex items-center gap-1.5 px-4 py-2.5 bg-amber-500 hover:bg-amber-400 text-white font-extrabold text-xs uppercase tracking-wider rounded-xl border-b-4 border-amber-600 active:border-b-0 active:translate-y-1 transition cursor-pointer shrink-0"
+          className="px-4 py-2.5 bg-amber-500 hover:bg-amber-400 text-white font-extrabold text-xs uppercase tracking-wider rounded-xl border-b-4 border-amber-600 active:border-b-0 active:translate-y-1 transition cursor-pointer shrink-0"
         >
-          <IoAdd className="text-base stroke-2" />
-          <span>TARGET BARU</span>
+          + TARGET BARU
         </button>
       </div>
 

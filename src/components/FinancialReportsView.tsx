@@ -262,23 +262,68 @@ export default function FinancialReportsView({
 
   return (
     <div className="space-y-6">
-      {/* Header Halaman Laporan & Navigasi Bulan */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white border-2 border-slate-200 border-b-4 rounded-3xl p-5 md:p-6 shadow-2xs">
+      {/* Header Halaman Rekap: Total Uang Yang Dimiliki (Gaya Header Halaman Pemasukan, Teks Hitam & Besar) */}
+      <div className="bg-white rounded-2xl p-5 border-2 border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <span className="p-2 rounded-xl bg-indigo-50 text-indigo-600 font-black">
-              <IoBarChartOutline className="text-2xl" />
+            <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
+              TOTAL UANG YANG DIMILIKI
             </span>
-            <div>
-              <h1 className="text-xl md:text-2xl font-black text-slate-800 tracking-tight">
-                Rekap Keuangan
-              </h1> 
-            </div>
+            {!isEditingCash && (
+              <button
+                type="button"
+                onClick={handleStartEditCash}
+                className="p-1 rounded-lg bg-slate-100 hover:bg-amber-100 text-slate-500 hover:text-amber-700 transition cursor-pointer"
+                title="Ubah Total Uang"
+              >
+                <IoPencil className="text-xs" />
+              </button>
+            )}
           </div>
+
+          {isEditingCash ? (
+            <div className="flex items-center gap-2 mt-2">
+              <div className="relative">
+                <span className="absolute left-3 top-2 text-sm font-bold text-slate-400">Rp</span>
+                <input
+                  type="number"
+                  autoFocus
+                  value={cashInputValue}
+                  onChange={(e) => setCashInputValue(e.target.value)}
+                  placeholder="0"
+                  className="w-48 md:w-60 bg-slate-50 border-2 border-amber-400 rounded-xl pl-9 pr-3 py-1.5 text-base font-black text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-400"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleSaveCash();
+                    if (e.key === 'Escape') handleCancelCash();
+                  }}
+                />
+              </div>
+              <button
+                type="button"
+                onClick={handleSaveCash}
+                className="px-3 py-2 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-extrabold rounded-xl transition flex items-center gap-1 cursor-pointer shadow-2xs"
+              >
+                <IoCheckmark className="text-base stroke-2" />
+                <span>Simpan</span>
+              </button>
+              <button
+                type="button"
+                onClick={handleCancelCash}
+                className="px-3 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-extrabold rounded-xl transition flex items-center gap-1 cursor-pointer"
+              >
+                <IoClose className="text-base" />
+                <span>Batal</span>
+              </button>
+            </div>
+          ) : (
+            <h2 className="text-3xl sm:text-4xl font-black text-slate-900 mt-0.5 tracking-tight">
+              {formatRupiah(totalCash)}
+            </h2>
+          )}
         </div>
 
         {/* Pemilih Bulan (Duolingo Style Pill) */}
-        <div className="flex items-center gap-1.5 bg-slate-100 p-1.5 rounded-2xl self-start sm:self-auto">
+        <div className="flex items-center gap-1.5 bg-slate-100 p-1.5 rounded-2xl self-start sm:self-auto shrink-0">
           <button
             type="button"
             onClick={handlePrevMonth}
@@ -301,78 +346,10 @@ export default function FinancialReportsView({
         </div>
       </div>
 
-      {/* SECTION 1: KELOLA TOTAL UANG YANG DIMILIKI */}
-      <div className="bg-linear-to-r from-amber-50 to-orange-50 border-2 border-amber-200 border-b-4 rounded-3xl p-5 md:p-6 shadow-2xs">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="flex items-start gap-3.5">
-            <div className="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-sm">
-              <IoWalletOutline className="text-2xl" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-black uppercase tracking-wider text-amber-700">
-                  TOTAL UANG YANG DIMILIKI
-                </span>
-                {!isEditingCash && (
-                  <button
-                    type="button"
-                    onClick={handleStartEditCash}
-                    className="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-white/80 hover:bg-white text-amber-800 text-xs font-bold border border-amber-300 transition cursor-pointer shadow-2xs"
-                  >
-                    <IoPencil className="text-[11px]" />
-                    <span>Ubah Saldo</span>
-                  </button>
-                )}
-              </div>
-
-              {isEditingCash ? (
-                <div className="flex items-center gap-2 mt-2">
-                  <div className="relative">
-                    <span className="absolute left-3 top-2 text-sm font-bold text-slate-400">Rp</span>
-                    <input
-                      type="number"
-                      autoFocus
-                      value={cashInputValue}
-                      onChange={(e) => setCashInputValue(e.target.value)}
-                      placeholder="0"
-                      className="w-48 md:w-60 bg-white border-2 border-amber-400 rounded-xl pl-9 pr-3 py-1.5 text-sm font-black text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-400"
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') handleSaveCash();
-                        if (e.key === 'Escape') handleCancelCash();
-                      }}
-                    />
-                  </div>
-                  <button
-                    type="button"
-                    onClick={handleSaveCash}
-                    className="px-3 py-2 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-extrabold rounded-xl transition flex items-center gap-1 cursor-pointer shadow-2xs"
-                  >
-                    <IoCheckmark className="text-base stroke-2" />
-                    <span>Simpan</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleCancelCash}
-                    className="px-3 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-extrabold rounded-xl transition flex items-center gap-1 cursor-pointer"
-                  >
-                    <IoClose className="text-base" />
-                    <span>Batal</span>
-                  </button>
-                </div>
-              ) : (
-                <div className="text-2xl md:text-3xl font-black text-slate-800 tracking-tight mt-1">
-                  {formatRupiah(totalCash)}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* SECTION 2: 4 KARTU METRIK ARUS KAS MENDALAM */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-        {/* Pemasukan */}
-        <div className="bg-white border-2 border-slate-200 border-b-4 rounded-2xl p-4 flex flex-col justify-between">
+      {/* 4 KARTU METRIK ARUS KAS: DITATA PER 2 BARIS (2 KOLOM X 2 BARIS) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {/* Baris 1 - Kolom 1: Pemasukan */}
+        <div className="bg-white border-2 border-slate-200 rounded-2xl p-4 flex flex-col justify-between">
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
             <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
@@ -380,15 +357,15 @@ export default function FinancialReportsView({
             </span>
           </div>
           <div className="mt-2">
-            <div className="text-lg md:text-xl font-black text-emerald-600 truncate">
+            <div className="text-lg sm:text-xl font-black text-emerald-500 truncate">
               +{formatRupiah(monthlyIncome)}
             </div>
             <span className="text-[10px] font-bold text-slate-400">Total bulan ini</span>
           </div>
         </div>
 
-        {/* Pengeluaran */}
-        <div className="bg-white border-2 border-slate-200 border-b-4 rounded-2xl p-4 flex flex-col justify-between">
+        {/* Baris 1 - Kolom 2: Pengeluaran */}
+        <div className="bg-white border-2 border-slate-200 rounded-2xl p-4 flex flex-col justify-between">
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
             <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
@@ -396,7 +373,7 @@ export default function FinancialReportsView({
             </span>
           </div>
           <div className="mt-2">
-            <div className="text-lg md:text-xl font-black text-rose-500 truncate">
+            <div className="text-lg sm:text-xl font-black text-rose-500 truncate">
               -{formatRupiah(monthlyExpense)}
             </div>
             <span className="text-[10px] font-bold text-slate-400">
@@ -405,16 +382,16 @@ export default function FinancialReportsView({
           </div>
         </div>
 
-        {/* Kas Bersih */}
-        <div className="bg-white border-2 border-slate-200 border-b-4 rounded-2xl p-4 flex flex-col justify-between">
+        {/* Baris 2 - Kolom 1: Kas Bersih (Warna Biru Khas Duolingo/Tema Website: Sky Blue) */}
+        <div className="bg-white border-2 border-slate-200 rounded-2xl p-4 flex flex-col justify-between">
           <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-indigo-500"></span>
+            <span className="w-2.5 h-2.5 rounded-full bg-sky-500"></span>
             <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
               Kas Bersih
             </span>
           </div>
           <div className="mt-2">
-            <div className={`text-lg md:text-xl font-black truncate ${netCash < 0 ? 'text-rose-500' : 'text-slate-800'}`}>
+            <div className={`text-lg sm:text-xl font-black truncate ${netCash < 0 ? 'text-rose-500' : 'text-sky-500'}`}>
               {netCash >= 0 ? '+' : ''}{formatRupiah(netCash)}
             </div>
             <span className="text-[10px] font-bold text-slate-400">
@@ -423,8 +400,8 @@ export default function FinancialReportsView({
           </div>
         </div>
 
-        {/* Total Tabungan */}
-        <div className="bg-white border-2 border-slate-200 border-b-4 rounded-2xl p-4 flex flex-col justify-between">
+        {/* Baris 2 - Kolom 2: Total Tabungan (Warna Amber-500 Cerah sama seperti di Halaman Target) */}
+        <div className="bg-white border-2 border-slate-200 rounded-2xl p-4 flex flex-col justify-between">
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
             <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
@@ -432,7 +409,7 @@ export default function FinancialReportsView({
             </span>
           </div>
           <div className="mt-2">
-            <div className="text-lg md:text-xl font-black text-amber-600 truncate">
+            <div className="text-lg sm:text-xl font-black text-amber-500 truncate">
               {formatRupiah(totalSavings)}
             </div>
             <span className="text-[10px] font-bold text-slate-400">
@@ -442,233 +419,14 @@ export default function FinancialReportsView({
         </div>
       </div>
 
-      {/* SECTION 3: GRAFIK NAIK TURUN PEMASUKAN & PENGELUARAN (TREND CHART) */}
-      <div className="bg-white border-2 border-slate-200 border-b-4 rounded-3xl p-5 md:p-6 shadow-2xs">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
-          <div>
-            <h2 className="text-base font-black text-slate-800 tracking-tight flex items-center gap-2">
-              <IoBarChartOutline className="text-indigo-500" />
-              <span>Grafik Tren Harian (Pemasukan vs Pengeluaran)</span>
-            </h2>
-            <p className="text-xs font-bold text-slate-400">
-              Grafik fluktuasi naik turunnya uang masuk dan uang keluar sepanjang bulan {monthLabel}
-            </p>
-          </div>
-
-          {/* Legend */}
-          <div className="flex items-center gap-4 text-xs font-extrabold">
-            <div className="flex items-center gap-1.5">
-              <span className="w-3 h-3 rounded-md bg-emerald-500"></span>
-              <span className="text-slate-600">Pemasukan</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className="w-3 h-3 rounded-md bg-rose-500"></span>
-              <span className="text-slate-600">Pengeluaran</span>
-            </div>
-          </div>
-        </div>
-
-        {/* SVG Cashflow Chart Container */}
-        <div className="relative w-full h-64 md:h-72 select-none">
-          {/* Tooltip Hover Popover */}
-          {hoveredChartPoint && (
-            <div
-              className="absolute z-20 pointer-events-none transform -translate-x-1/2 -translate-y-full mb-3 bg-slate-900 text-white rounded-xl px-3 py-2 text-xs shadow-xl border border-slate-700 min-w-[130px]"
-              style={{
-                left: `${Math.min(Math.max(hoveredChartPoint.x, 70), 95)}%`,
-                top: `${hoveredChartPoint.y}%`,
-              }}
-            >
-              <div className="font-black text-slate-200 pb-1 border-b border-slate-700 mb-1">
-                Tgl {hoveredChartPoint.day} {monthLabel.split(' ')[0]}
-              </div>
-              <div className="text-emerald-400 font-extrabold">
-                Masuk: +{formatRupiah(hoveredChartPoint.income)}
-              </div>
-              <div className="text-rose-400 font-extrabold">
-                Keluar: -{formatRupiah(hoveredChartPoint.expense)}
-              </div>
-            </div>
-          )}
-
-          <svg className="w-full h-full overflow-visible" viewBox="0 0 1000 240" preserveAspectRatio="none">
-            {/* Grid Horizontal Lines */}
-            {[0, 0.25, 0.5, 0.75, 1].map((ratio) => {
-              const y = 200 - ratio * 180;
-              const val = Math.round(ratio * maxChartValue);
-              return (
-                <g key={ratio}>
-                  <line
-                    x1="40"
-                    y1={y}
-                    x2="980"
-                    y2={y}
-                    stroke="#f1f5f9"
-                    strokeWidth="1.5"
-                    strokeDasharray={ratio > 0 && ratio < 1 ? '4 4' : undefined}
-                  />
-                  <text
-                    x="35"
-                    y={y + 4}
-                    textAnchor="end"
-                    fontSize="11"
-                    fontWeight="700"
-                    fill="#94a3b8"
-                  >
-                    {formatCompactRupiah(val)}
-                  </text>
-                </g>
-              );
-            })}
-
-            {/* Area & Line Pemasukan (Hijau) */}
-            {(() => {
-              const points = chartPoints.map((p, idx) => {
-                const x = 50 + (idx / Math.max(chartPoints.length - 1, 1)) * 920;
-                const y = 200 - (p.income / maxChartValue) * 180;
-                return { x, y, ...p };
-              });
-
-              const pathD = points.reduce((acc, curr, idx) => {
-                return idx === 0 ? `M ${curr.x} ${curr.y}` : `${acc} L ${curr.x} ${curr.y}`;
-              }, '');
-
-              return (
-                <>
-                  <path
-                    d={`${pathD} L ${points[points.length - 1]?.x || 970} 200 L 50 200 Z`}
-                    fill="rgba(16, 185, 129, 0.08)"
-                  />
-                  <path
-                    d={pathD}
-                    fill="none"
-                    stroke="#10b981"
-                    strokeWidth="3"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </>
-              );
-            })()}
-
-            {/* Area & Line Pengeluaran (Merah/Rose) */}
-            {(() => {
-              const points = chartPoints.map((p, idx) => {
-                const x = 50 + (idx / Math.max(chartPoints.length - 1, 1)) * 920;
-                const y = 200 - (p.expense / maxChartValue) * 180;
-                return { x, y, ...p };
-              });
-
-              const pathD = points.reduce((acc, curr, idx) => {
-                return idx === 0 ? `M ${curr.x} ${curr.y}` : `${acc} L ${curr.x} ${curr.y}`;
-              }, '');
-
-              return (
-                <>
-                  <path
-                    d={`${pathD} L ${points[points.length - 1]?.x || 970} 200 L 50 200 Z`}
-                    fill="rgba(244, 63, 94, 0.08)"
-                  />
-                  <path
-                    d={pathD}
-                    fill="none"
-                    stroke="#f43f5e"
-                    strokeWidth="3"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </>
-              );
-            })()}
-
-            {/* Interactive Data Dots & Hover Overlay */}
-            {chartPoints.map((p, idx) => {
-              const x = 50 + (idx / Math.max(chartPoints.length - 1, 1)) * 920;
-              const yInc = 200 - (p.income / maxChartValue) * 180;
-              const yExp = 200 - (p.expense / maxChartValue) * 180;
-              const hasActivity = p.income > 0 || p.expense > 0;
-
-              return (
-                <g
-                  key={p.day}
-                  className="cursor-pointer"
-                  onMouseEnter={() => {
-                    const topY = Math.min(yInc, yExp);
-                    setHoveredChartPoint({
-                      day: p.day,
-                      dateStr: p.dateStr,
-                      income: p.income,
-                      expense: p.expense,
-                      x: (x / 1000) * 100,
-                      y: (topY / 240) * 100,
-                    });
-                  }}
-                  onMouseLeave={() => setHoveredChartPoint(null)}
-                >
-                  {/* Invisible hit column */}
-                  <rect
-                    x={x - 12}
-                    y={20}
-                    width={24}
-                    height={190}
-                    fill="transparent"
-                  />
-
-                  {/* Dot Pemasukan */}
-                  {p.income > 0 && (
-                    <circle
-                      cx={x}
-                      cy={yInc}
-                      r="4"
-                      fill="#10b981"
-                      stroke="#ffffff"
-                      strokeWidth="2"
-                    />
-                  )}
-
-                  {/* Dot Pengeluaran */}
-                  {p.expense > 0 && (
-                    <circle
-                      cx={x}
-                      cy={yExp}
-                      r="4"
-                      fill="#f43f5e"
-                      stroke="#ffffff"
-                      strokeWidth="2"
-                    />
-                  )}
-
-                  {/* Date labels on X-axis (every 5 days and last day) */}
-                  {(p.day === 1 || p.day % 5 === 0 || p.day === daysInMonth) && (
-                    <text
-                      x={x}
-                      y={225}
-                      textAnchor="middle"
-                      fontSize="11"
-                      fontWeight="700"
-                      fill={hasActivity ? '#334155' : '#94a3b8'}
-                    >
-                      {p.day}
-                    </text>
-                  )}
-                </g>
-              );
-            })}
-          </svg>
-        </div>
-      </div>
-
-      {/* SECTION 4: KALENDER KEUANGAN (FINANCIAL CALENDAR) */}
-      <div className="bg-white border-2 border-slate-200 border-b-4 rounded-3xl p-5 md:p-6 shadow-2xs">
+      {/* SECTION: KALENDER KEUANGAN (MUNCUL SEBELUM GRAFIK) */}
+      <div className="bg-white border-2 border-slate-200 rounded-2xl p-5 md:p-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
           <div>
             <h2 className="text-base font-black text-slate-800 tracking-tight flex items-center gap-2">
               <IoCalendarOutline className="text-amber-500" />
               <span>Kalender Keuangan ({monthLabel})</span>
             </h2>
-            <p className="text-xs font-bold text-slate-400">
-              Klik pada tanggal untuk melihat rincian transaksi lengkap pada hari tersebut
-            </p>
           </div>
 
           <div className="flex items-center gap-2 text-xs font-bold">
@@ -827,9 +585,233 @@ export default function FinancialReportsView({
         )}
       </div>
 
+      {/* SECTION: GRAFIK NAIK TURUN PEMASUKAN & PENGELUARAN (TREND CHART) */}
+      <div className="bg-white border-2 border-slate-200 rounded-2xl p-5 md:p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+          <div>
+            <h2 className="text-base font-black text-slate-800 tracking-tight flex items-center gap-2">
+              <IoBarChartOutline className="text-violet-400" />
+              <span>Grafik Tren Harian (Pemasukan vs Pengeluaran)</span>
+            </h2>
+          </div>
+
+          {/* Legend */}
+          <div className="flex items-center gap-4 text-xs font-extrabold">
+            <div className="flex items-center gap-1.5">
+              <span className="w-3 h-3 rounded-md bg-emerald-500"></span>
+              <span className="text-slate-600">Pemasukan</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="w-3 h-3 rounded-md bg-rose-500"></span>
+              <span className="text-slate-600">Pengeluaran</span>
+            </div>
+          </div>
+        </div>
+
+        {/* SVG Cashflow Chart Container */}
+        <div className="relative w-full h-72 sm:h-84 md:h-96 select-none">
+          {/* Tooltip Hover Popover */}
+          {hoveredChartPoint && (
+            <div
+              className="absolute z-20 pointer-events-none transform -translate-x-1/2 -translate-y-full mb-3 bg-slate-900 text-white rounded-xl px-3 py-2 text-xs shadow-xl border border-slate-700 min-w-[140px]"
+              style={{
+                left: `${Math.min(Math.max(hoveredChartPoint.x, 8), 92)}%`,
+                top: `${Math.max(hoveredChartPoint.y, 8)}%`,
+              }}
+            >
+              <div className="font-black text-slate-200 pb-1 border-b border-slate-700 mb-1">
+                Tgl {hoveredChartPoint.day} {monthLabel.split(' ')[0]}
+              </div>
+              <div className="text-emerald-400 font-extrabold">
+                Masuk: +{formatRupiah(hoveredChartPoint.income)}
+              </div>
+              <div className="text-rose-400 font-extrabold">
+                Keluar: -{formatRupiah(hoveredChartPoint.expense)}
+              </div>
+            </div>
+          )}
+
+          <svg className="w-full h-full overflow-visible" viewBox="0 0 800 360">
+            <defs>
+              <linearGradient id="incomeGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#10b981" stopOpacity="0.22" />
+                <stop offset="100%" stopColor="#10b981" stopOpacity="0.01" />
+              </linearGradient>
+              <linearGradient id="expenseGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#f43f5e" stopOpacity="0.22" />
+                <stop offset="100%" stopColor="#f43f5e" stopOpacity="0.01" />
+              </linearGradient>
+            </defs>
+
+            {/* Grid Horizontal Lines */}
+            {[0, 0.25, 0.5, 0.75, 1].map((ratio) => {
+              const y = 290 - ratio * 240;
+              const val = Math.round(ratio * maxChartValue);
+              return (
+                <g key={ratio}>
+                  <line
+                    x1="55"
+                    y1={y}
+                    x2="780"
+                    y2={y}
+                    stroke="#f1f5f9"
+                    strokeWidth="1.5"
+                    strokeDasharray={ratio > 0 && ratio < 1 ? '4 4' : undefined}
+                  />
+                  <text
+                    x="50"
+                    y={y + 4}
+                    textAnchor="end"
+                    fontSize="11"
+                    fontWeight="700"
+                    fill="#94a3b8"
+                  >
+                    {formatCompactRupiah(val)}
+                  </text>
+                </g>
+              );
+            })}
+
+            {/* Area & Line Pemasukan (Hijau) */}
+            {(() => {
+              const points = chartPoints.map((p, idx) => {
+                const x = 65 + (idx / Math.max(chartPoints.length - 1, 1)) * 705;
+                const y = 290 - (p.income / maxChartValue) * 240;
+                return { x, y, ...p };
+              });
+
+              const pathD = points.reduce((acc, curr, idx) => {
+                return idx === 0 ? `M ${curr.x} ${curr.y}` : `${acc} L ${curr.x} ${curr.y}`;
+              }, '');
+
+              return (
+                <>
+                  <path
+                    d={`${pathD} L ${points[points.length - 1]?.x || 770} 290 L 65 290 Z`}
+                    fill="url(#incomeGradient)"
+                  />
+                  <path
+                    d={pathD}
+                    fill="none"
+                    stroke="#10b981"
+                    strokeWidth="3.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </>
+              );
+            })()}
+
+            {/* Area & Line Pengeluaran (Merah/Rose) */}
+            {(() => {
+              const points = chartPoints.map((p, idx) => {
+                const x = 65 + (idx / Math.max(chartPoints.length - 1, 1)) * 705;
+                const y = 290 - (p.expense / maxChartValue) * 240;
+                return { x, y, ...p };
+              });
+
+              const pathD = points.reduce((acc, curr, idx) => {
+                return idx === 0 ? `M ${curr.x} ${curr.y}` : `${acc} L ${curr.x} ${curr.y}`;
+              }, '');
+
+              return (
+                <>
+                  <path
+                    d={`${pathD} L ${points[points.length - 1]?.x || 770} 290 L 65 290 Z`}
+                    fill="url(#expenseGradient)"
+                  />
+                  <path
+                    d={pathD}
+                    fill="none"
+                    stroke="#f43f5e"
+                    strokeWidth="3.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </>
+              );
+            })()}
+
+            {/* Interactive Data Dots & Hover Overlay */}
+            {chartPoints.map((p, idx) => {
+              const x = 65 + (idx / Math.max(chartPoints.length - 1, 1)) * 705;
+              const yInc = 290 - (p.income / maxChartValue) * 240;
+              const yExp = 290 - (p.expense / maxChartValue) * 240;
+              const hasActivity = p.income > 0 || p.expense > 0;
+
+              return (
+                <g
+                  key={p.day}
+                  className="cursor-pointer"
+                  onMouseEnter={() => {
+                    const topY = Math.min(yInc, yExp);
+                    setHoveredChartPoint({
+                      day: p.day,
+                      dateStr: p.dateStr,
+                      income: p.income,
+                      expense: p.expense,
+                      x: (x / 800) * 100,
+                      y: (topY / 360) * 100,
+                    });
+                  }}
+                  onMouseLeave={() => setHoveredChartPoint(null)}
+                >
+                  {/* Invisible hit column */}
+                  <rect
+                    x={x - 12}
+                    y={30}
+                    width={24}
+                    height={270}
+                    fill="transparent"
+                  />
+
+                  {/* Dot Pemasukan */}
+                  {p.income > 0 && (
+                    <circle
+                      cx={x}
+                      cy={yInc}
+                      r="4.5"
+                      fill="#10b981"
+                      stroke="#ffffff"
+                      strokeWidth="2.5"
+                    />
+                  )}
+
+                  {/* Dot Pengeluaran */}
+                  {p.expense > 0 && (
+                    <circle
+                      cx={x}
+                      cy={yExp}
+                      r="4.5"
+                      fill="#f43f5e"
+                      stroke="#ffffff"
+                      strokeWidth="2.5"
+                    />
+                  )}
+
+                  {/* Date labels on X-axis (every 5 days and last day) */}
+                  {(p.day === 1 || p.day % 5 === 0 || p.day === daysInMonth) && (
+                    <text
+                      x={x}
+                      y={322}
+                      textAnchor="middle"
+                      fontSize="11"
+                      fontWeight="700"
+                      fill={hasActivity ? '#334155' : '#94a3b8'}
+                    >
+                      {p.day}
+                    </text>
+                  )}
+                </g>
+              );
+            })}
+          </svg>
+        </div>
+      </div>
+
       {/* SECTION 5: KOMPOSISI PENGELUARAN PER KATEGORI */}
       {categoryBreakdown.length > 0 && (
-        <div className="bg-white border-2 border-slate-200 border-b-4 rounded-3xl p-5 md:p-6 shadow-2xs">
+        <div className="bg-white border-2 border-slate-200 rounded-2xl p-5 md:p-6">
           <div className="flex items-center gap-2 mb-4">
             <IoPieChartOutline className="text-xl text-rose-500" />
             <h2 className="text-base font-black text-slate-800 tracking-tight">
