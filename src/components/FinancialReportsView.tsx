@@ -430,7 +430,7 @@ export default function FinancialReportsView({
           </div>
 
           <div className="flex items-center gap-2 text-xs font-bold">
-            <span className="flex items-center gap-1 text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">
+            <span className="flex items-center gap-1 text-emerald-500 bg-emerald-50 px-2 py-0.5 rounded-md">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
               +Masuk
             </span>
@@ -513,7 +513,7 @@ export default function FinancialReportsView({
                 <div className="space-y-0.5 mt-1">
                   {hasIncome && (
                     <div
-                      className="text-[9px] md:text-[10px] font-black text-emerald-700 bg-emerald-100/80 px-1 py-0.5 rounded truncate text-right"
+                      className="text-[9px] md:text-[10px] font-black text-emerald-500 bg-emerald-50 px-1 py-0.5 rounded truncate text-right"
                       title={`Pemasukan: +${formatRupiah(cell.income || 0)}`}
                     >
                       +{formatCompactRupiah(cell.income || 0)}
@@ -521,7 +521,7 @@ export default function FinancialReportsView({
                   )}
                   {hasExpense && (
                     <div
-                      className="text-[9px] md:text-[10px] font-black text-rose-700 bg-rose-100/80 px-1 py-0.5 rounded truncate text-right"
+                      className="text-[9px] md:text-[10px] font-black text-rose-500 bg-rose-50 px-1 py-0.5 rounded truncate text-right"
                       title={`Pengeluaran: -${formatRupiah(cell.expense || 0)}`}
                     >
                       -{formatCompactRupiah(cell.expense || 0)}
@@ -573,7 +573,7 @@ export default function FinancialReportsView({
                   </div>
                   <span
                     className={`text-xs font-black ${
-                      tx.type === 'income' ? 'text-emerald-600' : 'text-rose-500'
+                      tx.type === 'income' ? 'text-emerald-500' : 'text-rose-500'
                     }`}
                   >
                     {tx.type === 'income' ? '+' : '-'}{formatRupiah(Number(tx.amount))}
@@ -622,7 +622,7 @@ export default function FinancialReportsView({
               <div className="font-black text-slate-200 pb-1 border-b border-slate-700 mb-1">
                 Tgl {hoveredChartPoint.day} {monthLabel.split(' ')[0]}
               </div>
-              <div className="text-emerald-400 font-extrabold">
+              <div className="text-emerald-500 font-extrabold">
                 Masuk: +{formatRupiah(hoveredChartPoint.income)}
               </div>
               <div className="text-rose-400 font-extrabold">
