@@ -1,37 +1,42 @@
 'use client';
 
 import React, { useState } from 'react';
-import WallabyMascot from './WallabyMascot';
+import Image from 'next/image';
 
 interface InteractiveMascotProps {
   size?: number;
+  className?: string;
 }
 
 export default function InteractiveMascot({
-  size = 195,
+  size = 200,
+  className = '',
 }: InteractiveMascotProps) {
-  const [mood, setMood] = useState<'happy' | 'waving' | 'excited'>('waving');
   const [isReacting, setIsReacting] = useState(false);
 
   const handleClick = () => {
-    // Reaksi sederhana: ganti mood ceria & sedikit reaksi animasi klik
     setIsReacting(true);
-    setMood((prev) => (prev === 'waving' ? 'excited' : prev === 'excited' ? 'happy' : 'waving'));
-
     setTimeout(() => {
       setIsReacting(false);
-    }, 400);
+    }, 450);
   };
 
   return (
     <div
       onClick={handleClick}
-      className={`relative inline-block cursor-pointer select-none transition-transform duration-300 transform hover:scale-105 active:scale-95 ${
-        isReacting ? '-translate-y-1.5 scale-105' : ''
-      }`}
-      title="Klik Wally"
+      className={`relative inline-block cursor-pointer select-none transition-all duration-300 transform hover:scale-105 active:scale-95 ${
+        isReacting ? '-translate-y-3 scale-110 rotate-3' : ''
+      } ${className}`}
+      title="Klik Wally Si Kangguru Keuangan!"
     >
-      <WallabyMascot size={size} mood={mood} animated={true} />
+      <Image
+        src="/images/mascot-money-transparent.png"
+        alt="Wally Mascot"
+        width={size}
+        height={size}
+        className="w-full h-full object-contain drop-shadow-xl pointer-events-none select-none"
+        priority
+      />
     </div>
   );
 }

@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import WallabyMascot from './WallabyMascot';
 import { IoAlertCircle, IoClose, IoLockClosed } from 'react-icons/io5';
 import { Goal } from '@/types';
 
@@ -78,8 +77,7 @@ export default function GoalModal({
     <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
       <div className="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl border border-slate-100 relative">
         <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
-          <div className="flex items-center gap-2">
-            <WallabyMascot size={32} mood="happy" />
+          <div>
             <h3 className="text-sm font-black text-slate-900">
               {editingGoal ? 'Edit Target Celengan' : 'Buat Target Celengan Baru'}
             </h3>

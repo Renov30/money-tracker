@@ -37,8 +37,8 @@ export default function LingoraHeroBanner({
       </div>
 
       {/* Interactive Wallaby Mascot on the Right */}
-      <div className="absolute right-4 sm:right-10 md:right-13 top-0 z-0">
-        <InteractiveMascot size={320} />
+      <div className="absolute right-8 -top-10 z-0 pointer-events-auto">
+        <InteractiveMascot size={360} />
       </div>
     </div>
   );

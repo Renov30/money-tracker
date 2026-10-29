@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import WallabyMascot from './WallabyMascot';
 import {
   IoClose,
   IoAlertCircle,
@@ -104,15 +103,10 @@ export default function AccountSettingsModal({
       >
         {/* Header Duolingo Style */}
         <div className="flex items-center justify-between pb-3 border-b-2 border-slate-100">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-amber-50 border-2 border-amber-200 flex items-center justify-center">
-              <WallabyMascot size={26} mood="happy" />
-            </div>
-            <div>
-              <h3 className="text-sm font-black text-slate-800 tracking-tight">
-                PENGATURAN AKUN
-              </h3>
-            </div>
+          <div>
+            <h3 className="text-sm font-black text-slate-800 tracking-tight">
+              PENGATURAN AKUN
+            </h3>
           </div>
           <button
             type="button"

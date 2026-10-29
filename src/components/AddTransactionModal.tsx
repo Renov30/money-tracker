@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import { Transaction, TransactionType, CustomCategory } from '@/types';
 import { storage, formatRupiah } from '@/lib/storage';
-import WallabyMascot from './WallabyMascot';
 import {
   IoTrendingDown,
   IoTrendingUp,
@@ -289,13 +288,9 @@ export default function AddTransactionModal({
         {/* Header with Duolingo style */}
         <div className="flex items-center justify-between pb-3 border-b-2 border-slate-100">
           <div className="flex items-center gap-2.5">
-            {isEditing ? (
+            {isEditing && (
               <div className="w-9 h-9 rounded-xl bg-amber-50 border-2 border-amber-200 flex items-center justify-center text-amber-600">
                 <IoPencil className="text-lg" />
-              </div>
-            ) : (
-              <div className="w-9 h-9 rounded-xl bg-amber-50 border-2 border-amber-200 flex items-center justify-center">
-                <WallabyMascot size={26} mood="happy" />
               </div>
             )}
             <div>
