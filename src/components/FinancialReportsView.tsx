@@ -316,7 +316,7 @@ export default function FinancialReportsView({
               </button>
             </div>
           ) : (
-            <h2 className="text-3xl sm:text-4xl font-black text-slate-900 mt-0.5 tracking-tight">
+            <h2 className="text-3xl font-black text-slate-900 mt-0.5 tracking-tight">
               {formatRupiah(totalCash)}
             </h2>
           )}
