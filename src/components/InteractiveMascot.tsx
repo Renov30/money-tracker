@@ -114,13 +114,13 @@ export default function InteractiveMascot({
           }
         }
 
-        /* 5. Kipas Gepokan Uang Kertas (Cash Fan Wave) */
-        @keyframes wallyCashWave {
+        /* 5. Ayunan Seluruh Lengan & Tangan yang Memegang Uang (Full Arm & Hand Wave) */
+        @keyframes wallyArmWave {
           0%, 100% {
-            transform: rotate(0deg) scale(1);
+            transform: rotate(0deg) translateY(0px);
           }
           50% {
-            transform: rotate(-5deg) translateY(-4px) scale(1.02);
+            transform: rotate(-5.5deg) translateY(-8px);
           }
         }
 
@@ -198,10 +198,10 @@ export default function InteractiveMascot({
           animation: wallyEyesBlink 4.5s infinite;
         }
 
-        .mascot-cash {
+        .mascot-arm-right {
           transform-box: view-box;
-          transform-origin: 806px 783px;
-          animation: wallyCashWave 3s ease-in-out infinite;
+          transform-origin: 900px 620px;
+          animation: wallyArmWave 3.2s ease-in-out infinite;
         }
 
         .mascot-coin-left {
