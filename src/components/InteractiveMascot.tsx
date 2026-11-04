@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import Image from 'next/image';
+import MascotSvg from './MascotSvg';
 
 interface InteractiveMascotProps {
   size?: number;
@@ -13,66 +13,92 @@ export default function InteractiveMascot({
   className = '',
 }: InteractiveMascotProps) {
   const [isReacting, setIsReacting] = useState(false);
+  const [clicks, setClicks] = useState<
+    { id: number; x: number; y: number; text: string }[]
+  >([]);
 
-  const handleClick = () => {
+  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     setIsReacting(true);
+
+    const texts = [
+      '✨ Cuan! ✨',
+      '💰 Mantap!',
+      '🪙 Semangat!',
+      '🎉 Hebat!',
+      '❤️ Cerdas!',
+      '🚀 Gas Terus!',
+    ];
+    const randomText = texts[Math.floor(Math.random() * texts.length)];
+    const rect = e.currentTarget.getBoundingClientRect();
+    const newClick = {
+      id: Date.now() + Math.random(),
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+      text: randomText,
+    };
+    setClicks((prev) => [...prev.slice(-4), newClick]);
+
     setTimeout(() => {
       setIsReacting(false);
-    }, 500);
+    }, 600);
+
+    setTimeout(() => {
+      setClicks((prev) => prev.filter((c) => c.id !== newClick.id));
+    }, 1200);
   };
 
   return (
     <div
       onClick={handleClick}
-      className={`relative inline-block cursor-pointer select-none transition-transform duration-300 transform hover:scale-105 active:scale-95 ${
-        isReacting ? '-translate-y-4 scale-110' : ''
+      className={`relative inline-block cursor-pointer select-none transition-all duration-300 transform hover:scale-105 active:scale-95 ${
+        isReacting
+          ? '-translate-y-5 scale-110 drop-shadow-2xl'
+          : 'drop-shadow-lg'
       } ${className}`}
       style={{ width: size, height: size }}
       title="Klik Wally!"
     >
       <style>{`
-        /* Animasi Nafas / Idle Bounce untuk seluruh tubuh asli */
+        /* 1. Nafas / Idle Floating untuk seluruh tubuh maskot */
         @keyframes wallyFloatIdle {
           0% {
             transform: translateY(0px) rotate(0deg);
           }
           50% {
-            transform: translateY(-6px) rotate(0.8deg);
+            transform: translateY(-8px) rotate(0.8deg);
           }
           100% {
             transform: translateY(0px) rotate(0deg);
           }
         }
 
-        /* Animasi Kedip Mata Asli (Blink) */
+        /* 2. Kedip Mata Kiri & Kanan (Blink) */
         @keyframes wallyEyesBlink {
-          0%, 92%, 98%, 100% {
+          0%, 90%, 96%, 100% {
             transform: scaleY(1);
-            opacity: 1;
           }
-          95% {
+          93% {
             transform: scaleY(0.08);
-            opacity: 0.9;
           }
         }
 
-        /* Animasi Telinga Kiri Bergoyang (Ear Wiggle Left) */
+        /* 3. Telinga Kiri Bergoyang (Ear Wiggle Left) */
         @keyframes wallyLeftEarWiggle {
           0%, 75%, 100% {
             transform: rotate(0deg);
           }
           80% {
-            transform: rotate(-5deg);
+            transform: rotate(-6deg);
           }
           86% {
-            transform: rotate(4deg);
+            transform: rotate(5deg);
           }
           92% {
             transform: rotate(-2deg);
           }
         }
 
-        /* Animasi Telinga Kanan Bergoyang (Ear Wiggle Right) */
+        /* 4. Telinga Kanan Bergoyang (Ear Wiggle Right) */
         @keyframes wallyRightEarWiggle {
           0%, 78%, 100% {
             transform: rotate(0deg);
@@ -81,176 +107,142 @@ export default function InteractiveMascot({
             transform: rotate(6deg);
           }
           89% {
-            transform: rotate(-4deg);
+            transform: rotate(-5deg);
           }
           94% {
             transform: rotate(2deg);
           }
         }
 
-        /* Animasi Kipas Uang (Cash Fan Wave) */
+        /* 5. Kipas Gepokan Uang Kertas (Cash Fan Wave) */
         @keyframes wallyCashWave {
           0%, 100% {
             transform: rotate(0deg) scale(1);
           }
           50% {
-            transform: rotate(-4deg) translateY(-2px) scale(1.02);
+            transform: rotate(-5deg) translateY(-4px) scale(1.02);
           }
         }
 
-        /* Animasi Koin Berkilau Melayang */
-        @keyframes coinShineFloat {
+        /* 6. Koin Kiri Melayang */
+        @keyframes coinFloatL {
           0%, 100% {
-            transform: translateY(0) scale(1);
-            opacity: 0.85;
+            transform: translateY(0px) rotate(0deg);
           }
           50% {
-            transform: translateY(-8px) scale(1.08);
-            opacity: 1;
+            transform: translateY(-10px) rotate(-5deg);
           }
         }
 
-        .animate-wally-base {
-          animation: wallyFloatIdle 3.8s ease-in-out infinite;
+        /* 7. Koin Kanan Atas Melayang */
+        @keyframes coinFloatRT {
+          0%, 100% {
+            transform: translateY(0px) rotate(0deg);
+          }
+          50% {
+            transform: translateY(-9px) rotate(6deg);
+          }
         }
 
-        .animate-wally-blink {
-          animation: wallyEyesBlink 4.2s infinite;
+        /* 8. Koin Kanan Bawah Melayang */
+        @keyframes coinFloatRB {
+          0%, 100% {
+            transform: translateY(0px) rotate(0deg);
+          }
+          50% {
+            transform: translateY(-12px) rotate(-7deg);
+          }
         }
 
-        .animate-wally-ear-l {
-          transform-origin: 32% 35%;
-          animation: wallyLeftEarWiggle 3.6s ease-in-out infinite;
+        /* Pop-up bubble text saat diklik */
+        @keyframes popFloatingText {
+          0% {
+            opacity: 0;
+            transform: translate(-50%, 0px) scale(0.6);
+          }
+          30% {
+            opacity: 1;
+            transform: translate(-50%, -15px) scale(1.1);
+          }
+          100% {
+            opacity: 0;
+            transform: translate(-50%, -42px) scale(0.9);
+          }
         }
 
-        .animate-wally-ear-r {
-          transform-origin: 66% 30%;
-          animation: wallyRightEarWiggle 3.6s ease-in-out infinite 0.2s;
+        .animate-wally-root {
+          animation: wallyFloatIdle 4s ease-in-out infinite;
         }
 
-        .animate-wally-cash {
-          transform-origin: 70% 65%;
-          animation: wallyCashWave 2.8s ease-in-out infinite;
+        .mascot-ear-left {
+          transform-box: view-box;
+          transform-origin: 380px 380px;
+          animation: wallyLeftEarWiggle 3.8s ease-in-out infinite;
         }
 
-        .animate-coin-float {
-          animation: coinShineFloat 2.5s ease-in-out infinite;
+        .mascot-ear-right {
+          transform-box: view-box;
+          transform-origin: 820px 240px;
+          animation: wallyRightEarWiggle 3.8s ease-in-out infinite 0.3s;
+        }
+
+        .mascot-eye-left {
+          transform-box: view-box;
+          transform-origin: 568px 502px;
+          animation: wallyEyesBlink 4.5s infinite;
+        }
+
+        .mascot-eye-right {
+          transform-box: view-box;
+          transform-origin: 831px 416px;
+          animation: wallyEyesBlink 4.5s infinite;
+        }
+
+        .mascot-cash {
+          transform-box: view-box;
+          transform-origin: 806px 783px;
+          animation: wallyCashWave 3s ease-in-out infinite;
+        }
+
+        .mascot-coin-left {
+          transform-box: view-box;
+          transform-origin: 320px 580px;
+          animation: coinFloatL 2.7s ease-in-out infinite;
+        }
+
+        .mascot-coin-right-top {
+          transform-box: view-box;
+          transform-origin: 1070px 470px;
+          animation: coinFloatRT 3.2s ease-in-out infinite 0.4s;
+        }
+
+        .mascot-coin-right-bottom {
+          transform-box: view-box;
+          transform-origin: 1020px 920px;
+          animation: coinFloatRB 2.5s ease-in-out infinite 0.8s;
         }
       `}</style>
 
-      {/* Container Utuh Gambar Asli Maskot (100% Identik) */}
-      <div className="relative w-full h-full animate-wally-base">
-        {/* 1. Base Gambar Maskot Asli Beresolusi Tinggi */}
-        <Image
-          src="/images/mascot-money-transparent.png"
-          alt="Wally Mascot"
-          width={size}
-          height={size}
-          className="w-full h-full object-contain drop-shadow-xl pointer-events-none select-none"
-          priority
-        />
-
-        {/* 2. Layer Telinga Kiri Asli (Ear Wiggle) */}
-        <div
-          className="absolute pointer-events-none animate-wally-ear-l"
-          style={{
-            left: '16%',
-            top: '5%',
-            width: '28%',
-            height: '35%',
-          }}
-        >
-          <img
-            src="/images/mascot-parts/ear-left.png"
-            alt="Left Ear"
-            className="w-full h-full object-contain"
-          />
-        </div>
-
-        {/* 3. Layer Telinga Kanan Asli (Ear Wiggle) */}
-        <div
-          className="absolute pointer-events-none animate-wally-ear-r"
-          style={{
-            left: '54%',
-            top: '1%',
-            width: '24%',
-            height: '32%',
-          }}
-        >
-          <img
-            src="/images/mascot-parts/ear-right.png"
-            alt="Right Ear"
-            className="w-full h-full object-contain"
-          />
-        </div>
-
-        {/* 4. Layer Mata Kiri Asli (Blink) */}
-        <div
-          className="absolute pointer-events-none animate-wally-blink"
-          style={{
-            left: '38%',
-            top: '31%',
-            width: '16%',
-            height: '18%',
-            transformOrigin: '50% 50%',
-          }}
-        >
-          <img
-            src="/images/mascot-parts/eye-left.png"
-            alt="Left Eye"
-            className="w-full h-full object-contain"
-          />
-        </div>
-
-        {/* 5. Layer Mata Kanan Asli (Blink) */}
-        <div
-          className="absolute pointer-events-none animate-wally-blink"
-          style={{
-            left: '59%',
-            top: '25%',
-            width: '14%',
-            height: '18%',
-            transformOrigin: '50% 50%',
-          }}
-        >
-          <img
-            src="/images/mascot-parts/eye-right.png"
-            alt="Right Eye"
-            className="w-full h-full object-contain"
-          />
-        </div>
-
-        {/* 6. Layer Tangan & Uang Kertas Asli (Cash Wave) */}
-        <div
-          className="absolute pointer-events-none animate-wally-cash"
-          style={{
-            left: '57%',
-            top: '44%',
-            width: '27%',
-            height: '28%',
-          }}
-        >
-          <img
-            src="/images/mascot-parts/cash-hand.png"
-            alt="Cash"
-            className="w-full h-full object-contain"
-          />
-        </div>
-
-        {/* 7. Efek Kilau Koin Emas Melayang (Floating Sparkles) */}
-        <div
-          className="absolute pointer-events-none animate-coin-float"
-          style={{ left: '18%', top: '42%', width: '12%', height: '12%' }}
-        >
-          <div className="w-full h-full rounded-full bg-yellow-300/30 blur-[2px]" />
-        </div>
-        <div
-          className="absolute pointer-events-none animate-coin-float"
-          style={{ right: '8%', top: '32%', width: '14%', height: '14%', animationDelay: '0.8s' }}
-        >
-          <div className="w-full h-full rounded-full bg-yellow-300/30 blur-[2px]" />
-        </div>
+      {/* SVG Maskot dengan Animasi Hidup */}
+      <div className="relative w-full h-full animate-wally-root pointer-events-none">
+        <MascotSvg className="w-full h-full object-contain pointer-events-none select-none" />
       </div>
+
+      {/* Interactive floating burst text saat diklik */}
+      {clicks.map((c) => (
+        <span
+          key={c.id}
+          className="absolute z-30 font-black text-xs sm:text-sm text-amber-950 bg-amber-100/95 px-3 py-1 rounded-full shadow-lg border border-amber-300 pointer-events-none whitespace-nowrap"
+          style={{
+            left: c.x,
+            top: c.y,
+            animation:
+              'popFloatingText 1.1s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+          }}
+        >
+          {c.text}
+        </span>
+      ))}
     </div>
   );
 }
